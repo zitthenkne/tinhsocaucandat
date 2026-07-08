@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính số câu cần đạt — GPA hệ 4</title>
+    <meta name="description" content="Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu ở mỗi kỳ thi (theo công thức UMP). — CLB Tình Nguyện Trường Y.">
+    <link rel="icon" type="image/png" href="logo_clb.png">
+    <meta name="theme-color" content="#dc2f2f">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Bảng màu CLB Tình Nguyện Trường Y — đỏ (brand), xanh dương (ocean), nền trắng
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fef3f2', 100: '#fde3e1', 200: '#fac7c4', 300: '#f39d98',
+                            400: '#ea6a63', 500: '#dc2f2f', 600: '#c11f26', 700: '#9f1a20',
+                        },
+                        ocean: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#2563eb', 600: '#1d4ed8', 700: '#1e40af',
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #fef3f2 0%, #ffffff 48%, #eff6ff 100%);
+            min-height: 100vh;
+        }
+        /* Logo phát sáng nhẹ theo nhịp cho phần đầu trang */
+        @keyframes logoGlow {
+            0%, 100% { box-shadow: 0 8px 22px rgba(220,47,47,.28), 0 0 0 rgba(37,99,235,0); }
+            50%      { box-shadow: 0 10px 26px rgba(220,47,47,.36), 0 0 18px rgba(37,99,235,.22); }
+        }
+        .fade-in { animation: fadeIn .4s ease both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        /* Toast thông báo nhỏ góc màn hình */
+        #toast-container { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: .5rem; align-items: center; pointer-events: none; }
+        .toast {
+            padding: .6rem 1.1rem; border-radius: 9999px; font-size: .8rem; font-weight: 700;
+            color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.15); animation: toastIn .25s ease both;
+        }
+        .toast.success { background: linear-gradient(90deg, #34d399, #10b981); }
+        .toast.warning { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .toast.error   { background: linear-gradient(90deg, #f87171, #ef4444); }
+        .toast.info    { background: linear-gradient(90deg, #dc2f2f, #ee5a5a); }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        .toast.hide { transition: opacity .3s, transform .3s; opacity: 0; transform: translateY(10px); }
+    </style>
+</head>
+
+<body>
+    <main class="px-5 py-8 sm:py-12">
+        <div class="max-w-2xl mx-auto fade-in">
+            <!-- Banner CLB: logo + tên câu lạc bộ + slogan -->
+            <header class="relative overflow-hidden rounded-3xl mb-8 border border-brand-100 shadow-xl shadow-brand-100/50 bg-white">
+                <!-- Dải màu cờ CLB: đỏ → trắng → xanh -->
+                <div class="h-2 w-full bg-gradient-to-r from-brand-500 via-white to-ocean-600"></div>
+                <div class="flex flex-col items-center text-center gap-3 px-6 py-7 sm:py-8">
+                    <img src="logo_clb.png" alt="Logo CLB Tình Nguyện Trường Y"
+                        class="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-full bg-white p-1.5 ring-2 ring-brand-200"
+                        style="animation: logoGlow 3.5s ease-in-out infinite;">
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-ocean-600">
+                            CLB Tình Nguyện Trường Y
+                        </h1>
+                        <p class="mt-1.5 inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.25em] text-brand-600">
+                            <i class="fas fa-heart-pulse text-brand-500"></i> Man in Red
+                        </p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tiêu đề công cụ -->
+            <div class="text-center mb-8">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#dc2f2f] to-[#2563eb] drop-shadow">
+                    <i class="fas fa-bullseye mr-2 text-[#dc2f2f]"></i>Tính số câu cần đạt
+                </h2>
+                <p class="text-sm text-gray-500 mt-2">Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu mỗi lần thi 🩺</p>
+            </div>
+
+            <!-- CARD: Tính số câu cần đạt cho từng kỳ thi -->
+            <section id="required-correct-section"
+                class="bg-white rounded-3xl shadow-xl shadow-brand-100/50 border border-brand-100 p-6 sm:p-8 mb-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#dc2f2f] to-[#2563eb] flex items-center justify-center text-white shadow-md shrink-0">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-lg font-extrabold text-gray-800">Tính số câu cần đạt cho từng kỳ thi</h3>
+                        <p class="text-xs text-gray-400">Đặt mục tiêu GPA và xem cần đúng bao nhiêu câu mỗi lần thi</p>
+                    </div>
+                    <button type="button" id="reset-goal-btn"
+                        class="ml-auto w-9 h-9 shrink-0 flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl hover:bg-brand-100 hover:text-brand-500 transition shadow-sm"
+                        title="Xoá dữ liệu đã nhập" aria-label="Xoá dữ liệu đã nhập">
+                        <i class="fas fa-rotate-left"></i>
+                    </button>
+                </div>
+
+                <div class="mb-5">
+                    <label for="exam-type" class="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                        <i class="fas fa-clipboard-list text-brand-400"></i> Loại kỳ thi
+                    </label>
+                    <select id="exam-type"
+                        class="w-full px-4 py-2.5 bg-white border border-brand-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#dc2f2f] focus:border-[#dc2f2f] transition cursor-pointer">
+                        <option value="pretest">Có pretest (10 · 20 · 70)</option>
+                        <option value="nopretest">Không pretest (30 · 70)</option>
+                        <option value="custom">Tùy chỉnh — nhiều đợt, tự đặt tên</option>
+                    </select>
+                </div>
+
+                <!-- Thang điểm mỗi bài: cách quy đổi câu đúng → hệ 10 trước khi nhân trọng số -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-5 bg-brand-50/60 border border-brand-100 rounded-xl px-3 py-2.5">
+                    <span class="text-xs font-semibold text-gray-500 flex items-center gap-1.5"
+                        title="Cách quy đổi câu đúng của mỗi bài thi ra điểm hệ 10 trước khi nhân trọng số">
+                        <i class="fas fa-scale-balanced text-brand-400"></i> Thang điểm mỗi bài
+                    </span>
+                    <div id="scale-mode-toggle" class="flex bg-white p-0.5 rounded-lg border border-brand-100 gap-0.5">
+                        <button type="button" data-mode="ump" class="scale-mode-btn px-3 h-7 rounded-md text-xs font-bold transition"
+                            title="Câu đúng → hệ 10 theo công thức UMP">Công thức UMP</button>
+                        <button type="button" data-mode="linear" class="scale-mode-btn px-3 h-7 rounded-md text-xs font-bold transition"
+                            title="Hệ 10 = tỉ lệ câu đúng × 10">% đúng × 10</button>
+                    </div>
+                </div>
+
+                <div id="attempts-table" class="mb-5">
+                    <!-- Bảng nhập câu đúng / tổng câu / trọng số từng lần (render bằng JS) -->
+                </div>
+
+                <div class="mb-5">
+                    <label class="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-star text-amber-400"></i> Điểm hệ 4 mong muốn
+                    </label>
+                    <input type="hidden" id="desired-gpa-4" value="4.0">
+                    <div id="desired-gpa-chips" class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+                        <button type="button" data-gpa="1.0" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
+                            <span class="text-sm font-extrabold leading-none">D</span><span class="text-[10px] font-semibold opacity-70 mt-1">1.0</span>
+                        </button>
+                        <button type="button" data-gpa="1.5" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
+                            <span class="text-sm font-extrabold leading-none">D+</span><span class="text-[10px] font-semibold opacity-70 mt-1">1.5</span>
+                        </button>
+                        <button type="button" data-gpa="2.0" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
+                            <span class="text-sm font-extrabold leading-none">C</span><span class="text-[10px] font-semibold opacity-70 mt-1">2.0</span>
+                        </button>
+                        <button type="button" data-gpa="2.5" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
+                            <span class="text-sm font-extrabold leading-none">C+</span><span class="text-[10px] font-semibold opacity-70 mt-1">2.5</span>
+                        </button>
+                        <button type="button" data-gpa="3.0" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
+                            <span class="text-sm font-extrabold leading-none">B</span><span class="text-[10px] font-semibold opacity-70 mt-1">3.0</span>
+                        </button>
+                        <button type="button" data-gpa="3.5" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
+                            <span class="text-sm font-extrabold leading-none">B+</span><span class="text-[10px] font-semibold opacity-70 mt-1">3.5</span>
+                        </button>
+                        <button type="button" data-gpa="4.0" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
+                            <span class="text-sm font-extrabold leading-none">A</span><span class="text-[10px] font-semibold opacity-70 mt-1">4.0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Điểm tổng kết tạm tính (cập nhật theo thời gian thực khi nhập / kéo thanh trượt) -->
+                <div id="gpa-live-projection" class="hidden"></div>
+
+                <button type="button" id="calculate-required-btn"
+                    class="w-full px-6 py-3 bg-gradient-to-r from-[#dc2f2f] to-[#ee5a5a] text-white rounded-xl hover:shadow-lg hover:shadow-brand-200 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-bold flex items-center justify-center gap-2">
+                    <i class="fas fa-bullseye"></i> Tính số câu cần đạt
+                </button>
+                <div id="required-correct-result" class="mt-5"></div>
+                <div class="flex items-start gap-1.5 text-xs text-gray-400 mt-3">
+                    <i class="fas fa-circle-info mt-0.5"></i>
+                    <span>Để trống ô câu đúng của các lần <b>chưa thi</b> để nhận gợi ý số câu cần đạt. Dữ liệu bạn nhập được lưu tự động trên máy; sau lần tính đầu tiên, kết quả sẽ tự cập nhật khi bạn chỉnh số liệu.</span>
+                </div>
+
+                <!-- Bảng quy đổi tham khảo (đóng/mở) -->
+                <details class="mt-5 group">
+                    <summary class="cursor-pointer list-none flex items-center gap-1.5 text-xs font-bold text-brand-500 hover:text-brand-600 transition select-none">
+                        <i class="fas fa-chevron-right text-[10px] transition-transform group-open:rotate-90"></i>
+                        Xem bảng quy đổi hệ 10 → điểm chữ → hệ 4
+                    </summary>
+                    <div class="mt-3 overflow-x-auto rounded-xl border border-brand-100">
+                        <table class="w-full text-xs text-center">
+                            <thead>
+                                <tr class="bg-brand-50 text-gray-500 font-bold uppercase tracking-wide text-[10px]">
+                                    <th class="py-2 px-2">Hệ 10</th>
+                                    <th class="py-2 px-2">Điểm chữ</th>
+                                    <th class="py-2 px-2">Hệ 4</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-brand-50 text-gray-700 font-semibold">
+                                <tr><td class="py-1.5">9.5 – 10</td><td class="text-amber-500 font-extrabold">A+</td><td>4.0</td></tr>
+                                <tr><td class="py-1.5">8.5 – 9.4</td><td class="text-amber-500 font-extrabold">A</td><td>4.0</td></tr>
+                                <tr><td class="py-1.5">8.0 – 8.4</td><td class="text-emerald-500 font-extrabold">B+</td><td>3.5</td></tr>
+                                <tr><td class="py-1.5">7.0 – 7.9</td><td class="text-emerald-500 font-extrabold">B</td><td>3.0</td></tr>
+                                <tr><td class="py-1.5">6.5 – 6.9</td><td class="text-sky-500 font-extrabold">C+</td><td>2.5</td></tr>
+                                <tr><td class="py-1.5">5.5 – 6.4</td><td class="text-sky-500 font-extrabold">C</td><td>2.0</td></tr>
+                                <tr><td class="py-1.5">5.0 – 5.4</td><td class="text-violet-500 font-extrabold">D+</td><td>1.5</td></tr>
+                                <tr><td class="py-1.5">4.0 – 4.9</td><td class="text-violet-500 font-extrabold">D</td><td>1.0</td></tr>
+                                <tr><td class="py-1.5">&lt; 4.0</td><td class="text-gray-400 font-extrabold">F</td><td>0.0</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">
+                        <i class="fas fa-circle-info mr-1"></i>Câu đúng → hệ 10 theo công thức UMP: dưới 50% đúng tính <b>8 × tỉ lệ đúng</b>; 50% = 4.0đ; 60% = 5.0đ; trên 60% tăng dần tới 10đ.
+                    </p>
+                </details>
+            </section>
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script>
+        'use strict';
+
+        // ===== Toast thông báo nhỏ (thay cho showToast của app gốc) =====
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.textContent = message;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.classList.add('hide');
+                setTimeout(() => el.remove(), 350);
+            }, 2600);
+        }
+
+        /**
+         * Tính toán GPA hệ 4 và điểm chữ từ phần trăm điểm số hệ 10
+         * @param {number} percentage Phần trăm điểm số (0 - 100)
+         * @returns {object} { score4, letterGrade }
+         */
+        function calculateGPAFromPercent(percentage) {
+            const score10 = percentage / 10;
+            let score4 = 0.0;
+            let letterGrade = 'F';
+
+            if (score10 >= 9.5) { score4 = 4.0; letterGrade = 'A+'; }
+            else if (score10 >= 8.5) { score4 = 4.0; letterGrade = 'A'; }
+            else if (score10 >= 8.0) { score4 = 3.5; letterGrade = 'B+'; }
+            else if (score10 >= 7.0) { score4 = 3.0; letterGrade = 'B'; }
+            else if (score10 >= 6.5) { score4 = 2.5; letterGrade = 'C+'; }
+            else if (score10 >= 5.5) { score4 = 2.0; letterGrade = 'C'; }
+            else if (score10 >= 5.0) { score4 = 1.5; letterGrade = 'D+'; }
+            else if (score10 >= 4.0) { score4 = 1.0; letterGrade = 'D'; }
+            else { score4 = 0.0; letterGrade = 'F'; }
+
+            return { score4, letterGrade };
+        }
+
+        /**
+         * Quy đổi số câu đúng (x) trên tổng số câu (y) ra điểm hệ 10 theo công thức UMP.
+         */
+        function score10FromCorrect(x, y) {
+            const n = x / y;
+            if (n < 0.5) return (8 * x) / y;
+            if (n === 0.5) return 4.0;
+            if (n < 0.6) return 4 + (10 * (x - 0.5 * y)) / y;
+            if (n === 0.6) return 5.0;
+            return 5 + (12.5 * (x - 0.6 * y)) / y;
+        }
+
+        // Bảng các mốc điểm chữ theo điểm hệ 10 (biên dưới) — dùng cho gợi ý mức tiếp theo.
+        const GRADE_TIERS = [
+            { min10: 4.0, score4: 1.0, letter: 'D' },
+            { min10: 5.0, score4: 1.5, letter: 'D+' },
+            { min10: 5.5, score4: 2.0, letter: 'C' },
+            { min10: 6.5, score4: 2.5, letter: 'C+' },
+            { min10: 7.0, score4: 3.0, letter: 'B' },
+            { min10: 8.0, score4: 3.5, letter: 'B+' },
+            { min10: 8.5, score4: 4.0, letter: 'A' },
+        ];
+
+        // ===== Thang điểm mỗi bài =====
+        // 'ump'    : câu đúng → hệ 10 theo công thức UMP
+        // 'linear' : hệ 10 = tỉ lệ đúng × 10 (thang thẳng)
+        const SCALE_MODE_KEY = 'gpaScaleMode';
+        const GOAL_STATE_KEY = 'gpaGoalState_v1';
+
+        function getScaleMode() {
+            try { return localStorage.getItem(SCALE_MODE_KEY) === 'linear' ? 'linear' : 'ump'; }
+            catch (e) { return 'ump'; }
+        }
+
+        /** Điểm hệ 10 của một bài thi trắc nghiệm theo thang đang chọn. */
+        function rowScore10(correct, total, mode) {
+            if (!total || total <= 0) return 0;
+            return mode === 'linear' ? (correct / total) * 10 : score10FromCorrect(correct, total);
+        }
+
+        /**
+         * Số câu đúng tối thiểu để bài thi đạt >= target10 (hệ 10) theo thang đang chọn.
+         * Cả hai thang đều đơn điệu tăng theo số câu đúng nên quét tuyến tính là đủ.
+         * @returns số câu (0..total), hoặc Infinity nếu đúng hết vẫn không chạm mốc.
+         */
+        function minCorrectForScore10(target10, total, mode) {
+            if (target10 <= 1e-9) return 0;
+            for (let k = 0; k <= total; k++) {
+                if (rowScore10(k, total, mode) >= target10 - 1e-9) return k;
+            }
+            return Infinity;
+        }
+
+        // ===== Chế độ "Tùy chỉnh": cấu trúc các lần thi do người dùng tự dựng =====
+        // Mỗi phần tử: { label, kind: 'ratio'|'score', weight }. Giá trị nhập vẫn nằm trong DOM,
+        // nên mọi thao tác đổi cấu trúc (thêm/xoá/đổi kiểu) phải capture -> render -> apply lại giá trị.
+        const MAX_ATTEMPTS = 12;
+        let customRows = [
+            { label: 'Giữa kỳ', kind: 'ratio', weight: 30 },
+            { label: 'Cuối kỳ', kind: 'ratio', weight: 70 },
+        ];
+
+        /** Escape chuỗi người dùng nhập khi nhúng vào thuộc tính/nội dung HTML. */
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        /** Ghi lại giá trị đang nhập của từng thẻ lần thi (theo thứ tự) trước khi vẽ lại bảng. */
+        function captureAttemptValues() {
+            return Array.from(document.querySelectorAll('#attempts-table .attempt-row')).map(el => ({
+                score: el.querySelector('.attempt-score')?.value || '',
+                correct: el.querySelector('.attempt-correct')?.value || '',
+                total: el.querySelector('.attempt-total')?.value || '',
+            }));
+        }
+
+        /** Áp lại giá trị đã capture sau khi vẽ lại bảng (bắn 'input' để đồng bộ slider/pill). */
+        function applyAttemptValues(vals) {
+            document.querySelectorAll('#attempts-table .attempt-row').forEach((el, i) => {
+                const v = vals[i];
+                if (!v) return;
+                // Tổng câu phải vào trước để ô câu đúng không bị clamp sai
+                const set = (sel, val) => {
+                    const inp = el.querySelector(sel);
+                    if (inp && val !== '') { inp.value = val; inp.dispatchEvent(new Event('input')); }
+                };
+                set('.attempt-total', v.total);
+                set('.attempt-score', v.score);
+                set('.attempt-correct', v.correct);
+            });
+        }
+
+        // Đã bấm tính ít nhất một lần -> cho phép kết quả tự cập nhật khi chỉnh số liệu
+        let requiredCalcDone = false;
+        let autoRequiredTimer = null;
+        function scheduleAutoRequired() {
+            if (!requiredCalcDone) return;
+            clearTimeout(autoRequiredTimer);
+            autoRequiredTimer = setTimeout(() => calculateRequiredCorrectAnswers({ silent: true }), 350);
+        }
+
+        // Lưu/khôi phục dữ liệu trên máy (chỉ lưu sau khi đã khôi phục xong,
+        // tránh việc render bảng trống lúc khởi tạo ghi đè mất dữ liệu cũ)
+        let goalStateRestored = false;
+        let saveGoalTimer = null;
+        function scheduleSaveGoalState() {
+            if (!goalStateRestored) return;
+            clearTimeout(saveGoalTimer);
+            saveGoalTimer = setTimeout(saveGoalState, 400);
+        }
+        function saveGoalState() {
+            if (!goalStateRestored) return;
+            try {
+                const state = {
+                    examType: document.getElementById('exam-type')?.value || 'pretest',
+                    desired: document.getElementById('desired-gpa-4')?.value || '4.0',
+                    rows: Array.from(document.querySelectorAll('#attempts-table .attempt-row')).map(el => ({
+                        label: el.dataset.label || '',
+                        kind: el.dataset.kind || 'ratio',
+                        score: el.querySelector('.attempt-score')?.value ?? '',
+                        correct: el.querySelector('.attempt-correct')?.value ?? '',
+                        total: el.querySelector('.attempt-total')?.value ?? '',
+                        weight: el.querySelector('.attempt-weight')?.value ?? '',
+                    })),
+                };
+                localStorage.setItem(GOAL_STATE_KEY, JSON.stringify(state));
+            } catch (e) { /* localStorage không khả dụng */ }
+        }
+        function loadGoalState() {
+            try { return JSON.parse(localStorage.getItem(GOAL_STATE_KEY) || 'null'); }
+            catch (e) { return null; }
+        }
+
+        /**
+         * Bảng mốc: với kết quả các lần khác giữ nguyên, lần `attempt` cần bao nhiêu câu/điểm
+         * để chạm TỪNG mức điểm chữ (D → A). Giúp nhìn một phát biết mình đang với tới đâu.
+         * @param {object} attempt {kind, total, weight, label}
+         * @param {number} otherPct Điểm đã "chốt" từ các lần khác (thang 0–100)
+         */
+        function milestoneTableHtml(attempt, otherPct, mode, desiredGPA) {
+            const rows = GRADE_TIERS.map(t => {
+                const needPct = t.min10 * 10 - otherPct;
+                let text, state; // state: safe (chắc chắn) | ok (khả thi) | far (ngoài tầm)
+                if (needPct <= 1e-9) { text = 'Chắc chắn ✓'; state = 'safe'; }
+                else if (attempt.weight <= 0) { text = '—'; state = 'far'; }
+                else {
+                    const s = (needPct / attempt.weight) * 10; // điểm hệ 10 cần ở lần này
+                    if (attempt.kind === 'score') {
+                        if (s > 10 + 1e-9) { text = 'Ngoài tầm'; state = 'far'; }
+                        else { text = `≥ ${(Math.ceil(s * 100) / 100).toFixed(2)}đ`; state = 'ok'; }
+                    } else {
+                        const k = minCorrectForScore10(s, attempt.total, mode);
+                        if (k > attempt.total) { text = 'Ngoài tầm'; state = 'far'; }
+                        else { text = `≥ ${k}/${attempt.total} câu`; state = 'ok'; }
+                    }
+                }
+                const selected = Math.abs(t.score4 - desiredGPA) < 1e-9;
+                const stateCls = state === 'far'
+                    ? 'text-gray-400 bg-gray-50 border-gray-200'
+                    : state === 'safe'
+                        ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                        : 'text-gray-700 bg-white/80 border-brand-100';
+                return `<div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs ${stateCls} ${selected ? 'ring-2 ring-brand-300' : ''}">
+                    <span class="font-extrabold">${t.letter} <span class="font-semibold text-[10px] opacity-60">· ${t.score4.toFixed(1)}</span></span>
+                    <span class="font-bold">${text}</span>
+                </div>`;
+            }).join('');
+            return `
+                <div class="mt-4 pt-3 border-t border-brand-100">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2"><i class="fas fa-signal mr-1 text-brand-300"></i>Mốc từng mức điểm ở lần "${attempt.label}"</p>
+                    <div class="grid grid-cols-1 min-[380px]:grid-cols-2 gap-1.5">${rows}</div>
+                </div>`;
+        }
+
+        /**
+         * Quy đổi điểm hệ 4 mong muốn -> điểm hệ 10 tối thiểu cần đạt.
+         * Lấy đúng các ngưỡng trong bảng chuẩn calculateGPAFromPercent để không bị lệch.
+         * @param {number} targetGpa4 Điểm hệ 4 mong muốn (1.0 - 4.0)
+         * @returns {number} Điểm hệ 10 tối thiểu để đạt được GPA đó
+         */
+        function minScore10ForGpa4(targetGpa4) {
+            // Sắp xếp theo GPA tăng dần; ngưỡng hệ 10 là biên dưới của mỗi mức điểm chữ.
+            const table = [
+                { min10: 4.0, gpa: 1.0 }, // D
+                { min10: 5.0, gpa: 1.5 }, // D+
+                { min10: 5.5, gpa: 2.0 }, // C
+                { min10: 6.5, gpa: 2.5 }, // C+
+                { min10: 7.0, gpa: 3.0 }, // B
+                { min10: 8.0, gpa: 3.5 }, // B+
+                { min10: 8.5, gpa: 4.0 }, // A
+            ];
+            for (const row of table) {
+                if (row.gpa >= targetGpa4 - 1e-9) return row.min10;
+            }
+            return 8.5;
+        }
+
+        /**
+         * Tính số câu cần đúng ở các lần thi còn lại để đạt điểm hệ 4 mong muốn.
+         *
+         * Mô hình chuẩn hoá: mỗi lần thi có trọng số w_i (%) và hiệu suất p_i ∈ [0,1]
+         * (lần thường: p = câu đúng / tổng câu; pretest: p = điểm hệ 10 / 10).
+         * Điểm tổng kết (thang 0–100) = Σ p_i * w_i, với Σ w_i = 100.
+         */
+        function calculateRequiredCorrectAnswers(opts) {
+            const silent = !!(opts && opts.silent === true);
+            const desiredGPAInput = document.getElementById('desired-gpa-4');
+            const resultArea = document.getElementById('required-correct-result');
+            if (!desiredGPAInput || !resultArea) return;
+            const mode = getScaleMode();
+
+            const showError = (msg) => {
+                if (silent) return; // đang gõ dở: giữ kết quả cũ, không chen lỗi vào
+                requiredCalcDone = true;
+                resultArea.innerHTML = `
+                    <div class="rounded-2xl border border-red-200 bg-red-50 overflow-hidden shadow-sm">
+                        <div class="flex items-center gap-2.5 px-4 py-3 border-b border-red-200">
+                            <span class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-sm shrink-0"><i class="fas fa-circle-exclamation"></i></span>
+                            <span class="font-extrabold text-red-700 text-sm">Chưa thể tính</span>
+                        </div>
+                        <div class="px-4 py-4 text-sm text-gray-700 leading-relaxed">${msg}</div>
+                    </div>`;
+            };
+
+            // 1. Thu thập dữ liệu từng lần thi từ bảng
+            const rowEls = Array.from(document.querySelectorAll('#attempts-table .attempt-row'));
+            if (rowEls.length === 0) { showError('Chưa có bảng các lần thi. Vui lòng chọn loại kỳ thi.'); return; }
+
+            const attempts = [];
+            let weightSum = 0;
+            for (const el of rowEls) {
+                const kind = el.dataset.kind;
+                const label = escapeHtml(el.dataset.label || 'Lần thi'); // tên do người dùng đặt -> escape trước khi nhúng vào HTML kết quả
+                const weight = parseFloat(el.querySelector('.attempt-weight')?.value);
+                if (isNaN(weight) || weight < 0 || weight > 100) {
+                    showError(`Trọng số của "<b>${label}</b>" không hợp lệ (0–100%).`);
+                    return;
+                }
+                weightSum += weight;
+
+                if (kind === 'score') {
+                    const raw = (el.querySelector('.attempt-score')?.value || '').trim();
+                    let p = null;
+                    if (raw !== '') {
+                        const s = parseFloat(raw);
+                        if (isNaN(s) || s < 0 || s > 10) {
+                            showError(`Điểm pretest của "<b>${label}</b>" phải trong khoảng 0–10.`);
+                            return;
+                        }
+                        p = s / 10;
+                    }
+                    attempts.push({ label, kind, weight, total: null, p });
+                } else {
+                    const total = parseInt((el.querySelector('.attempt-total')?.value || '').trim(), 10);
+                    if (isNaN(total) || total <= 0) {
+                        showError(`Vui lòng nhập <b>tổng số câu</b> của "<b>${label}</b>".`);
+                        return;
+                    }
+                    const correctRaw = (el.querySelector('.attempt-correct')?.value || '').trim();
+                    let p = null;
+                    let correct = null;
+                    if (correctRaw !== '') {
+                        const c = parseInt(correctRaw, 10);
+                        if (isNaN(c) || c < 0 || c > total) {
+                            showError(`Số câu đúng của "<b>${label}</b>" phải trong khoảng 0–${total}.`);
+                            return;
+                        }
+                        correct = c;
+                        p = rowScore10(c, total, mode) / 10; // hiệu suất = điểm hệ 10 / 10 theo thang đang chọn
+                    }
+                    attempts.push({ label, kind, weight, total, correct, p });
+                }
+            }
+
+            if (Math.round(weightSum) !== 100) {
+                showError(`Tổng trọng số các lần thi phải bằng <b>100%</b> (hiện tại đang là ${Math.round(weightSum * 100) / 100}%).`);
+                return;
+            }
+
+            const desiredGPA = parseFloat(desiredGPAInput.value);
+            if (isNaN(desiredGPA) || desiredGPA <= 0 || desiredGPA > 4) {
+                showError('Vui lòng chọn điểm hệ 4 mong muốn hợp lệ.');
+                return;
+            }
+
+            // 2. Mục tiêu (thang 0–100, = điểm hệ 10 × 10)
+            const targetScore10 = minScore10ForGpa4(desiredGPA);
+            const targetPct = targetScore10 * 10;
+
+            const knownPct = attempts.filter(a => a.p !== null).reduce((s, a) => s + a.p * a.weight, 0);
+            const unknown = attempts.filter(a => a.p === null);
+            const neededPct = targetPct - knownPct;
+
+            // Bộ khung hiển thị kết quả: header trạng thái + nội dung + chân nhắc mục tiêu (đồng nhất mọi nhánh)
+            const TONES = {
+                success: { bg: 'bg-emerald-50', border: 'border-emerald-200', head: 'text-emerald-700', iconBg: 'bg-emerald-100 text-emerald-600' },
+                info:    { bg: 'bg-brand-50',    border: 'border-brand-200',    head: 'text-brand-700',    iconBg: 'bg-brand-100 text-brand-600' },
+                warn:    { bg: 'bg-amber-50',   border: 'border-amber-200',   head: 'text-amber-700',   iconBg: 'bg-amber-100 text-amber-600' },
+                danger:  { bg: 'bg-red-50',     border: 'border-red-200',     head: 'text-red-700',     iconBg: 'bg-red-100 text-red-600' },
+            };
+            const render = ({ tone, icon, title, body }) => {
+                requiredCalcDone = true; // từ giờ kết quả sẽ tự cập nhật khi chỉnh số liệu
+                const t = TONES[tone];
+                resultArea.innerHTML = `
+                    <div class="rounded-2xl border ${t.border} ${t.bg} overflow-hidden shadow-sm">
+                        <div class="flex items-center gap-2.5 px-4 py-3 border-b ${t.border}">
+                            <span class="w-8 h-8 rounded-xl ${t.iconBg} flex items-center justify-center text-sm shrink-0"><i class="fas ${icon}"></i></span>
+                            <span class="font-extrabold ${t.head} text-sm">${title}</span>
+                        </div>
+                        <div class="px-4 py-4 text-sm text-gray-700 leading-relaxed">${body}</div>
+                        <div class="flex items-center gap-1.5 px-4 py-2.5 bg-white/60 border-t ${t.border} text-xs text-gray-500">
+                            <i class="fas fa-bullseye text-brand-400"></i>
+                            <span>Mục tiêu <b class="text-gray-700">GPA ${desiredGPA.toFixed(1)}</b> · điểm tổng kết cần <b class="text-gray-700">≥ ${targetScore10.toFixed(1)}</b> (hệ 10)</span>
+                        </div>
+                    </div>`;
+                // Bấm nút tính (không phải auto-update) thì đưa kết quả vào tầm nhìn — quan trọng trên mobile
+                if (!silent) setTimeout(() => resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+            };
+            // Khối "số to" cho con số cần đạt
+            const heroNumber = (big, unit, badge) => `
+                <div class="flex items-end gap-2">
+                    <span class="text-4xl font-extrabold text-brand-500 leading-none">${big}</span>
+                    <span class="text-base font-bold text-gray-400 mb-0.5">${unit}</span>
+                    ${badge ? `<span class="ml-auto text-sm font-bold text-brand-600 bg-brand-100 rounded-full px-2.5 py-1">${badge}</span>` : ''}
+                </div>`;
+            // Ba ô điểm hệ 10 / hệ 4 / điểm chữ
+            const statChips = (s10, s4, letter, tone) => {
+                const t = TONES[tone];
+                const chip = (lbl, val) => `<div class="px-3 py-1.5 rounded-xl bg-white/70 border ${t.border} text-center"><span class="text-[10px] text-gray-400 font-semibold block">${lbl}</span><b class="text-base text-gray-800">${val}</b></div>`;
+                return `<div class="flex flex-wrap gap-2">${chip('HỆ 10', s10)}${chip('HỆ 4', s4)}${chip('ĐIỂM CHỮ', letter)}</div>`;
+            };
+
+            // 3a. Đã nhập đủ tất cả -> báo kết quả tổng kết
+            if (unknown.length === 0) {
+                const finalScore10 = knownPct / 10;
+                const { score4, letterGrade } = calculateGPAFromPercent(knownPct);
+                const reached = knownPct >= targetPct - 1e-9;
+
+                if (reached) {
+                    render({
+                        tone: 'success', icon: 'fa-trophy', title: 'Đã đạt mục tiêu! 🎉',
+                        body: `${statChips(finalScore10.toFixed(2), score4.toFixed(1), letterGrade, 'success')}
+                               <p class="mt-3 font-semibold text-emerald-600">Kết quả hiện tại đã đủ để đạt mục tiêu. Tuyệt vời! 🐿️</p>`
+                    });
+                    return;
+                }
+
+                // Chưa đạt: lấy lần thi có trọng số lớn nhất làm "đòn bẩy", gợi ý số câu cần đúng ở lần đó
+                // (giữ nguyên kết quả các lần khác) để biết cụ thể cần làm bao nhiêu câu mới chạm mục tiêu.
+                const ratioAttempts = attempts.filter(a => a.kind === 'ratio');
+                const pool = ratioAttempts.length ? ratioAttempts : attempts;
+                const lever = pool.reduce((best, a) => (a.weight > best.weight ? a : best), pool[0]);
+                const otherPct = knownPct - lever.p * lever.weight;            // điểm các lần khác (giữ nguyên)
+                const neededFromLever = targetPct - otherPct;                  // phần cần bù từ lần đòn bẩy
+                const neededP = lever.weight > 0 ? neededFromLever / lever.weight : Infinity;
+                const chips = statChips(finalScore10.toFixed(2), score4.toFixed(1), letterGrade, 'warn');
+
+                if (lever.kind === 'score') {
+                    const needScore = Math.ceil(neededP * 10 * 100) / 100;
+                    const cur = lever.p * 10;
+                    if (needScore > 10) {
+                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
+                            body: `${chips}<p class="mt-3 text-gray-600">Dù đạt <b>10/10</b> điểm ở lần "<b>${lever.label}</b>", điểm tổng kết vẫn chưa chạm mục tiêu.</p>
+                                   ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
+                    } else {
+                        render({ tone: 'info', icon: 'fa-bullseye', title: 'Để đạt mục tiêu cần',
+                            body: `${chips}<div class="mt-3">${heroNumber(needScore.toFixed(2), '/ 10 điểm', null)}</div>
+                                   <p class="mt-2 text-gray-500">Ở lần <b class="text-gray-700">${lever.label}</b> cần đạt bấy nhiêu điểm (đang ${cur.toFixed(2)}/10), giữ nguyên các lần khác.</p>
+                                   ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
+                    }
+                    return;
+                }
+
+                const needCorrect = minCorrectForScore10(neededP * 10, lever.total, mode);
+                const cur = lever.correct;
+                if (needCorrect > lever.total) {
+                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
+                        body: `${chips}<p class="mt-3 text-gray-600">Dù đúng cả <b>${lever.total}/${lever.total}</b> câu ở lần "<b>${lever.label}</b>", điểm tổng kết vẫn chưa chạm mục tiêu.</p>
+                               ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
+                    return;
+                }
+                const acc = Math.round((needCorrect / lever.total) * 100);
+                render({ tone: 'info', icon: 'fa-bullseye', title: 'Để đạt mục tiêu cần',
+                    body: `${chips}
+                           <div class="mt-3">${heroNumber(needCorrect, `/ ${lever.total} câu`, '≈ ' + acc + '%')}</div>
+                           <p class="mt-2 text-gray-500">Số câu đúng tối thiểu ở lần <b class="text-gray-700">${lever.label}</b> (đang ${cur}/${lever.total}), giữ nguyên các lần khác.</p>
+                           <div class="mt-3 w-full h-2 bg-white rounded-full overflow-hidden shadow-inner"><div class="h-full bg-brand-400 rounded-full transition-all duration-500" style="width:${acc}%"></div></div>
+                           ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
+                return;
+            }
+
+            // 3b. Đã chắc chắn đạt dù các lần còn lại được 0 điểm
+            if (neededPct <= 1e-9) {
+                render({
+                    tone: 'success', icon: 'fa-circle-check', title: 'Chắc suất đạt mục tiêu! 🎉',
+                    body: `Kết quả các lần đã thi đã đủ để đạt <b>GPA ${desiredGPA.toFixed(1)}</b> — kể cả khi các lần còn lại được 0 điểm. Quá đỉnh! 🐿️`
+                });
+                return;
+            }
+
+            // 3c. Còn đúng 1 lần chưa nhập -> giải chính xác
+            if (unknown.length === 1) {
+                const a = unknown[0];
+                if (a.weight <= 0) {
+                    render({ tone: 'warn', icon: 'fa-triangle-exclamation', title: 'Không thể bù điểm',
+                        body: `Lần "<b>${a.label}</b>" có trọng số <b>0%</b> nên không ảnh hưởng tới điểm tổng kết.` });
+                    return;
+                }
+                const neededP = neededPct / a.weight; // hiệu suất cần ở lần này
+
+                if (a.kind === 'score') {
+                    const needScore = Math.ceil(neededP * 10 * 100) / 100; // điểm hệ 10, làm tròn lên 2 số lẻ
+                    if (needScore > 10) {
+                        const maxScore10 = (knownPct + a.weight) / 10;
+                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
+                            body: `Dù đạt <b>10/10</b> điểm ở lần "<b>${a.label}</b>", điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).
+                                   ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
+                    } else {
+                        render({ tone: 'info', icon: 'fa-bullseye', title: 'Điểm cần đạt',
+                            body: `${heroNumber(needScore.toFixed(2), '/ 10 điểm', null)}
+                                   <p class="mt-2 text-gray-500">Điểm hệ 10 tối thiểu ở lần <b class="text-gray-700">${a.label}</b> để đạt mục tiêu.</p>
+                                   ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
+                    }
+                    return;
+                }
+
+                const needCorrect = minCorrectForScore10(neededP * 10, a.total, mode);
+                if (needCorrect > a.total) {
+                    const maxScore10 = (knownPct + a.weight) / 10;
+                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
+                        body: `Dù đúng cả <b>${a.total}/${a.total}</b> câu ở lần "<b>${a.label}</b>", điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).
+                               ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
+                    return;
+                }
+                const acc = Math.round((needCorrect / a.total) * 100);
+                render({ tone: 'info', icon: 'fa-bullseye', title: 'Số câu cần đạt',
+                    body: `${heroNumber(needCorrect, `/ ${a.total} câu`, '≈ ' + acc + '%')}
+                           <p class="mt-2 text-gray-500">Số câu đúng tối thiểu ở lần <b class="text-gray-700">${a.label}</b> để đạt mục tiêu.</p>
+                           <div class="mt-3 w-full h-2 bg-white rounded-full overflow-hidden shadow-inner"><div class="h-full bg-brand-400 rounded-full transition-all duration-500" style="width:${acc}%"></div></div>
+                           ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
+                return;
+            }
+
+            // 3d. Còn nhiều lần chưa nhập -> gợi ý theo mức "đúng đều" giữa các lần
+            const unknownWeight = unknown.reduce((s, a) => s + a.weight, 0);
+            if (unknownWeight <= 0) {
+                render({ tone: 'warn', icon: 'fa-triangle-exclamation', title: 'Không thể bù điểm',
+                    body: 'Các lần còn lại có tổng trọng số <b>0%</b> nên không ảnh hưởng tới điểm tổng kết.' });
+                return;
+            }
+            const reqRatio = neededPct / unknownWeight; // hiệu suất đồng đều cần ở các lần còn lại
+
+            if (reqRatio > 1 + 1e-9) {
+                const maxScore10 = (knownPct + unknownWeight) / 10;
+                render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
+                    body: `Dù đạt điểm tuyệt đối ở tất cả các lần còn lại, điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).` });
+                return;
+            }
+
+            const reqScore10 = reqRatio * 10; // điểm hệ 10 cần đạt đều ở mỗi lần còn lại
+            const rows = unknown.map(a => {
+                let val;
+                if (a.kind === 'score') {
+                    val = Math.min(10, Math.ceil(reqScore10 * 100) / 100).toFixed(2) + ' điểm';
+                } else {
+                    const needCorrect = Math.min(a.total, minCorrectForScore10(reqScore10, a.total, mode));
+                    val = `${needCorrect}/${a.total} câu`;
+                }
+                return `<div class="flex items-center justify-between bg-white/70 rounded-xl px-3 py-2 border border-brand-200">
+                    <span class="font-semibold text-gray-700"><i class="fas fa-circle-dot text-brand-300 mr-1.5 text-[10px]"></i>${a.label}</span>
+                    <span class="font-bold text-brand-600">${val}</span>
+                </div>`;
+            }).join('');
+
+            render({ tone: 'info', icon: 'fa-lightbulb', title: `Gợi ý cho ${unknown.length} lần còn lại`,
+                body: `<div class="inline-flex items-center gap-1.5 text-brand-600 bg-brand-100 rounded-full px-3 py-1 text-xs font-bold mb-3"><i class="fas fa-wave-square"></i> Giữ phong độ đều ≈ ${reqScore10.toFixed(1)}/10 điểm mỗi lần</div>
+                       <div class="space-y-1.5">${rows}</div>
+                       <p class="text-xs text-gray-400 mt-3">💡 Phương án cân bằng — lần này làm tốt hơn thì lần sau có thể nhẹ nhàng hơn.</p>` });
+        }
+
+        /**
+         * Trả về cấu hình các lần thi (nhãn, kiểu nhập, trọng số) theo loại kỳ thi.
+         * kind: 'ratio' = nhập câu đúng / tổng câu; 'score' = nhập thẳng điểm hệ 10 (pretest).
+         * Chế độ 'custom' lấy từ `customRows` do người dùng tự dựng (thêm/xoá/đặt tên).
+         */
+        function getExamConfig(type) {
+            if (type === 'pretest') {
+                return [
+                    { label: 'Pretest', kind: 'score', weight: 10 },
+                    { label: 'Giữa kỳ', kind: 'ratio', weight: 20 },
+                    { label: 'Cuối kỳ', kind: 'ratio', weight: 70 },
+                ];
+            }
+            if (type === 'nopretest') {
+                return [
+                    { label: 'Giữa kỳ', kind: 'ratio', weight: 30 },
+                    { label: 'Cuối kỳ', kind: 'ratio', weight: 70 },
+                ];
+            }
+            return customRows.map(r => ({ label: r.label, kind: r.kind, weight: r.weight }));
+        }
+
+        // Icon gợi nhớ cho từng loại bài thi
+        const ATTEMPT_ICONS = { 'Pretest': 'fa-vial', 'Giữa kỳ': 'fa-pen-fancy', 'Cuối kỳ': 'fa-flag-checkered' };
+
+        /**
+         * Render các thẻ "lần thi" (dạng card, thân thiện mobile).
+         * Mỗi thẻ có thanh trượt (slider) để chọn nhanh số câu đúng / điểm, cập nhật điểm tổng kết tức thì.
+         */
+        function renderAttemptsTable() {
+            const examTypeEl = document.getElementById('exam-type');
+            const tableContainer = document.getElementById('attempts-table');
+
+            if (!examTypeEl || !tableContainer) return;
+
+            const examType = examTypeEl.value;
+            const isCustom = examType === 'custom';
+            const rows = getExamConfig(examType);
+
+            const pillHtml = '<span class="attempt-live text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 shrink-0">Chưa thi</span>';
+
+            const cardsHtml = rows.map((row, idx) => {
+                const icon = ATTEMPT_ICONS[row.label] || 'fa-layer-group';
+                const safeLabel = escapeHtml(row.label);
+
+                let header;
+                if (isCustom) {
+                    // Chế độ tùy chỉnh: tên sửa được, chọn kiểu nhập, chỉnh trọng số, xoá lần thi
+                    const removeBtn = rows.length > 1
+                        ? `<button type="button" class="attempt-remove w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition" title="Xoá lần thi này" aria-label="Xoá lần thi"><i class="fas fa-trash-can text-xs"></i></button>`
+                        : '';
+                    header = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-100 to-ocean-100 text-brand-500 flex items-center justify-center text-xs shrink-0"><i class="fas ${icon}"></i></span>
+                        <input type="text" maxlength="30" value="${safeLabel}" aria-label="Tên lần thi" placeholder="Tên lần thi"
+                            class="attempt-label flex-1 min-w-0 px-2 py-1 -ml-1 text-sm font-bold text-gray-800 bg-transparent border border-transparent border-b-brand-100 rounded-lg focus:bg-white focus:border-brand-200 focus:outline-none transition">
+                        ${pillHtml}
+                        ${removeBtn}
+                    </div>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <select class="attempt-kind text-xs font-semibold text-gray-600 bg-gray-50 border border-brand-100 rounded-lg pl-2 pr-7 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-200 cursor-pointer" aria-label="Kiểu nhập kết quả">
+                            <option value="ratio" ${row.kind === 'ratio' ? 'selected' : ''}>Nhập câu đúng</option>
+                            <option value="score" ${row.kind === 'score' ? 'selected' : ''}>Nhập điểm /10</option>
+                        </select>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Trọng số</span>
+                            <input type="number" inputmode="numeric" class="attempt-weight w-14 px-1.5 py-1 border border-brand-200 rounded-lg text-center text-sm font-bold text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" min="0" max="100" value="${row.weight}" aria-label="Trọng số (%)">
+                            <span class="text-xs font-bold text-brand-400">%</span>
+                        </div>
+                    </div>`;
+                } else {
+                    header = `
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-100 to-ocean-100 text-brand-500 flex items-center justify-center text-xs shrink-0"><i class="fas ${icon}"></i></span>
+                            <span class="font-bold text-gray-800 text-sm truncate">${safeLabel}</span>
+                            ${pillHtml}
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0"><span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Trọng số</span><span class="text-sm font-extrabold text-brand-600">${row.weight}%</span><input type="hidden" class="attempt-weight" value="${row.weight}"></div>
+                    </div>`;
+                }
+
+                if (row.kind === 'score') {
+                    return `
+                    <div class="attempt-row bg-white border border-brand-100 rounded-2xl p-3.5 shadow-sm transition hover:shadow-md" data-kind="score" data-label="${safeLabel}" data-index="${idx}">
+                        ${header}
+                        <div class="flex items-center gap-3">
+                            <input type="number" inputmode="decimal" class="attempt-score w-24 px-3 py-2 border border-brand-200 rounded-xl text-center font-semibold focus:outline-none focus:ring-2 focus:ring-brand-200" min="0" max="10" step="0.01" placeholder="… /10">
+                            <input type="range" class="attempt-slider flex-1 accent-brand-500 cursor-pointer" min="0" max="10" step="0.1" value="0">
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1.5"><i class="fas fa-circle-info mr-1"></i>Nhập thẳng điểm hệ 10 của lần thi này (vd pretest), hoặc kéo thanh trượt.</p>
+                    </div>`;
+                }
+                return `
+                <div class="attempt-row bg-white border border-brand-100 rounded-2xl p-3.5 shadow-sm transition hover:shadow-md" data-kind="ratio" data-label="${safeLabel}" data-index="${idx}">
+                    ${header}
+                    <div class="flex items-end gap-2 mb-3">
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-semibold text-gray-500 mb-1">Câu đúng</label>
+                            <input type="number" inputmode="numeric" class="attempt-correct w-full px-3 py-2 border border-brand-200 rounded-xl text-center font-semibold focus:outline-none focus:ring-2 focus:ring-brand-200" min="0" placeholder="—">
+                        </div>
+                        <span class="text-gray-300 font-bold pb-2">/</span>
+                        <div class="flex-1">
+                            <label class="block text-[11px] font-semibold text-gray-500 mb-1">Tổng câu</label>
+                            <input type="number" inputmode="numeric" class="attempt-total w-full px-3 py-2 border border-brand-200 rounded-xl text-center font-semibold focus:outline-none focus:ring-2 focus:ring-brand-200" min="1" placeholder="—">
+                        </div>
+                    </div>
+                    <input type="range" class="attempt-slider w-full accent-brand-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50" min="0" max="100" step="1" value="0" disabled>
+                    <p class="attempt-hint text-[11px] text-gray-400 mt-1.5"><i class="fas fa-circle-info mr-1"></i>Nhập tổng câu để kéo thanh chọn nhanh số câu đúng.</p>
+                </div>`;
+            }).join('');
+
+            const totalWeight = rows.reduce((a, r) => a + (parseFloat(r.weight) || 0), 0);
+            const addBtnHtml = isCustom && rows.length < MAX_ATTEMPTS
+                ? `<button type="button" id="add-attempt-btn" class="w-full mt-3 py-2.5 border-2 border-dashed border-brand-200 rounded-2xl text-sm font-bold text-brand-400 hover:text-brand-500 hover:border-brand-300 hover:bg-brand-50/50 transition flex items-center justify-center gap-1.5"><i class="fas fa-plus"></i> Thêm lần thi</button>`
+                : '';
+            const balanceBtnHtml = isCustom
+                ? `<button type="button" id="balance-weights-btn" class="text-brand-500 font-bold hover:text-brand-600 underline decoration-dotted underline-offset-2" title="Chia đều trọng số cho các lần thi">chia đều %</button>`
+                : '';
+            tableContainer.innerHTML = `
+                <div class="space-y-3">${cardsHtml}</div>
+                ${addBtnHtml}
+                <div id="attempts-weight-note" class="flex items-center justify-end gap-3 text-xs ${Math.round(totalWeight) === 100 ? 'text-gray-400' : 'text-red-500'} mt-2.5">${balanceBtnHtml}<span>Tổng trọng số: <b id="attempts-weight-sum">${Math.round(totalWeight * 100) / 100}</b>%</span></div>`;
+
+            wireAttemptInputs(isCustom);
+            updateGpaProjection();
+        }
+
+        /**
+         * Gắn sự kiện đồng bộ ô nhập ↔ thanh trượt và cập nhật điểm tổng kết tạm tính theo thời gian thực.
+         */
+        function wireAttemptInputs(isCustom) {
+            const container = document.getElementById('attempts-table');
+            if (!container) return;
+            const rows = Array.from(container.querySelectorAll('.attempt-row'));
+
+            rows.forEach(row => {
+                const slider = row.querySelector('.attempt-slider');
+                if (row.dataset.kind === 'score') {
+                    const score = row.querySelector('.attempt-score');
+                    score?.addEventListener('input', () => {
+                        const v = parseFloat(score.value);
+                        if (slider && !isNaN(v)) slider.value = Math.max(0, Math.min(10, v));
+                        updateGpaProjection();
+                    });
+                    slider?.addEventListener('input', () => {
+                        if (score) score.value = slider.value;
+                        updateGpaProjection();
+                    });
+                } else {
+                    const correct = row.querySelector('.attempt-correct');
+                    const total = row.querySelector('.attempt-total');
+                    const hint = row.querySelector('.attempt-hint');
+                    const syncRange = () => {
+                        const t = parseInt(total.value, 10);
+                        if (!slider) return;
+                        if (!isNaN(t) && t > 0) {
+                            slider.max = t;
+                            slider.disabled = false;
+                            if (hint) hint.classList.add('hidden');
+                        } else {
+                            slider.disabled = true;
+                            slider.value = 0;
+                            if (hint) hint.classList.remove('hidden');
+                        }
+                    };
+                    const clampCorrect = () => {
+                        const t = parseInt(total.value, 10);
+                        let c = parseInt(correct.value, 10);
+                        if (!isNaN(t) && !isNaN(c) && c > t) { correct.value = t; c = t; }
+                        if (slider && correct.value !== '') slider.value = correct.value;
+                    };
+                    total?.addEventListener('input', () => { syncRange(); clampCorrect(); updateGpaProjection(); });
+                    correct?.addEventListener('input', () => { clampCorrect(); updateGpaProjection(); });
+                    slider?.addEventListener('input', () => {
+                        if (correct) correct.value = slider.value;
+                        updateGpaProjection();
+                    });
+                    syncRange();
+                }
+            });
+
+            // Enter: nhảy sang ô nhập kế tiếp; ở ô cuối cùng thì tính luôn
+            const navInputs = Array.from(container.querySelectorAll('input[type="number"]'));
+            navInputs.forEach((inp, i) => {
+                inp.addEventListener('keydown', (e) => {
+                    if (e.key !== 'Enter') return;
+                    e.preventDefault();
+                    const next = navInputs[i + 1];
+                    if (next) { next.focus(); next.select?.(); }
+                    else { inp.blur(); calculateRequiredCorrectAnswers(); }
+                });
+            });
+
+            // Chế độ tùy chỉnh: trọng số, tên, kiểu nhập, thêm/xoá lần thi
+            if (isCustom) {
+                const weightInputs = Array.from(container.querySelectorAll('.attempt-weight'));
+                const note = document.getElementById('attempts-weight-note');
+                const sumEl = document.getElementById('attempts-weight-sum');
+                const updateSum = () => {
+                    const sum = weightInputs.reduce((a, el) => a + (parseFloat(el.value) || 0), 0);
+                    if (sumEl) sumEl.textContent = Math.round(sum * 100) / 100;
+                    if (note) {
+                        note.classList.toggle('text-red-500', Math.round(sum) !== 100);
+                        note.classList.toggle('text-gray-400', Math.round(sum) === 100);
+                    }
+                    updateGpaProjection();
+                };
+                weightInputs.forEach((el, i) => el.addEventListener('input', () => {
+                    if (customRows[i]) customRows[i].weight = parseFloat(el.value) || 0;
+                    updateSum();
+                }));
+
+                // Đổi cấu trúc (kiểu nhập/xoá) phải giữ lại giá trị đang nhập: capture -> render -> apply
+                const rebuild = (mutate, vals) => {
+                    mutate();
+                    renderAttemptsTable();
+                    applyAttemptValues(vals);
+                    updateGpaProjection();
+                    scheduleSaveGoalState();
+                };
+
+                rows.forEach((rowEl, i) => {
+                    // Tên lần thi: sửa tại chỗ, không cần vẽ lại bảng
+                    rowEl.querySelector('.attempt-label')?.addEventListener('input', (e) => {
+                        const name = e.target.value.trim() || `Lần ${i + 1}`;
+                        if (customRows[i]) customRows[i].label = name;
+                        rowEl.dataset.label = name;
+                        scheduleSaveGoalState();
+                        scheduleAutoRequired();
+                    });
+                    // Kiểu nhập: câu đúng <-> điểm hệ 10 (ô nhập của lần này đổi loại nên giá trị lần này bỏ trống)
+                    rowEl.querySelector('.attempt-kind')?.addEventListener('change', (e) => {
+                        const vals = captureAttemptValues();
+                        vals[i] = { score: '', correct: '', total: '' };
+                        rebuild(() => { if (customRows[i]) customRows[i].kind = e.target.value === 'score' ? 'score' : 'ratio'; }, vals);
+                    });
+                    // Xoá lần thi
+                    rowEl.querySelector('.attempt-remove')?.addEventListener('click', () => {
+                        const vals = captureAttemptValues();
+                        vals.splice(i, 1);
+                        rebuild(() => customRows.splice(i, 1), vals);
+                    });
+                });
+
+                // Thêm lần thi mới: trọng số mặc định = phần còn thiếu cho đủ 100%
+                document.getElementById('add-attempt-btn')?.addEventListener('click', () => {
+                    const vals = captureAttemptValues();
+                    const sum = customRows.reduce((a, r) => a + (parseFloat(r.weight) || 0), 0);
+                    rebuild(() => customRows.push({
+                        label: `Lần ${customRows.length + 1}`,
+                        kind: 'ratio',
+                        weight: Math.max(0, Math.min(100, Math.round(100 - sum))),
+                    }), vals);
+                    // Đưa con trỏ vào ô tên của lần vừa thêm cho tiện đặt tên
+                    const rowEls = document.querySelectorAll('#attempts-table .attempt-row');
+                    rowEls[rowEls.length - 1]?.querySelector('.attempt-label')?.select();
+                });
+
+                // Chia đều trọng số (phần dư dồn vào lần cuối)
+                document.getElementById('balance-weights-btn')?.addEventListener('click', () => {
+                    const vals = captureAttemptValues();
+                    const n = customRows.length;
+                    const base = Math.floor(100 / n);
+                    rebuild(() => customRows.forEach((r, i) => { r.weight = i === n - 1 ? 100 - base * (n - 1) : base; }), vals);
+                });
+            }
+        }
+
+        /**
+         * Cập nhật bảng "Điểm tổng kết tạm tính" theo thời gian thực khi người dùng nhập / kéo thanh trượt.
+         * Các lần chưa nhập được tạm tính = 0 điểm; có thanh tiến độ và mốc mục tiêu để dễ hình dung.
+         */
+        function updateGpaProjection() {
+            // Mọi thay đổi số liệu đều đi qua đây -> tiện thể lưu nháp + tính lại kết quả (đều debounce + có guard)
+            scheduleSaveGoalState();
+            scheduleAutoRequired();
+
+            const panel = document.getElementById('gpa-live-projection');
+            if (!panel) return;
+            const rows = Array.from(document.querySelectorAll('#attempts-table .attempt-row'));
+            if (rows.length === 0) { panel.classList.add('hidden'); return; }
+
+            const mode = getScaleMode();
+            const PILL_BASE = 'attempt-live text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0';
+
+            let totalPct = 0, blanks = 0, anyEntered = false;
+            for (const el of rows) {
+                const weight = parseFloat(el.querySelector('.attempt-weight')?.value) || 0;
+                let p = null;
+                if (el.dataset.kind === 'score') {
+                    const raw = (el.querySelector('.attempt-score')?.value || '').trim();
+                    if (raw !== '') { const s = parseFloat(raw); if (!isNaN(s)) p = Math.max(0, Math.min(10, s)) / 10; }
+                } else {
+                    const total = parseInt(el.querySelector('.attempt-total')?.value, 10);
+                    const raw = (el.querySelector('.attempt-correct')?.value || '').trim();
+                    if (!isNaN(total) && total > 0 && raw !== '') {
+                        const c = parseInt(raw, 10);
+                        if (!isNaN(c)) p = rowScore10(Math.max(0, Math.min(total, c)), total, mode) / 10;
+                    }
+                }
+
+                // Pill điểm hệ 10 ngay trên thẻ từng lần thi
+                const pill = el.querySelector('.attempt-live');
+                if (pill) {
+                    if (p === null) {
+                        pill.textContent = 'Chưa thi';
+                        pill.className = `${PILL_BASE} bg-gray-100 text-gray-400`;
+                        pill.removeAttribute('title');
+                    } else {
+                        const s10 = p * 10;
+                        const { score4, letterGrade } = calculateGPAFromPercent(s10 * 10);
+                        const cls = s10 >= 8.5 ? 'bg-amber-100 text-amber-600'
+                            : s10 >= 7.0 ? 'bg-emerald-100 text-emerald-600'
+                            : s10 >= 5.5 ? 'bg-sky-100 text-sky-600'
+                            : s10 >= 4.0 ? 'bg-violet-100 text-violet-600'
+                            : 'bg-red-100 text-red-500';
+                        pill.textContent = `${score4.toFixed(1)} · ${s10.toFixed(2)} · ${letterGrade}`;
+                        pill.className = `${PILL_BASE} ${cls}`;
+                        pill.title = `Hệ 4: ${score4.toFixed(1)} · Hệ 10: ${s10.toFixed(2)} · Điểm chữ: ${letterGrade}`;
+                    }
+                }
+
+                if (p === null) blanks++; else { anyEntered = true; totalPct += p * weight; }
+            }
+
+            if (!anyEntered) { panel.classList.add('hidden'); return; }
+
+            const score10 = totalPct / 10;
+            const { score4, letterGrade } = calculateGPAFromPercent(totalPct);
+            const desired = parseFloat(document.getElementById('desired-gpa-4')?.value) || 0;
+            const targetScore10 = minScore10ForGpa4(desired);
+            const reached = score10 >= targetScore10 - 1e-9;
+            const fillPct = Math.max(0, Math.min(100, score10 * 10));
+            const targetPct = Math.max(0, Math.min(100, targetScore10 * 10));
+            const accent = reached ? 'text-emerald-600' : 'text-brand-500';
+
+            const blankNote = blanks > 0
+                ? `<span class="text-[11px] text-gray-400">${blanks} lần chưa nhập = 0đ</span>`
+                : '';
+
+            panel.className = 'mt-1 mb-5 p-4 rounded-2xl border ' + (reached ? 'bg-emerald-50 border-emerald-200' : 'bg-brand-50/70 border-brand-200');
+            panel.innerHTML = `
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1.5"><i class="fas fa-gauge-high text-brand-400"></i> Điểm tổng kết tạm tính</span>
+                    ${blankNote}
+                </div>
+                <div class="flex items-end gap-4 mb-3 flex-wrap">
+                    <div class="flex flex-col"><span class="text-[10px] text-gray-400 font-semibold">HỆ 10</span><span class="text-2xl font-extrabold ${accent}">${score10.toFixed(2)}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-gray-400 font-semibold">HỆ 4</span><span class="text-2xl font-extrabold ${accent}">${score4.toFixed(1)}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-gray-400 font-semibold">ĐIỂM CHỮ</span><span class="text-2xl font-extrabold ${accent}">${letterGrade}</span></div>
+                    <div class="ml-auto text-right"><span class="text-[10px] text-gray-400 font-semibold block">MỤC TIÊU</span><span class="text-sm font-bold ${reached ? 'text-emerald-600' : 'text-amber-600'}">${reached ? 'Đã đạt 🎉' : 'GPA ' + desired.toFixed(1)}</span></div>
+                </div>
+                <div class="relative w-full h-3 bg-white rounded-full overflow-hidden shadow-inner">
+                    <div class="h-full rounded-full transition-all duration-300 ${reached ? 'bg-emerald-400' : 'bg-brand-400'}" style="width:${fillPct}%"></div>
+                    <div class="absolute top-0 bottom-0 w-0.5 bg-amber-500" style="left:${targetPct}%"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+                    <span>0</span>
+                    <span class="text-amber-500 font-semibold">▲ mốc cần đạt ${targetScore10.toFixed(1)}</span>
+                    <span>10</span>
+                </div>`;
+            panel.classList.remove('hidden');
+        }
+
+        /**
+         * Khởi tạo và thiết lập các Event Listeners
+         */
+        function initGpaCalculator() {
+            // Chips chọn mục tiêu GPA (#desired-gpa-4 là input ẩn)
+            const desiredInput = document.getElementById('desired-gpa-4');
+            const gpaChipsWrap = document.getElementById('desired-gpa-chips');
+            const styleGpaChips = () => {
+                if (!gpaChipsWrap || !desiredInput) return;
+                gpaChipsWrap.querySelectorAll('.gpa-chip').forEach(btn => {
+                    const active = btn.dataset.gpa === desiredInput.value;
+                    btn.classList.toggle('bg-gradient-to-br', active);
+                    btn.classList.toggle('from-[#dc2f2f]', active);
+                    btn.classList.toggle('to-[#ee5a5a]', active);
+                    btn.classList.toggle('text-white', active);
+                    btn.classList.toggle('border-transparent', active);
+                    btn.classList.toggle('shadow-md', active);
+                    btn.classList.toggle('shadow-brand-200', active);
+                    btn.classList.toggle('bg-white', !active);
+                    btn.classList.toggle('text-gray-600', !active);
+                    btn.classList.toggle('border-brand-100', !active);
+                });
+            };
+            if (gpaChipsWrap && desiredInput) {
+                gpaChipsWrap.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-gpa]');
+                    if (!btn) return;
+                    desiredInput.value = btn.dataset.gpa;
+                    styleGpaChips();
+                    updateGpaProjection();
+                });
+            }
+
+            // Toggle "Thang điểm mỗi bài": công thức UMP <-> % đúng × 10 (lưu lựa chọn trên máy)
+            const scaleToggle = document.getElementById('scale-mode-toggle');
+            const styleScaleToggle = () => {
+                if (!scaleToggle) return;
+                const mode = getScaleMode();
+                scaleToggle.querySelectorAll('.scale-mode-btn').forEach(btn => {
+                    const active = btn.dataset.mode === mode;
+                    btn.classList.toggle('bg-[#dc2f2f]', active);
+                    btn.classList.toggle('text-white', active);
+                    btn.classList.toggle('shadow-sm', active);
+                    btn.classList.toggle('text-gray-500', !active);
+                });
+            };
+            if (scaleToggle) {
+                scaleToggle.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-mode]');
+                    if (!btn || btn.dataset.mode === getScaleMode()) return;
+                    try { localStorage.setItem(SCALE_MODE_KEY, btn.dataset.mode); } catch (err) { /* bỏ qua */ }
+                    styleScaleToggle();
+                    updateGpaProjection();
+                });
+            }
+
+            // Nút xoá nhanh dữ liệu đã nhập (giữ nguyên loại kỳ thi & mục tiêu)
+            const resetGoalBtn = document.getElementById('reset-goal-btn');
+            if (resetGoalBtn) {
+                resetGoalBtn.addEventListener('click', () => {
+                    requiredCalcDone = false; // tắt tự tính lại trước khi dọn bảng
+                    renderAttemptsTable(); // vẽ lại bảng trống theo cấu hình hiện tại
+                    const resultArea = document.getElementById('required-correct-result');
+                    if (resultArea) resultArea.innerHTML = '';
+                    scheduleSaveGoalState();
+                    showToast('Đã xoá dữ liệu các lần thi 🧹', 'success');
+                });
+            }
+
+            const examTypeEl = document.getElementById('exam-type');
+            if (examTypeEl) {
+                examTypeEl.addEventListener('change', () => { renderAttemptsTable(); scheduleSaveGoalState(); });
+            }
+
+            const calcRequiredBtn = document.getElementById('calculate-required-btn');
+            if (calcRequiredBtn) {
+                calcRequiredBtn.addEventListener('click', () => calculateRequiredCorrectAnswers());
+            }
+
+            restoreGoalState();
+            styleGpaChips();
+            styleScaleToggle();
+        }
+
+        /**
+         * Khôi phục dữ liệu đã lưu trên máy (loại kỳ thi, mục tiêu, số liệu từng lần thi),
+         * sau đó mới bật cơ chế tự lưu để không ghi đè dữ liệu cũ.
+         */
+        function restoreGoalState() {
+            const st = loadGoalState();
+            const examTypeEl = document.getElementById('exam-type');
+            const desiredInput = document.getElementById('desired-gpa-4');
+
+            if (st) {
+                if (st.examType && examTypeEl && [...examTypeEl.options].some(o => o.value === st.examType)) examTypeEl.value = st.examType;
+                if (st.desired && desiredInput) desiredInput.value = st.desired;
+                // Chế độ tùy chỉnh: dựng lại cấu trúc các lần thi (tên, kiểu nhập, trọng số) đã lưu
+                if (examTypeEl?.value === 'custom' && Array.isArray(st.rows) && st.rows.length > 0) {
+                    customRows = st.rows.slice(0, MAX_ATTEMPTS).map((r, i) => ({
+                        label: (r.label || '').trim() || `Lần ${i + 1}`,
+                        kind: r.kind === 'score' ? 'score' : 'ratio',
+                        weight: Math.max(0, Math.min(100, parseFloat(r.weight) || 0)),
+                    }));
+                }
+            }
+
+            renderAttemptsTable();
+
+            if (st && Array.isArray(st.rows)) {
+                const rowEls = document.querySelectorAll('#attempts-table .attempt-row');
+                rowEls.forEach((el, i) => {
+                    const r = st.rows[i];
+                    if (!r) return;
+                    const setVal = (sel, v) => {
+                        const inp = el.querySelector(sel);
+                        if (inp && v != null && v !== '') inp.value = v;
+                    };
+                    setVal('.attempt-total', r.total);
+                    setVal('.attempt-score', r.score);
+                    setVal('.attempt-correct', r.correct);
+                });
+                // Bắn 'input' để đồng bộ slider / tổng trọng số theo giá trị vừa khôi phục
+                rowEls.forEach(el => {
+                    el.querySelectorAll('.attempt-total, .attempt-correct, .attempt-score').forEach(inp => {
+                        if (inp.value !== '') inp.dispatchEvent(new Event('input'));
+                    });
+                });
+            }
+
+            goalStateRestored = true; // từ giờ mới cho phép tự lưu
+            updateGpaProjection();
+        }
+
+        document.addEventListener('DOMContentLoaded', initGpaCalculator);
+    </script>
+</body>
+
+</html>
