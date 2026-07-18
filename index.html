@@ -3,222 +3,859 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Tính số câu cần đạt — GPA hệ 4</title>
-    <meta name="description" content="Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu ở mỗi kỳ thi (theo công thức UMP). — CLB Tình Nguyện Trường Y.">
+    <meta name="description" content="Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu mỗi lần thi (theo công thức UMP). — CLB Tình Nguyện Trường Y (Man in Red).">
     <link rel="icon" type="image/png" href="logo_clb.png">
-    <meta name="theme-color" content="#dc2f2f">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Bảng màu CLB Tình Nguyện Trường Y — đỏ (brand), xanh dương (ocean), nền trắng
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#fef3f2', 100: '#fde3e1', 200: '#fac7c4', 300: '#f39d98',
-                            400: '#ea6a63', 500: '#dc2f2f', 600: '#c11f26', 700: '#9f1a20',
-                        },
-                        ocean: {
-                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
-                            400: '#60a5fa', 500: '#2563eb', 600: '#1d4ed8', 700: '#1e40af',
-                        },
-                    },
-                },
-            },
-        };
-    </script>
+    <meta name="theme-color" content="#09090B">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;500;700;900&family=Geist+Mono:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ============================================================
+           MONOCHROME BRUTALIST — 90% mono, red ONLY for
+           active state / final result / primary CTA
+           ============================================================ */
+        :root {
+            --surface: #FFFFFF;
+            --ink: #09090B;
+            --steel: #A1A1AA;
+            --hairline: #E4E4E7;
+            --accent: #DC2F2F;
+
+            --font-body: 'Geist', sans-serif;
+            --font-mono: 'Geist Mono', monospace;
+
+            --spring-ease: cubic-bezier(0.19, 1, 0.22, 1);
+            --transition-fast: 300ms var(--spring-ease);
+            --transition-slow: 600ms var(--spring-ease);
+
+            --line: 2px solid var(--ink);
+            --sheet-radius: 28px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; }
+
         body {
-            background: linear-gradient(135deg, #fef3f2 0%, #ffffff 48%, #eff6ff 100%);
-            min-height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--ink);
+            color: var(--ink);
+            font-family: var(--font-body);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
-        /* Logo phát sáng nhẹ theo nhịp cho phần đầu trang */
-        @keyframes logoGlow {
-            0%, 100% { box-shadow: 0 8px 22px rgba(220,47,47,.28), 0 0 0 rgba(37,99,235,0); }
-            50%      { box-shadow: 0 10px 26px rgba(220,47,47,.36), 0 0 18px rgba(37,99,235,.22); }
+
+        .mono, input, select, output { font-family: var(--font-mono); }
+
+        /* Custom focus rings — no default outlines */
+        :focus { outline: none; }
+        :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+        .stage :focus-visible { outline-color: var(--surface); }
+
+        /* Universal tactile press */
+        button { transition: transform 120ms var(--spring-ease); cursor: pointer; touch-action: manipulation; }
+        button:active { transform: scale(0.95); }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        .fade-in { animation: fadeIn .4s ease both; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-        /* Toast thông báo nhỏ góc màn hình */
-        #toast-container { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: .5rem; align-items: center; pointer-events: none; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+
+        /* ============================================================
+           STAGE — immersive dark hero zone (top 40dvh)
+           ============================================================ */
+        .stage {
+            flex: 0 0 40dvh;
+            min-height: 0;
+            background: var(--ink);
+            color: var(--surface);
+            display: flex;
+            flex-direction: column;
+            padding: max(14px, env(safe-area-inset-top)) 20px 40px;
+            animation: rise var(--transition-slow) backwards;
+        }
+        .stage-inner {
+            width: 100%;
+            max-width: 620px;
+            margin: 0 auto;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 6px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .brand img { width: 34px; height: 34px; object-fit: contain; background: var(--surface); border-radius: 50%; padding: 2px; }
+        .brand-name { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; line-height: 1.25; }
+        .brand-sub { display: block; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500; color: var(--steel); text-transform: uppercase; letter-spacing: 0.2em; }
+
+        .stage-title {
+            font-family: var(--font-mono);
+            font-weight: 300;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--steel);
+        }
+
+        .stage-main { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+        .stage-gpa {
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: clamp(4rem, 10vw, 8rem);
+            line-height: 0.85;
+            letter-spacing: -0.04em;
+            color: var(--accent);
+        }
+        .stage-side { display: flex; flex-direction: column; gap: 2px; }
+        .stage-letter { font-family: var(--font-mono); font-weight: 900; font-size: 1.6rem; line-height: 1; }
+        .stage-s10 { font-family: var(--font-mono); font-weight: 300; font-size: 0.85rem; color: var(--steel); }
+
+        .stage-bar {
+            position: relative;
+            width: 100%;
+            height: 10px;
+            background: #27272A;
+            border-radius: 999px;
+            overflow: visible;
+        }
+        .stage-fill {
+            height: 100%;
+            width: var(--w, 0%);
+            background: var(--accent);
+            border-radius: 999px;
+            transition: width var(--transition-slow);
+        }
+        .stage-mark {
+            position: absolute;
+            top: -5px;
+            bottom: -5px;
+            width: 3px;
+            border-radius: 2px;
+            background: var(--surface);
+            left: var(--t, 85%);
+            transition: left var(--transition-slow);
+        }
+        .stage-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-weight: 300;
+            font-size: 0.66rem;
+            color: var(--steel);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .stage-meta b { font-weight: 700; color: var(--surface); }
+
+        /* ============================================================
+           SHEET — floating bottom sheet, the thumb zone
+           ============================================================ */
+        .sheet {
+            flex: 1 1 auto;
+            min-height: 0;
+            background: var(--surface);
+            border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+            margin-top: -24px;
+            z-index: 2;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            animation: rise var(--transition-slow) 120ms backwards;
+            box-shadow: 0 -8px 0 rgba(9, 9, 11, 0.25);
+        }
+        .sheet-inner {
+            max-width: 620px;
+            margin: 0 auto;
+            padding: 10px 20px 0;
+        }
+        .grabber {
+            width: 44px;
+            height: 5px;
+            border-radius: 999px;
+            background: var(--hairline);
+            margin: 4px auto 14px;
+        }
+
+        .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+        .sheet-head h1 { font-weight: 900; font-size: 1.25rem; letter-spacing: -0.02em; line-height: 1.15; }
+        .sheet-head p { font-weight: 300; font-size: 0.8rem; color: var(--steel); margin-top: 3px; }
+
+        .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 14px;
+            background: var(--surface);
+            border: var(--line);
+            border-radius: 999px;
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            flex-shrink: 0;
+        }
+
+        /* ===== Fields ===== */
+        .field { margin-bottom: 18px; }
+        .field-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-weight: 300;
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--steel);
+            margin-bottom: 8px;
+        }
+
+        .field-input {
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 16px;
+            background: var(--surface);
+            border: var(--line);
+            border-radius: 16px;
+            color: var(--ink);
+            appearance: none;
+        }
+        select.field-input {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%2309090B' stroke-width='2.5'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 44px;
+        }
+
+        /* ===== Scale toggle ===== */
+        .scale-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+        .scale-row .field-label { margin-bottom: 0; }
+        .toggle-group { display: inline-flex; border: var(--line); border-radius: 999px; overflow: hidden; background: var(--surface); }
+        .toggle-btn {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 9px 14px;
+            background: var(--surface);
+            color: var(--steel);
+            border: none;
+        }
+        .toggle-btn + .toggle-btn { border-left: var(--line); }
+        .toggle-btn.active { background: var(--ink); color: var(--surface); }
+
+        /* ===== Attempt cards ===== */
+        @keyframes cardRise {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .attempt-row {
+            background: var(--surface);
+            border: var(--line);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            animation: cardRise var(--transition-slow) backwards;
+        }
+        .attempt-row:nth-child(1) { animation-delay: 0ms; }
+        .attempt-row:nth-child(2) { animation-delay: 70ms; }
+        .attempt-row:nth-child(3) { animation-delay: 140ms; }
+        .attempt-row:nth-child(4) { animation-delay: 210ms; }
+        .attempt-row:nth-child(5) { animation-delay: 280ms; }
+        .attempt-row:nth-child(n+6) { animation-delay: 350ms; }
+
+        .attempt-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .attempt-icon {
+            width: 32px; height: 32px;
+            display: grid; place-items: center;
+            border-radius: 10px;
+            background: var(--ink);
+            color: var(--surface);
+            font-size: 0.72rem;
+            flex-shrink: 0;
+        }
+        .attempt-name { font-weight: 900; font-size: 0.95rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        input.attempt-label {
+            flex: 1; min-width: 0;
+            font-family: var(--font-body);
+            font-weight: 900;
+            font-size: 0.95rem;
+            border: none;
+            border-bottom: 2px solid var(--hairline);
+            background: transparent;
+            padding: 4px 2px;
+            border-radius: 0;
+        }
+        input.attempt-label:focus-visible { outline: none; border-bottom-color: var(--ink); }
+
+        .attempt-live {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 5px 9px;
+            border-radius: 999px;
+            border: 1.5px solid var(--hairline);
+            background: var(--surface);
+            color: var(--steel);
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .attempt-live.lv-top,
+        .attempt-live.lv-good { border-color: var(--ink); background: var(--ink); color: var(--surface); }
+        .attempt-live.lv-mid,
+        .attempt-live.lv-low { border-color: var(--ink); color: var(--ink); }
+        .attempt-live.lv-fail { border-color: var(--accent); background: var(--accent); color: var(--surface); }
+
+        .attempt-weight-tag { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .attempt-weight-kicker { font-family: var(--font-mono); font-weight: 300; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--steel); }
+        .attempt-weight-val { font-family: var(--font-mono); font-weight: 900; font-size: 0.95rem; }
+        input.attempt-weight[type="number"] {
+            width: 62px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 0.9rem;
+            padding: 7px 4px;
+            border: var(--line);
+            border-radius: 10px;
+        }
+
+        .attempt-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+        select.attempt-kind {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 8px 30px 8px 12px;
+            border: var(--line);
+            border-radius: 999px;
+            background-color: var(--surface);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7'><path d='M1 1l4 4 4-4' fill='none' stroke='%2309090B' stroke-width='2'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+        .attempt-remove {
+            width: 32px; height: 32px;
+            border: var(--line);
+            border-radius: 10px;
+            background: var(--surface);
+            color: var(--ink);
+            display: grid; place-items: center;
+            flex-shrink: 0;
+        }
+
+        .attempt-inputs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; margin-bottom: 10px; }
+        .attempt-inputs .slash { font-family: var(--font-mono); font-weight: 300; color: var(--steel); padding-bottom: 14px; }
+        .mini-label { display: block; font-family: var(--font-mono); font-weight: 300; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--steel); margin-bottom: 6px; }
+        .num-input {
+            width: 100%;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 900;
+            padding: 13px 8px;
+            border: var(--line);
+            border-radius: 14px;
+            background: var(--surface);
+        }
+        .num-input::placeholder { color: var(--hairline); font-weight: 400; }
+
+        .score-line { display: flex; align-items: center; gap: 14px; }
+        .score-line .num-input { width: 116px; flex-shrink: 0; }
+
+        input[type="range"].attempt-slider {
+            flex: 1;
+            width: 100%;
+            accent-color: var(--accent);
+            cursor: pointer;
+            height: 24px;
+        }
+        input[type="range"].attempt-slider:disabled { cursor: not-allowed; opacity: 0.35; }
+
+        .hint { display: flex; gap: 6px; font-weight: 300; font-size: 0.72rem; color: var(--steel); margin-top: 6px; }
+        .hint i { margin-top: 2px; }
+        .hidden { display: none !important; }
+
+        .add-attempt-btn {
+            width: 100%;
+            padding: 14px;
+            border: 2px dashed var(--steel);
+            border-radius: 20px;
+            background: var(--surface);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--ink);
+        }
+
+        .weight-note {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 14px;
+            font-family: var(--font-mono);
+            font-weight: 300;
+            font-size: 0.7rem;
+            color: var(--steel);
+            margin-top: 8px;
+        }
+        .weight-note b { font-weight: 900; }
+        .weight-note.bad { color: var(--accent); }
+        .balance-btn {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--ink);
+            background: none;
+            border: none;
+            border-bottom: 2px solid var(--ink);
+            padding: 0 0 1px;
+        }
+
+        /* ===== GPA target chips — horizontal snap rail, thumb-sized ===== */
+        .chip-rail {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 4px 2px 10px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .chip-rail::-webkit-scrollbar { display: none; }
+        .gpa-chip {
+            scroll-snap-align: center;
+            flex: 0 0 auto;
+            min-width: 92px;
+            height: 78px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            border: var(--line);
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--ink);
+        }
+        .gpa-chip .letter { font-family: var(--font-mono); font-weight: 900; font-size: 1.5rem; line-height: 1; }
+        .gpa-chip .val { font-family: var(--font-mono); font-weight: 300; font-size: 0.68rem; color: var(--steel); }
+        .gpa-chip.selected { background: var(--accent); border-color: var(--accent); }
+        .gpa-chip.selected .letter, .gpa-chip.selected .val { color: var(--surface); }
+
+        /* ===== Primary CTA — sticky in the thumb zone ===== */
+        .cta-wrap {
+            position: sticky;
+            bottom: 0;
+            z-index: 3;
+            background: var(--surface);
+            padding: 10px 0 calc(12px + env(safe-area-inset-bottom));
+            border-top: 1px solid var(--hairline);
+        }
+        .btn-calc {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px;
+            background: var(--accent);
+            color: var(--surface);
+            border: none;
+            border-radius: 999px;
+            font-family: var(--font-body);
+            font-weight: 900;
+            font-size: 1rem;
+            letter-spacing: 0.01em;
+        }
+
+        /* ===== Result card ===== */
+        .result-card { border: var(--line); border-radius: 20px; overflow: hidden; background: var(--surface); animation: cardRise var(--transition-slow) backwards; margin-bottom: 18px; }
+        .result-head { display: flex; align-items: center; gap: 10px; padding: 13px 16px; font-weight: 900; font-size: 0.9rem; }
+        .tone-info .result-head, .tone-success .result-head { background: var(--ink); color: var(--surface); }
+        .tone-warn .result-head { border-bottom: var(--line); color: var(--ink); }
+        .tone-danger .result-head { background: var(--accent); color: var(--surface); }
+        .result-body { padding: 16px; font-size: 0.88rem; font-weight: 500; }
+        .result-body p { margin-top: 10px; font-weight: 300; color: var(--steel); }
+        .result-body b { font-weight: 900; color: var(--ink); }
+        .result-foot { display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-top: 1px solid var(--hairline); font-family: var(--font-mono); font-weight: 300; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--steel); }
+        .result-foot b { font-weight: 900; color: var(--ink); }
+        .result-foot i { color: var(--accent); }
+
+        .hero-number { display: flex; align-items: flex-end; gap: 10px; margin-top: 12px; }
+        .hero-number .big { font-family: var(--font-mono); font-weight: 900; font-size: 3.4rem; line-height: 0.85; letter-spacing: -0.03em; color: var(--accent); }
+        .hero-number .unit { font-family: var(--font-mono); font-weight: 300; font-size: 0.95rem; color: var(--steel); padding-bottom: 4px; }
+        .hero-number .badge {
+            margin-left: auto;
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: var(--ink);
+            color: var(--surface);
+        }
+
+        .bar-track { position: relative; width: 100%; height: 10px; border-radius: 999px; background: var(--hairline); margin-top: 14px; overflow: hidden; }
+        .bar-fill { height: 100%; width: var(--w, 0%); border-radius: 999px; background: var(--accent); transition: width var(--transition-slow); }
+
+        .stat-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .stat-chip { border: var(--line); border-radius: 14px; padding: 8px 14px; text-align: center; background: var(--surface); }
+        .stat-chip .k { display: block; font-family: var(--font-mono); font-weight: 300; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--steel); margin-bottom: 2px; }
+        .stat-chip b { font-family: var(--font-mono); font-weight: 900; font-size: 1.05rem; }
+
+        .milestones { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hairline); }
+        .milestones .m-title { display: block; font-family: var(--font-mono); font-weight: 300; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--steel); margin-bottom: 10px; }
+        .tier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .tier {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1.5px solid var(--hairline);
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            background: var(--surface);
+        }
+        .tier .t-sub { font-size: 0.6rem; color: var(--steel); font-weight: 300; }
+        .tier.ok { border-color: var(--ink); }
+        .tier.safe { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+        .tier.safe .t-sub { color: var(--steel); }
+        .tier.far { color: var(--steel); }
+        .tier.picked { border: 2px solid var(--accent); }
+
+        .suggest-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            background: var(--ink);
+            color: var(--surface);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 7px 13px;
+            margin-bottom: 12px;
+        }
+        .suggest-rows { display: flex; flex-direction: column; gap: 8px; }
+        .suggest-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border: 1.5px solid var(--hairline);
+            border-radius: 12px;
+            padding: 10px 13px;
+            font-size: 0.85rem;
+        }
+        .suggest-row .s-name { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .suggest-row .s-name i { color: var(--steel); font-size: 0.55rem; }
+        .suggest-row .s-val { font-family: var(--font-mono); font-weight: 900; color: var(--accent); }
+
+        /* ===== Conversion table ===== */
+        details.convert { margin: 6px 0 18px; }
+        details.convert summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--ink);
+            user-select: none;
+        }
+        details.convert summary::-webkit-details-marker { display: none; }
+        details.convert summary i { transition: transform var(--transition-fast); font-size: 0.6rem; }
+        details.convert[open] summary i { transform: rotate(90deg); }
+        .convert-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-family: var(--font-mono); font-size: 0.78rem; }
+        .convert-table th {
+            font-weight: 300;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: var(--steel);
+            padding: 8px;
+            border-bottom: var(--line);
+        }
+        .convert-table td { padding: 8px; border-bottom: 1px solid var(--hairline); text-align: center; font-weight: 500; }
+        .convert-table td.lg { font-weight: 900; }
+        .convert-note { font-weight: 300; font-size: 0.72rem; color: var(--steel); margin-top: 10px; }
+
+        /* ===== Toasts ===== */
+        #toast-container {
+            position: fixed;
+            bottom: calc(96px + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            pointer-events: none;
+            width: max-content;
+            max-width: calc(100vw - 32px);
+        }
+        @keyframes toastRise {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
         .toast {
-            padding: .6rem 1.1rem; border-radius: 9999px; font-size: .8rem; font-weight: 700;
-            color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.15); animation: toastIn .25s ease both;
+            display: flex;
+            align-items: stretch;
+            background: var(--ink);
+            color: var(--surface);
+            border-radius: 999px;
+            overflow: hidden;
+            animation: toastRise var(--transition-fast) backwards;
         }
-        .toast.success { background: linear-gradient(90deg, #34d399, #10b981); }
-        .toast.warning { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
-        .toast.error   { background: linear-gradient(90deg, #f87171, #ef4444); }
-        .toast.info    { background: linear-gradient(90deg, #dc2f2f, #ee5a5a); }
-        @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-        .toast.hide { transition: opacity .3s, transform .3s; opacity: 0; transform: translateY(10px); }
+        .toast.hide { transition: opacity var(--transition-fast), transform var(--transition-fast); opacity: 0; transform: translateY(10px); }
+        .toast-tag {
+            display: flex;
+            align-items: center;
+            padding: 9px 13px;
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .toast.success .toast-tag { background: var(--surface); color: var(--ink); }
+        .toast.warning .toast-tag { background: var(--steel); color: var(--ink); }
+        .toast.error   .toast-tag { background: var(--accent); color: var(--surface); }
+        .toast.info    .toast-tag { background: var(--surface); color: var(--ink); }
+        .toast-msg { padding: 9px 15px 9px 11px; font-size: 0.78rem; font-weight: 500; }
+
+        /* ===== Credit — luôn hiện trên stage, cả mobile lẫn desktop ===== */
+        .stage-credit {
+            font-family: var(--font-mono);
+            font-weight: 300;
+            font-size: 0.64rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--steel);
+        }
+        .stage-credit i { color: var(--accent); margin-right: 4px; }
+        .stage-credit b { font-weight: 900; color: var(--surface); }
+        .stage-credit span { font-weight: 700; color: var(--surface); }
+
+        @media (max-width: 380px) {
+            .tier-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ============================================================
+           DESKTOP ≥ 768px — split-screen app: dark rail trái cố định,
+           vùng làm việc phải tự scroll. Bỏ hẳn bottom-sheet paradigm.
+           ============================================================ */
+        @media (min-width: 768px) {
+            body { flex-direction: row; }
+
+            .stage {
+                flex: 0 0 clamp(360px, 36vw, 480px);
+                height: 100dvh;
+                padding: 44px 44px 36px;
+            }
+            .stage-inner { max-width: none; }
+            .brand img { width: 44px; height: 44px; }
+            .brand-name { font-size: 0.82rem; }
+            .stage-title { font-size: 0.78rem; }
+            .stage-gpa { font-size: clamp(5.5rem, 9vw, 8rem); }
+            .stage-letter { font-size: 2rem; }
+            .stage-s10 { font-size: 0.95rem; }
+            .stage-meta { font-size: 0.72rem; }
+            .stage-credit { font-size: 0.74rem; }
+
+            .sheet {
+                flex: 1;
+                margin-top: 0;
+                border-radius: 0;
+                box-shadow: none;
+                border-left: 1px solid var(--hairline);
+            }
+            .sheet-inner { max-width: 760px; padding: 40px 56px 0; }
+            .grabber { display: none; }
+
+            .sheet-head { margin-bottom: 26px; }
+            .sheet-head h1 { font-size: 1.7rem; }
+            .sheet-head p { font-size: 0.9rem; }
+
+            .field { margin-bottom: 24px; }
+
+            /* Chips: bỏ snap-rail ngang, trải đều một hàng */
+            .chip-rail { flex-wrap: wrap; overflow-x: visible; scroll-snap-type: none; }
+            .gpa-chip { flex: 1 1 0; min-width: 84px; height: 84px; scroll-snap-align: none; }
+
+            /* Hover affordance — chỉ có trên con trỏ chuột */
+            .gpa-chip:hover { border-color: var(--accent); }
+            .toggle-btn:hover { color: var(--ink); }
+            .btn-reset:hover { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+            .add-attempt-btn:hover { border-style: solid; border-color: var(--ink); }
+            .attempt-remove:hover { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+            .btn-calc:hover { transform: translateY(-2px); }
+            .btn-calc:active { transform: scale(0.95); }
+            details.convert summary:hover { color: var(--accent); }
+
+            .cta-wrap { padding: 14px 0 28px; border-top: none; }
+
+            .attempt-row { padding: 20px; }
+            .num-input { font-size: 1.4rem; }
+            .tier-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 
 <body>
-    <main class="px-5 py-8 sm:py-12">
-        <div class="max-w-2xl mx-auto fade-in">
-            <!-- Banner CLB: logo + tên câu lạc bộ + slogan -->
-            <header class="relative overflow-hidden rounded-3xl mb-8 border border-brand-100 shadow-xl shadow-brand-100/50 bg-white">
-                <!-- Dải màu cờ CLB: đỏ → trắng → xanh -->
-                <div class="h-2 w-full bg-gradient-to-r from-brand-500 via-white to-ocean-600"></div>
-                <div class="flex flex-col items-center text-center gap-3 px-6 py-7 sm:py-8">
-                    <img src="logo_clb.png" alt="Logo CLB Tình Nguyện Trường Y"
-                        class="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-full bg-white p-1.5 ring-2 ring-brand-200"
-                        style="animation: logoGlow 3.5s ease-in-out infinite;">
-                    <div>
-                        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-ocean-600">
-                            CLB Tình Nguyện Trường Y
-                        </h1>
-                        <p class="mt-1.5 inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.25em] text-brand-600">
-                            <i class="fas fa-heart-pulse text-brand-500"></i> Man in Red
-                        </p>
-                    </div>
+    <!-- ===== STAGE: immersive result zone ===== -->
+    <header class="stage">
+        <div class="stage-inner">
+            <div class="brand">
+                <img src="logo_clb.png" alt="Logo CLB Tình Nguyện Trường Y">
+                <span class="brand-name">CLB Tình Nguyện Trường Y<span class="brand-sub">Man in Red</span></span>
+            </div>
+            <span class="stage-title">Điểm tổng kết tạm tính · GPA hệ 4</span>
+            <div class="stage-main">
+                <span id="stage-gpa" class="stage-gpa mono">—</span>
+                <div class="stage-side">
+                    <span id="stage-letter" class="stage-letter">·</span>
+                    <span id="stage-s10" class="stage-s10">Hệ 10: 0.00</span>
                 </div>
-            </header>
+            </div>
+            <div class="stage-bar">
+                <div id="stage-fill" class="stage-fill"></div>
+                <div id="stage-mark" class="stage-mark"></div>
+            </div>
+            <div class="stage-meta">
+                <span id="stage-note">Nhập số liệu ở bảng dưới</span>
+                <span id="stage-goal">Mục tiêu <b>GPA 4.0</b> · ≥ <b>8.5</b></span>
+            </div>
+            <p class="stage-credit"><i class="fas fa-code"></i> Thực hiện bởi <b>Việt Thanh</b> · <span>Y23C - 17 - PRIT</span></p>
+        </div>
+    </header>
 
-            <!-- Tiêu đề công cụ -->
-            <div class="text-center mb-8">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#dc2f2f] to-[#2563eb] drop-shadow">
-                    <i class="fas fa-bullseye mr-2 text-[#dc2f2f]"></i>Tính số câu cần đạt
-                </h2>
-                <p class="text-sm text-gray-500 mt-2">Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu mỗi lần thi 🩺</p>
+    <!-- ===== SHEET: the thumb zone ===== -->
+    <main class="sheet" id="required-correct-section">
+        <div class="sheet-inner">
+            <div class="grabber" aria-hidden="true"></div>
+
+            <div class="sheet-head">
+                <div>
+                    <h1>Tính số câu cần đạt</h1>
+                    <p>Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu mỗi lần thi 🩺</p>
+                </div>
+                <button type="button" id="reset-goal-btn" class="btn-reset" title="Xóa dữ liệu đã nhập" aria-label="Xóa dữ liệu đã nhập">
+                    <i class="fas fa-rotate-left"></i> Xóa dữ liệu
+                </button>
             </div>
 
-            <!-- CARD: Tính số câu cần đạt cho từng kỳ thi -->
-            <section id="required-correct-section"
-                class="bg-white rounded-3xl shadow-xl shadow-brand-100/50 border border-brand-100 p-6 sm:p-8 mb-10">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#dc2f2f] to-[#2563eb] flex items-center justify-center text-white shadow-md shrink-0">
-                        <i class="fas fa-bullseye"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <h3 class="text-lg font-extrabold text-gray-800">Tính số câu cần đạt cho từng kỳ thi</h3>
-                        <p class="text-xs text-gray-400">Đặt mục tiêu GPA và xem cần đúng bao nhiêu câu mỗi lần thi</p>
-                    </div>
-                    <button type="button" id="reset-goal-btn"
-                        class="ml-auto w-9 h-9 shrink-0 flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl hover:bg-brand-100 hover:text-brand-500 transition shadow-sm"
-                        title="Xoá dữ liệu đã nhập" aria-label="Xoá dữ liệu đã nhập">
-                        <i class="fas fa-rotate-left"></i>
-                    </button>
+            <div class="field">
+                <label for="exam-type" class="field-label"><i class="fas fa-clipboard-list"></i> Loại kỳ thi</label>
+                <select id="exam-type" class="field-input">
+                    <option value="pretest">Có pretest (10 · 20 · 70)</option>
+                    <option value="nopretest">Không pretest (30 · 70)</option>
+                    <option value="custom">Tùy chỉnh — nhiều đợt, tự đặt tên</option>
+                </select>
+            </div>
+
+            <!-- Thang điểm mỗi bài: cách quy đổi câu đúng -> hệ 10 trước khi nhân trọng số -->
+            <div class="scale-row">
+                <span class="field-label" title="Cách quy đổi câu đúng của mỗi bài thi ra điểm hệ 10 trước khi nhân trọng số">
+                    <i class="fas fa-scale-balanced"></i> Thang điểm mỗi bài
+                </span>
+                <div id="scale-mode-toggle" class="toggle-group">
+                    <button type="button" data-mode="ump" class="toggle-btn scale-mode-btn" title="Câu đúng → hệ 10 theo công thức UMP">Công thức UMP</button>
+                    <button type="button" data-mode="linear" class="toggle-btn scale-mode-btn" title="Hệ 10 = tỉ lệ câu đúng × 10">% đúng × 10</button>
                 </div>
+            </div>
 
-                <div class="mb-5">
-                    <label for="exam-type" class="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
-                        <i class="fas fa-clipboard-list text-brand-400"></i> Loại kỳ thi
-                    </label>
-                    <select id="exam-type"
-                        class="w-full px-4 py-2.5 bg-white border border-brand-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#dc2f2f] focus:border-[#dc2f2f] transition cursor-pointer">
-                        <option value="pretest">Có pretest (10 · 20 · 70)</option>
-                        <option value="nopretest">Không pretest (30 · 70)</option>
-                        <option value="custom">Tùy chỉnh — nhiều đợt, tự đặt tên</option>
-                    </select>
+            <div id="attempts-table">
+                <!-- Bảng nhập câu đúng / tổng câu / trọng số từng lần (render bằng JS) -->
+            </div>
+
+            <div class="field">
+                <span class="field-label"><i class="fas fa-star"></i> Mục tiêu GPA — Điểm hệ 4 mong muốn</span>
+                <input type="hidden" id="desired-gpa-4" value="4.0">
+                <div id="desired-gpa-chips" class="chip-rail">
+                    <button type="button" data-gpa="1.0" class="gpa-chip"><span class="letter">D</span><span class="val">1.0</span></button>
+                    <button type="button" data-gpa="1.5" class="gpa-chip"><span class="letter">D+</span><span class="val">1.5</span></button>
+                    <button type="button" data-gpa="2.0" class="gpa-chip"><span class="letter">C</span><span class="val">2.0</span></button>
+                    <button type="button" data-gpa="2.5" class="gpa-chip"><span class="letter">C+</span><span class="val">2.5</span></button>
+                    <button type="button" data-gpa="3.0" class="gpa-chip"><span class="letter">B</span><span class="val">3.0</span></button>
+                    <button type="button" data-gpa="3.5" class="gpa-chip"><span class="letter">B+</span><span class="val">3.5</span></button>
+                    <button type="button" data-gpa="4.0" class="gpa-chip"><span class="letter">A</span><span class="val">4.0</span></button>
                 </div>
+            </div>
 
-                <!-- Thang điểm mỗi bài: cách quy đổi câu đúng → hệ 10 trước khi nhân trọng số -->
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-5 bg-brand-50/60 border border-brand-100 rounded-xl px-3 py-2.5">
-                    <span class="text-xs font-semibold text-gray-500 flex items-center gap-1.5"
-                        title="Cách quy đổi câu đúng của mỗi bài thi ra điểm hệ 10 trước khi nhân trọng số">
-                        <i class="fas fa-scale-balanced text-brand-400"></i> Thang điểm mỗi bài
-                    </span>
-                    <div id="scale-mode-toggle" class="flex bg-white p-0.5 rounded-lg border border-brand-100 gap-0.5">
-                        <button type="button" data-mode="ump" class="scale-mode-btn px-3 h-7 rounded-md text-xs font-bold transition"
-                            title="Câu đúng → hệ 10 theo công thức UMP">Công thức UMP</button>
-                        <button type="button" data-mode="linear" class="scale-mode-btn px-3 h-7 rounded-md text-xs font-bold transition"
-                            title="Hệ 10 = tỉ lệ câu đúng × 10">% đúng × 10</button>
-                    </div>
-                </div>
+            <div id="required-correct-result"></div>
 
-                <div id="attempts-table" class="mb-5">
-                    <!-- Bảng nhập câu đúng / tổng câu / trọng số từng lần (render bằng JS) -->
-                </div>
+            <div class="hint">
+                <i class="fas fa-circle-info"></i>
+                <span>Để trống ô câu đúng của các lần <b>chưa thi</b> để nhận gợi ý số câu cần đạt. Dữ liệu bạn nhập được lưu tự động trên máy; sau lần tính đầu tiên, kết quả sẽ tự cập nhật khi bạn chỉnh số liệu.</span>
+            </div>
 
-                <div class="mb-5">
-                    <label class="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-star text-amber-400"></i> Điểm hệ 4 mong muốn
-                    </label>
-                    <input type="hidden" id="desired-gpa-4" value="4.0">
-                    <div id="desired-gpa-chips" class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
-                        <button type="button" data-gpa="1.0" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
-                            <span class="text-sm font-extrabold leading-none">D</span><span class="text-[10px] font-semibold opacity-70 mt-1">1.0</span>
-                        </button>
-                        <button type="button" data-gpa="1.5" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
-                            <span class="text-sm font-extrabold leading-none">D+</span><span class="text-[10px] font-semibold opacity-70 mt-1">1.5</span>
-                        </button>
-                        <button type="button" data-gpa="2.0" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
-                            <span class="text-sm font-extrabold leading-none">C</span><span class="text-[10px] font-semibold opacity-70 mt-1">2.0</span>
-                        </button>
-                        <button type="button" data-gpa="2.5" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
-                            <span class="text-sm font-extrabold leading-none">C+</span><span class="text-[10px] font-semibold opacity-70 mt-1">2.5</span>
-                        </button>
-                        <button type="button" data-gpa="3.0" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
-                            <span class="text-sm font-extrabold leading-none">B</span><span class="text-[10px] font-semibold opacity-70 mt-1">3.0</span>
-                        </button>
-                        <button type="button" data-gpa="3.5" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
-                            <span class="text-sm font-extrabold leading-none">B+</span><span class="text-[10px] font-semibold opacity-70 mt-1">3.5</span>
-                        </button>
-                        <button type="button" data-gpa="4.0" class="gpa-chip flex flex-col items-center justify-center py-2 rounded-xl border border-brand-100 bg-white text-gray-600 hover:border-brand-300 transition">
-                            <span class="text-sm font-extrabold leading-none">A</span><span class="text-[10px] font-semibold opacity-70 mt-1">4.0</span>
-                        </button>
-                    </div>
-                </div>
+            <!-- Bảng quy đổi tham khảo (đóng/mở) -->
+            <details class="convert">
+                <summary><i class="fas fa-chevron-right"></i> Xem bảng quy đổi hệ 10 → điểm chữ → hệ 4</summary>
+                <table class="convert-table">
+                    <thead>
+                        <tr><th>Hệ 10</th><th>Điểm chữ</th><th>Hệ 4</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>9.5 – 10</td><td class="lg">A+</td><td>4.0</td></tr>
+                        <tr><td>8.5 – 9.4</td><td class="lg">A</td><td>4.0</td></tr>
+                        <tr><td>8.0 – 8.4</td><td class="lg">B+</td><td>3.5</td></tr>
+                        <tr><td>7.0 – 7.9</td><td class="lg">B</td><td>3.0</td></tr>
+                        <tr><td>6.5 – 6.9</td><td class="lg">C+</td><td>2.5</td></tr>
+                        <tr><td>5.5 – 6.4</td><td class="lg">C</td><td>2.0</td></tr>
+                        <tr><td>5.0 – 5.4</td><td class="lg">D+</td><td>1.5</td></tr>
+                        <tr><td>4.0 – 4.9</td><td class="lg">D</td><td>1.0</td></tr>
+                        <tr><td>&lt; 4.0</td><td class="lg">F</td><td>0.0</td></tr>
+                    </tbody>
+                </table>
+                <p class="convert-note">
+                    <i class="fas fa-circle-info"></i> Câu đúng → hệ 10 theo công thức UMP: dưới 50% đúng tính <b>8 × tỉ lệ đúng</b>; 50% = 4.0đ; 60% = 5.0đ; trên 60% tăng dần tới 10đ.
+                </p>
+            </details>
 
-                <!-- Điểm tổng kết tạm tính (cập nhật theo thời gian thực khi nhập / kéo thanh trượt) -->
-                <div id="gpa-live-projection" class="hidden"></div>
-
-                <button type="button" id="calculate-required-btn"
-                    class="w-full px-6 py-3 bg-gradient-to-r from-[#dc2f2f] to-[#ee5a5a] text-white rounded-xl hover:shadow-lg hover:shadow-brand-200 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-bold flex items-center justify-center gap-2">
+            <!-- Primary CTA: sticky in the thumb zone -->
+            <div class="cta-wrap">
+                <button type="button" id="calculate-required-btn" class="btn-calc">
                     <i class="fas fa-bullseye"></i> Tính số câu cần đạt
                 </button>
-                <div id="required-correct-result" class="mt-5"></div>
-                <div class="flex items-start gap-1.5 text-xs text-gray-400 mt-3">
-                    <i class="fas fa-circle-info mt-0.5"></i>
-                    <span>Để trống ô câu đúng của các lần <b>chưa thi</b> để nhận gợi ý số câu cần đạt. Dữ liệu bạn nhập được lưu tự động trên máy; sau lần tính đầu tiên, kết quả sẽ tự cập nhật khi bạn chỉnh số liệu.</span>
-                </div>
-
-                <!-- Bảng quy đổi tham khảo (đóng/mở) -->
-                <details class="mt-5 group">
-                    <summary class="cursor-pointer list-none flex items-center gap-1.5 text-xs font-bold text-brand-500 hover:text-brand-600 transition select-none">
-                        <i class="fas fa-chevron-right text-[10px] transition-transform group-open:rotate-90"></i>
-                        Xem bảng quy đổi hệ 10 → điểm chữ → hệ 4
-                    </summary>
-                    <div class="mt-3 overflow-x-auto rounded-xl border border-brand-100">
-                        <table class="w-full text-xs text-center">
-                            <thead>
-                                <tr class="bg-brand-50 text-gray-500 font-bold uppercase tracking-wide text-[10px]">
-                                    <th class="py-2 px-2">Hệ 10</th>
-                                    <th class="py-2 px-2">Điểm chữ</th>
-                                    <th class="py-2 px-2">Hệ 4</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-brand-50 text-gray-700 font-semibold">
-                                <tr><td class="py-1.5">9.5 – 10</td><td class="text-amber-500 font-extrabold">A+</td><td>4.0</td></tr>
-                                <tr><td class="py-1.5">8.5 – 9.4</td><td class="text-amber-500 font-extrabold">A</td><td>4.0</td></tr>
-                                <tr><td class="py-1.5">8.0 – 8.4</td><td class="text-emerald-500 font-extrabold">B+</td><td>3.5</td></tr>
-                                <tr><td class="py-1.5">7.0 – 7.9</td><td class="text-emerald-500 font-extrabold">B</td><td>3.0</td></tr>
-                                <tr><td class="py-1.5">6.5 – 6.9</td><td class="text-sky-500 font-extrabold">C+</td><td>2.5</td></tr>
-                                <tr><td class="py-1.5">5.5 – 6.4</td><td class="text-sky-500 font-extrabold">C</td><td>2.0</td></tr>
-                                <tr><td class="py-1.5">5.0 – 5.4</td><td class="text-violet-500 font-extrabold">D+</td><td>1.5</td></tr>
-                                <tr><td class="py-1.5">4.0 – 4.9</td><td class="text-violet-500 font-extrabold">D</td><td>1.0</td></tr>
-                                <tr><td class="py-1.5">&lt; 4.0</td><td class="text-gray-400 font-extrabold">F</td><td>0.0</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p class="text-[11px] text-gray-400 mt-2 leading-relaxed">
-                        <i class="fas fa-circle-info mr-1"></i>Câu đúng → hệ 10 theo công thức UMP: dưới 50% đúng tính <b>8 × tỉ lệ đúng</b>; 50% = 4.0đ; 60% = 5.0đ; trên 60% tăng dần tới 10đ.
-                    </p>
-                </details>
-            </section>
-
-            <!-- Ghi nguồn tác giả -->
-            <footer class="text-center pb-2">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-brand-100 shadow-sm shadow-brand-100/50 text-xs text-gray-500">
-                    <i class="fas fa-code text-brand-500"></i>
-                    <span>Thực hiện bởi <b class="text-gray-700">Việt Thanh</b> · <span class="text-ocean-600 font-semibold">Y23C - 17 - PRIT</span></span>
-                </div>
-                <p class="text-[11px] text-gray-400 mt-2">CLB Tình Nguyện Trường Y — <span class="font-semibold text-brand-500">Man in Red</span></p>
-            </footer>
+            </div>
         </div>
     </main>
 
@@ -227,13 +864,15 @@
     <script>
         'use strict';
 
-        // ===== Toast thông báo nhỏ (thay cho showToast của app gốc) =====
+        // ===== Toast thông báo: "Thành công" / "Cảnh báo" / "Lỗi" =====
+        const TOAST_LABELS = { success: 'Thành công', warning: 'Cảnh báo', error: 'Lỗi', info: 'Thông báo' };
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             if (!container) return;
             const el = document.createElement('div');
             el.className = `toast ${type}`;
-            el.textContent = message;
+            el.innerHTML = `<span class="toast-tag">${TOAST_LABELS[type] || TOAST_LABELS.info}</span><span class="toast-msg"></span>`;
+            el.querySelector('.toast-msg').textContent = message;
             container.appendChild(el);
             setTimeout(() => {
                 el.classList.add('hide');
@@ -421,20 +1060,16 @@
                     }
                 }
                 const selected = Math.abs(t.score4 - desiredGPA) < 1e-9;
-                const stateCls = state === 'far'
-                    ? 'text-gray-400 bg-gray-50 border-gray-200'
-                    : state === 'safe'
-                        ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                        : 'text-gray-700 bg-white/80 border-brand-100';
-                return `<div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs ${stateCls} ${selected ? 'ring-2 ring-brand-300' : ''}">
-                    <span class="font-extrabold">${t.letter} <span class="font-semibold text-[10px] opacity-60">· ${t.score4.toFixed(1)}</span></span>
-                    <span class="font-bold">${text}</span>
+                const stateCls = state === 'far' ? 'far' : state === 'safe' ? 'safe' : 'ok';
+                return `<div class="tier ${stateCls} ${selected ? 'picked' : ''}">
+                    <span>${t.letter} <span class="t-sub">· ${t.score4.toFixed(1)}</span></span>
+                    <span>${text}</span>
                 </div>`;
             }).join('');
             return `
-                <div class="mt-4 pt-3 border-t border-brand-100">
-                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2"><i class="fas fa-signal mr-1 text-brand-300"></i>Mốc từng mức điểm ở lần "${attempt.label}"</p>
-                    <div class="grid grid-cols-1 min-[380px]:grid-cols-2 gap-1.5">${rows}</div>
+                <div class="milestones">
+                    <span class="m-title"><i class="fas fa-signal"></i> Mốc từng mức điểm ở lần "${attempt.label}"</span>
+                    <div class="tier-grid">${rows}</div>
                 </div>`;
         }
 
@@ -479,12 +1114,9 @@
                 if (silent) return; // đang gõ dở: giữ kết quả cũ, không chen lỗi vào
                 requiredCalcDone = true;
                 resultArea.innerHTML = `
-                    <div class="rounded-2xl border border-red-200 bg-red-50 overflow-hidden shadow-sm">
-                        <div class="flex items-center gap-2.5 px-4 py-3 border-b border-red-200">
-                            <span class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-sm shrink-0"><i class="fas fa-circle-exclamation"></i></span>
-                            <span class="font-extrabold text-red-700 text-sm">Chưa thể tính</span>
-                        </div>
-                        <div class="px-4 py-4 text-sm text-gray-700 leading-relaxed">${msg}</div>
+                    <div class="result-card tone-danger">
+                        <div class="result-head"><i class="fas fa-circle-exclamation"></i> Chưa thể tính</div>
+                        <div class="result-body">${msg}</div>
                     </div>`;
             };
 
@@ -558,25 +1190,15 @@
             const neededPct = targetPct - knownPct;
 
             // Bộ khung hiển thị kết quả: header trạng thái + nội dung + chân nhắc mục tiêu (đồng nhất mọi nhánh)
-            const TONES = {
-                success: { bg: 'bg-emerald-50', border: 'border-emerald-200', head: 'text-emerald-700', iconBg: 'bg-emerald-100 text-emerald-600' },
-                info:    { bg: 'bg-brand-50',    border: 'border-brand-200',    head: 'text-brand-700',    iconBg: 'bg-brand-100 text-brand-600' },
-                warn:    { bg: 'bg-amber-50',   border: 'border-amber-200',   head: 'text-amber-700',   iconBg: 'bg-amber-100 text-amber-600' },
-                danger:  { bg: 'bg-red-50',     border: 'border-red-200',     head: 'text-red-700',     iconBg: 'bg-red-100 text-red-600' },
-            };
             const render = ({ tone, icon, title, body }) => {
                 requiredCalcDone = true; // từ giờ kết quả sẽ tự cập nhật khi chỉnh số liệu
-                const t = TONES[tone];
                 resultArea.innerHTML = `
-                    <div class="rounded-2xl border ${t.border} ${t.bg} overflow-hidden shadow-sm">
-                        <div class="flex items-center gap-2.5 px-4 py-3 border-b ${t.border}">
-                            <span class="w-8 h-8 rounded-xl ${t.iconBg} flex items-center justify-center text-sm shrink-0"><i class="fas ${icon}"></i></span>
-                            <span class="font-extrabold ${t.head} text-sm">${title}</span>
-                        </div>
-                        <div class="px-4 py-4 text-sm text-gray-700 leading-relaxed">${body}</div>
-                        <div class="flex items-center gap-1.5 px-4 py-2.5 bg-white/60 border-t ${t.border} text-xs text-gray-500">
-                            <i class="fas fa-bullseye text-brand-400"></i>
-                            <span>Mục tiêu <b class="text-gray-700">GPA ${desiredGPA.toFixed(1)}</b> · điểm tổng kết cần <b class="text-gray-700">≥ ${targetScore10.toFixed(1)}</b> (hệ 10)</span>
+                    <div class="result-card tone-${tone}">
+                        <div class="result-head"><i class="fas ${icon}"></i> ${title}</div>
+                        <div class="result-body">${body}</div>
+                        <div class="result-foot">
+                            <i class="fas fa-bullseye"></i>
+                            <span>Mục tiêu <b>GPA ${desiredGPA.toFixed(1)}</b> · điểm tổng kết cần <b>≥ ${targetScore10.toFixed(1)}</b> (hệ 10)</span>
                         </div>
                     </div>`;
                 // Bấm nút tính (không phải auto-update) thì đưa kết quả vào tầm nhìn — quan trọng trên mobile
@@ -584,17 +1206,18 @@
             };
             // Khối "số to" cho con số cần đạt
             const heroNumber = (big, unit, badge) => `
-                <div class="flex items-end gap-2">
-                    <span class="text-4xl font-extrabold text-brand-500 leading-none">${big}</span>
-                    <span class="text-base font-bold text-gray-400 mb-0.5">${unit}</span>
-                    ${badge ? `<span class="ml-auto text-sm font-bold text-brand-600 bg-brand-100 rounded-full px-2.5 py-1">${badge}</span>` : ''}
+                <div class="hero-number">
+                    <span class="big">${big}</span>
+                    <span class="unit">${unit}</span>
+                    ${badge ? `<span class="badge">${badge}</span>` : ''}
                 </div>`;
             // Ba ô điểm hệ 10 / hệ 4 / điểm chữ
-            const statChips = (s10, s4, letter, tone) => {
-                const t = TONES[tone];
-                const chip = (lbl, val) => `<div class="px-3 py-1.5 rounded-xl bg-white/70 border ${t.border} text-center"><span class="text-[10px] text-gray-400 font-semibold block">${lbl}</span><b class="text-base text-gray-800">${val}</b></div>`;
-                return `<div class="flex flex-wrap gap-2">${chip('HỆ 10', s10)}${chip('HỆ 4', s4)}${chip('ĐIỂM CHỮ', letter)}</div>`;
+            const statChips = (s10, s4, letter) => {
+                const chip = (lbl, val) => `<div class="stat-chip"><span class="k">${lbl}</span><b>${val}</b></div>`;
+                return `<div class="stat-chips">${chip('Hệ 10', s10)}${chip('Hệ 4', s4)}${chip('Điểm chữ', letter)}</div>`;
             };
+            const progressBar = (pct) => `
+                <div class="bar-track"><div class="bar-fill" style="--w:${pct}%"></div></div>`;
 
             // 3a. Đã nhập đủ tất cả -> báo kết quả tổng kết
             if (unknown.length === 0) {
@@ -604,9 +1227,9 @@
 
                 if (reached) {
                     render({
-                        tone: 'success', icon: 'fa-trophy', title: 'Đã đạt mục tiêu! 🎉',
-                        body: `${statChips(finalScore10.toFixed(2), score4.toFixed(1), letterGrade, 'success')}
-                               <p class="mt-3 font-semibold text-emerald-600">Kết quả hiện tại đã đủ để đạt mục tiêu. Tuyệt vời! 🐿️</p>`
+                        tone: 'success', icon: 'fa-trophy', title: 'Đã đạt mục tiêu!',
+                        body: `${statChips(finalScore10.toFixed(2), score4.toFixed(1), letterGrade)}
+                               <p>Kết quả hiện tại đã đủ để đạt mục tiêu. Tuyệt vời!</p>`
                     });
                     return;
                 }
@@ -619,19 +1242,19 @@
                 const otherPct = knownPct - lever.p * lever.weight;            // điểm các lần khác (giữ nguyên)
                 const neededFromLever = targetPct - otherPct;                  // phần cần bù từ lần đòn bẩy
                 const neededP = lever.weight > 0 ? neededFromLever / lever.weight : Infinity;
-                const chips = statChips(finalScore10.toFixed(2), score4.toFixed(1), letterGrade, 'warn');
+                const chips = statChips(finalScore10.toFixed(2), score4.toFixed(1), letterGrade);
 
                 if (lever.kind === 'score') {
                     const needScore = Math.ceil(neededP * 10 * 100) / 100;
                     const cur = lever.p * 10;
                     if (needScore > 10) {
-                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
-                            body: `${chips}<p class="mt-3 text-gray-600">Dù đạt <b>10/10</b> điểm ở lần "<b>${lever.label}</b>", điểm tổng kết vẫn chưa chạm mục tiêu.</p>
+                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
+                            body: `${chips}<p>Dù đạt <b>10/10</b> điểm ở lần "<b>${lever.label}</b>", điểm tổng kết vẫn chưa chạm mục tiêu.</p>
                                    ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
                     } else {
                         render({ tone: 'info', icon: 'fa-bullseye', title: 'Để đạt mục tiêu cần',
-                            body: `${chips}<div class="mt-3">${heroNumber(needScore.toFixed(2), '/ 10 điểm', null)}</div>
-                                   <p class="mt-2 text-gray-500">Ở lần <b class="text-gray-700">${lever.label}</b> cần đạt bấy nhiêu điểm (đang ${cur.toFixed(2)}/10), giữ nguyên các lần khác.</p>
+                            body: `${chips}${heroNumber(needScore.toFixed(2), '/ 10 điểm', null)}
+                                   <p>Ở lần <b>${lever.label}</b> cần đạt bấy nhiêu điểm (đang ${cur.toFixed(2)}/10), giữ nguyên các lần khác.</p>
                                    ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
                     }
                     return;
@@ -640,17 +1263,17 @@
                 const needCorrect = minCorrectForScore10(neededP * 10, lever.total, mode);
                 const cur = lever.correct;
                 if (needCorrect > lever.total) {
-                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
-                        body: `${chips}<p class="mt-3 text-gray-600">Dù đúng cả <b>${lever.total}/${lever.total}</b> câu ở lần "<b>${lever.label}</b>", điểm tổng kết vẫn chưa chạm mục tiêu.</p>
+                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
+                        body: `${chips}<p>Dù đúng cả <b>${lever.total}/${lever.total}</b> câu ở lần "<b>${lever.label}</b>", điểm tổng kết vẫn chưa chạm mục tiêu.</p>
                                ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
                     return;
                 }
                 const acc = Math.round((needCorrect / lever.total) * 100);
                 render({ tone: 'info', icon: 'fa-bullseye', title: 'Để đạt mục tiêu cần',
                     body: `${chips}
-                           <div class="mt-3">${heroNumber(needCorrect, `/ ${lever.total} câu`, '≈ ' + acc + '%')}</div>
-                           <p class="mt-2 text-gray-500">Số câu đúng tối thiểu ở lần <b class="text-gray-700">${lever.label}</b> (đang ${cur}/${lever.total}), giữ nguyên các lần khác.</p>
-                           <div class="mt-3 w-full h-2 bg-white rounded-full overflow-hidden shadow-inner"><div class="h-full bg-brand-400 rounded-full transition-all duration-500" style="width:${acc}%"></div></div>
+                           ${heroNumber(needCorrect, `/ ${lever.total} câu`, '≈ ' + acc + '%')}
+                           <p>Số câu đúng tối thiểu ở lần <b>${lever.label}</b> (đang ${cur}/${lever.total}), giữ nguyên các lần khác.</p>
+                           ${progressBar(acc)}
                            ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
                 return;
             }
@@ -658,8 +1281,8 @@
             // 3b. Đã chắc chắn đạt dù các lần còn lại được 0 điểm
             if (neededPct <= 1e-9) {
                 render({
-                    tone: 'success', icon: 'fa-circle-check', title: 'Chắc suất đạt mục tiêu! 🎉',
-                    body: `Kết quả các lần đã thi đã đủ để đạt <b>GPA ${desiredGPA.toFixed(1)}</b> — kể cả khi các lần còn lại được 0 điểm. Quá đỉnh! 🐿️`
+                    tone: 'success', icon: 'fa-circle-check', title: 'Chắc suất đạt mục tiêu!',
+                    body: `Kết quả các lần đã thi đã đủ để đạt <b>GPA ${desiredGPA.toFixed(1)}</b> — kể cả khi các lần còn lại được 0 điểm. Quá đỉnh!`
                 });
                 return;
             }
@@ -678,13 +1301,13 @@
                     const needScore = Math.ceil(neededP * 10 * 100) / 100; // điểm hệ 10, làm tròn lên 2 số lẻ
                     if (needScore > 10) {
                         const maxScore10 = (knownPct + a.weight) / 10;
-                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
+                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
                             body: `Dù đạt <b>10/10</b> điểm ở lần "<b>${a.label}</b>", điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).
                                    ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
                     } else {
                         render({ tone: 'info', icon: 'fa-bullseye', title: 'Điểm cần đạt',
                             body: `${heroNumber(needScore.toFixed(2), '/ 10 điểm', null)}
-                                   <p class="mt-2 text-gray-500">Điểm hệ 10 tối thiểu ở lần <b class="text-gray-700">${a.label}</b> để đạt mục tiêu.</p>
+                                   <p>Điểm hệ 10 tối thiểu ở lần <b>${a.label}</b> để đạt mục tiêu.</p>
                                    ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
                     }
                     return;
@@ -693,7 +1316,7 @@
                 const needCorrect = minCorrectForScore10(neededP * 10, a.total, mode);
                 if (needCorrect > a.total) {
                     const maxScore10 = (knownPct + a.weight) / 10;
-                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
+                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
                         body: `Dù đúng cả <b>${a.total}/${a.total}</b> câu ở lần "<b>${a.label}</b>", điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).
                                ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
                     return;
@@ -701,8 +1324,8 @@
                 const acc = Math.round((needCorrect / a.total) * 100);
                 render({ tone: 'info', icon: 'fa-bullseye', title: 'Số câu cần đạt',
                     body: `${heroNumber(needCorrect, `/ ${a.total} câu`, '≈ ' + acc + '%')}
-                           <p class="mt-2 text-gray-500">Số câu đúng tối thiểu ở lần <b class="text-gray-700">${a.label}</b> để đạt mục tiêu.</p>
-                           <div class="mt-3 w-full h-2 bg-white rounded-full overflow-hidden shadow-inner"><div class="h-full bg-brand-400 rounded-full transition-all duration-500" style="width:${acc}%"></div></div>
+                           <p>Số câu đúng tối thiểu ở lần <b>${a.label}</b> để đạt mục tiêu.</p>
+                           ${progressBar(acc)}
                            ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
                 return;
             }
@@ -718,7 +1341,7 @@
 
             if (reqRatio > 1 + 1e-9) {
                 const maxScore10 = (knownPct + unknownWeight) / 10;
-                render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với 😢',
+                render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
                     body: `Dù đạt điểm tuyệt đối ở tất cả các lần còn lại, điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).` });
                 return;
             }
@@ -732,16 +1355,16 @@
                     const needCorrect = Math.min(a.total, minCorrectForScore10(reqScore10, a.total, mode));
                     val = `${needCorrect}/${a.total} câu`;
                 }
-                return `<div class="flex items-center justify-between bg-white/70 rounded-xl px-3 py-2 border border-brand-200">
-                    <span class="font-semibold text-gray-700"><i class="fas fa-circle-dot text-brand-300 mr-1.5 text-[10px]"></i>${a.label}</span>
-                    <span class="font-bold text-brand-600">${val}</span>
+                return `<div class="suggest-row">
+                    <span class="s-name"><i class="fas fa-circle-dot"></i>${a.label}</span>
+                    <span class="s-val">${val}</span>
                 </div>`;
             }).join('');
 
             render({ tone: 'info', icon: 'fa-lightbulb', title: `Gợi ý cho ${unknown.length} lần còn lại`,
-                body: `<div class="inline-flex items-center gap-1.5 text-brand-600 bg-brand-100 rounded-full px-3 py-1 text-xs font-bold mb-3"><i class="fas fa-wave-square"></i> Giữ phong độ đều ≈ ${reqScore10.toFixed(1)}/10 điểm mỗi lần</div>
-                       <div class="space-y-1.5">${rows}</div>
-                       <p class="text-xs text-gray-400 mt-3">💡 Phương án cân bằng — lần này làm tốt hơn thì lần sau có thể nhẹ nhàng hơn.</p>` });
+                body: `<div class="suggest-badge"><i class="fas fa-wave-square"></i> Giữ phong độ đều ≈ ${reqScore10.toFixed(1)}/10 điểm mỗi lần</div>
+                       <div class="suggest-rows">${rows}</div>
+                       <p>Phương án cân bằng — lần này làm tốt hơn thì lần sau có thể nhẹ nhàng hơn.</p>` });
         }
 
         /**
@@ -770,7 +1393,7 @@
         const ATTEMPT_ICONS = { 'Pretest': 'fa-vial', 'Giữa kỳ': 'fa-pen-fancy', 'Cuối kỳ': 'fa-flag-checkered' };
 
         /**
-         * Render các thẻ "lần thi" (dạng card, thân thiện mobile).
+         * Render các thẻ "lần thi" (dạng card).
          * Mỗi thẻ có thanh trượt (slider) để chọn nhanh số câu đúng / điểm, cập nhật điểm tổng kết tức thì.
          */
         function renderAttemptsTable() {
@@ -783,7 +1406,7 @@
             const isCustom = examType === 'custom';
             const rows = getExamConfig(examType);
 
-            const pillHtml = '<span class="attempt-live text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 shrink-0">Chưa thi</span>';
+            const pillHtml = '<span class="attempt-live">Chưa thi</span>';
 
             const cardsHtml = rows.map((row, idx) => {
                 const icon = ATTEMPT_ICONS[row.label] || 'fa-layer-group';
@@ -793,80 +1416,82 @@
                 if (isCustom) {
                     // Chế độ tùy chỉnh: tên sửa được, chọn kiểu nhập, chỉnh trọng số, xoá lần thi
                     const removeBtn = rows.length > 1
-                        ? `<button type="button" class="attempt-remove w-7 h-7 shrink-0 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition" title="Xoá lần thi này" aria-label="Xoá lần thi"><i class="fas fa-trash-can text-xs"></i></button>`
+                        ? `<button type="button" class="attempt-remove" title="Xoá lần thi này" aria-label="Xoá lần thi"><i class="fas fa-trash-can"></i></button>`
                         : '';
                     header = `
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-100 to-ocean-100 text-brand-500 flex items-center justify-center text-xs shrink-0"><i class="fas ${icon}"></i></span>
-                        <input type="text" maxlength="30" value="${safeLabel}" aria-label="Tên lần thi" placeholder="Tên lần thi"
-                            class="attempt-label flex-1 min-w-0 px-2 py-1 -ml-1 text-sm font-bold text-gray-800 bg-transparent border border-transparent border-b-brand-100 rounded-lg focus:bg-white focus:border-brand-200 focus:outline-none transition">
+                    <div class="attempt-head">
+                        <span class="attempt-icon"><i class="fas ${icon}"></i></span>
+                        <input type="text" maxlength="30" value="${safeLabel}" aria-label="Tên lần thi" placeholder="Tên lần thi" class="attempt-label">
                         ${pillHtml}
                         ${removeBtn}
                     </div>
-                    <div class="flex items-center justify-between gap-2 mb-3">
-                        <select class="attempt-kind text-xs font-semibold text-gray-600 bg-gray-50 border border-brand-100 rounded-lg pl-2 pr-7 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-200 cursor-pointer" aria-label="Kiểu nhập kết quả">
+                    <div class="attempt-tools">
+                        <select class="attempt-kind" aria-label="Kiểu nhập kết quả">
                             <option value="ratio" ${row.kind === 'ratio' ? 'selected' : ''}>Nhập câu đúng</option>
                             <option value="score" ${row.kind === 'score' ? 'selected' : ''}>Nhập điểm /10</option>
                         </select>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Trọng số</span>
-                            <input type="number" inputmode="numeric" class="attempt-weight w-14 px-1.5 py-1 border border-brand-200 rounded-lg text-center text-sm font-bold text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" min="0" max="100" value="${row.weight}" aria-label="Trọng số (%)">
-                            <span class="text-xs font-bold text-brand-400">%</span>
-                        </div>
+                        <span class="attempt-weight-tag">
+                            <span class="attempt-weight-kicker">Trọng số</span>
+                            <input type="number" inputmode="numeric" class="attempt-weight" min="0" max="100" value="${row.weight}" aria-label="Trọng số (%)">
+                            <span class="attempt-weight-val">%</span>
+                        </span>
                     </div>`;
                 } else {
                     header = `
-                    <div class="flex items-center justify-between gap-2 mb-3">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-100 to-ocean-100 text-brand-500 flex items-center justify-center text-xs shrink-0"><i class="fas ${icon}"></i></span>
-                            <span class="font-bold text-gray-800 text-sm truncate">${safeLabel}</span>
-                            ${pillHtml}
-                        </div>
-                        <div class="flex items-center gap-1.5 shrink-0"><span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">Trọng số</span><span class="text-sm font-extrabold text-brand-600">${row.weight}%</span><input type="hidden" class="attempt-weight" value="${row.weight}"></div>
+                    <div class="attempt-head">
+                        <span class="attempt-icon"><i class="fas ${icon}"></i></span>
+                        <span class="attempt-name">${safeLabel}</span>
+                        ${pillHtml}
+                        <span class="attempt-weight-tag">
+                            <span class="attempt-weight-kicker">Trọng số</span>
+                            <span class="attempt-weight-val">${row.weight}%</span>
+                            <input type="hidden" class="attempt-weight" value="${row.weight}">
+                        </span>
                     </div>`;
                 }
 
                 if (row.kind === 'score') {
                     return `
-                    <div class="attempt-row bg-white border border-brand-100 rounded-2xl p-3.5 shadow-sm transition hover:shadow-md" data-kind="score" data-label="${safeLabel}" data-index="${idx}">
+                    <div class="attempt-row" data-kind="score" data-label="${safeLabel}" data-index="${idx}">
                         ${header}
-                        <div class="flex items-center gap-3">
-                            <input type="number" inputmode="decimal" class="attempt-score w-24 px-3 py-2 border border-brand-200 rounded-xl text-center font-semibold focus:outline-none focus:ring-2 focus:ring-brand-200" min="0" max="10" step="0.01" placeholder="… /10">
-                            <input type="range" class="attempt-slider flex-1 accent-brand-500 cursor-pointer" min="0" max="10" step="0.1" value="0">
+                        <div class="score-line">
+                            <input type="number" inputmode="decimal" class="attempt-score num-input" min="0" max="10" step="0.01" placeholder="…/10">
+                            <input type="range" class="attempt-slider" min="0" max="10" step="0.1" value="0">
                         </div>
-                        <p class="text-[11px] text-gray-400 mt-1.5"><i class="fas fa-circle-info mr-1"></i>Nhập thẳng điểm hệ 10 của lần thi này (vd pretest), hoặc kéo thanh trượt.</p>
+                        <p class="hint"><i class="fas fa-circle-info"></i><span>Nhập thẳng điểm hệ 10 của lần thi này (vd pretest), hoặc kéo thanh trượt.</span></p>
                     </div>`;
                 }
                 return `
-                <div class="attempt-row bg-white border border-brand-100 rounded-2xl p-3.5 shadow-sm transition hover:shadow-md" data-kind="ratio" data-label="${safeLabel}" data-index="${idx}">
+                <div class="attempt-row" data-kind="ratio" data-label="${safeLabel}" data-index="${idx}">
                     ${header}
-                    <div class="flex items-end gap-2 mb-3">
-                        <div class="flex-1">
-                            <label class="block text-[11px] font-semibold text-gray-500 mb-1">Câu đúng</label>
-                            <input type="number" inputmode="numeric" class="attempt-correct w-full px-3 py-2 border border-brand-200 rounded-xl text-center font-semibold focus:outline-none focus:ring-2 focus:ring-brand-200" min="0" placeholder="—">
+                    <div class="attempt-inputs">
+                        <div>
+                            <label class="mini-label">Câu đúng</label>
+                            <input type="number" inputmode="numeric" class="attempt-correct num-input" min="0" placeholder="—">
                         </div>
-                        <span class="text-gray-300 font-bold pb-2">/</span>
-                        <div class="flex-1">
-                            <label class="block text-[11px] font-semibold text-gray-500 mb-1">Tổng câu</label>
-                            <input type="number" inputmode="numeric" class="attempt-total w-full px-3 py-2 border border-brand-200 rounded-xl text-center font-semibold focus:outline-none focus:ring-2 focus:ring-brand-200" min="1" placeholder="—">
+                        <span class="slash">/</span>
+                        <div>
+                            <label class="mini-label">Tổng câu</label>
+                            <input type="number" inputmode="numeric" class="attempt-total num-input" min="1" placeholder="—">
                         </div>
                     </div>
-                    <input type="range" class="attempt-slider w-full accent-brand-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50" min="0" max="100" step="1" value="0" disabled>
-                    <p class="attempt-hint text-[11px] text-gray-400 mt-1.5"><i class="fas fa-circle-info mr-1"></i>Nhập tổng câu để kéo thanh chọn nhanh số câu đúng.</p>
+                    <input type="range" class="attempt-slider" min="0" max="100" step="1" value="0" disabled>
+                    <p class="attempt-hint hint"><i class="fas fa-circle-info"></i><span>Nhập tổng câu để kéo thanh chọn nhanh số câu đúng.</span></p>
                 </div>`;
             }).join('');
 
             const totalWeight = rows.reduce((a, r) => a + (parseFloat(r.weight) || 0), 0);
             const addBtnHtml = isCustom && rows.length < MAX_ATTEMPTS
-                ? `<button type="button" id="add-attempt-btn" class="w-full mt-3 py-2.5 border-2 border-dashed border-brand-200 rounded-2xl text-sm font-bold text-brand-400 hover:text-brand-500 hover:border-brand-300 hover:bg-brand-50/50 transition flex items-center justify-center gap-1.5"><i class="fas fa-plus"></i> Thêm lần thi</button>`
+                ? `<button type="button" id="add-attempt-btn" class="add-attempt-btn"><i class="fas fa-plus"></i> Thêm lần thi</button>`
                 : '';
             const balanceBtnHtml = isCustom
-                ? `<button type="button" id="balance-weights-btn" class="text-brand-500 font-bold hover:text-brand-600 underline decoration-dotted underline-offset-2" title="Chia đều trọng số cho các lần thi">chia đều %</button>`
+                ? `<button type="button" id="balance-weights-btn" class="balance-btn" title="Chia đều trọng số cho các lần thi">chia đều %</button>`
                 : '';
+
             tableContainer.innerHTML = `
-                <div class="space-y-3">${cardsHtml}</div>
+                <div>${cardsHtml}</div>
                 ${addBtnHtml}
-                <div id="attempts-weight-note" class="flex items-center justify-end gap-3 text-xs ${Math.round(totalWeight) === 100 ? 'text-gray-400' : 'text-red-500'} mt-2.5">${balanceBtnHtml}<span>Tổng trọng số: <b id="attempts-weight-sum">${Math.round(totalWeight * 100) / 100}</b>%</span></div>`;
+                <div id="attempts-weight-note" class="weight-note ${Math.round(totalWeight) === 100 ? '' : 'bad'}">${balanceBtnHtml}<span>Tổng trọng số: <b id="attempts-weight-sum">${Math.round(totalWeight * 100) / 100}</b>%</span></div>`;
 
             wireAttemptInputs(isCustom);
             updateGpaProjection();
@@ -946,10 +1571,7 @@
                 const updateSum = () => {
                     const sum = weightInputs.reduce((a, el) => a + (parseFloat(el.value) || 0), 0);
                     if (sumEl) sumEl.textContent = Math.round(sum * 100) / 100;
-                    if (note) {
-                        note.classList.toggle('text-red-500', Math.round(sum) !== 100);
-                        note.classList.toggle('text-gray-400', Math.round(sum) === 100);
-                    }
+                    if (note) note.classList.toggle('bad', Math.round(sum) !== 100);
                     updateGpaProjection();
                 };
                 weightInputs.forEach((el, i) => el.addEventListener('input', () => {
@@ -1014,21 +1636,25 @@
         }
 
         /**
-         * Cập nhật bảng "Điểm tổng kết tạm tính" theo thời gian thực khi người dùng nhập / kéo thanh trượt.
-         * Các lần chưa nhập được tạm tính = 0 điểm; có thanh tiến độ và mốc mục tiêu để dễ hình dung.
+         * Cập nhật Hero Zone (điểm tổng kết tạm tính) theo thời gian thực khi nhập / kéo thanh trượt / đổi mục tiêu.
+         * Các lần chưa nhập được tạm tính = 0 điểm; thanh tiến độ + mốc mục tiêu nằm ngay trên stage.
          */
         function updateGpaProjection() {
             // Mọi thay đổi số liệu đều đi qua đây -> tiện thể lưu nháp + tính lại kết quả (đều debounce + có guard)
             scheduleSaveGoalState();
             scheduleAutoRequired();
 
-            const panel = document.getElementById('gpa-live-projection');
-            if (!panel) return;
-            const rows = Array.from(document.querySelectorAll('#attempts-table .attempt-row'));
-            if (rows.length === 0) { panel.classList.add('hidden'); return; }
+            const elGpa = document.getElementById('stage-gpa');
+            const elLetter = document.getElementById('stage-letter');
+            const elS10 = document.getElementById('stage-s10');
+            const elFill = document.getElementById('stage-fill');
+            const elMark = document.getElementById('stage-mark');
+            const elNote = document.getElementById('stage-note');
+            const elGoal = document.getElementById('stage-goal');
+            if (!elGpa) return;
 
             const mode = getScaleMode();
-            const PILL_BASE = 'attempt-live text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0';
+            const rows = Array.from(document.querySelectorAll('#attempts-table .attempt-row'));
 
             let totalPct = 0, blanks = 0, anyEntered = false;
             for (const el of rows) {
@@ -1051,18 +1677,18 @@
                 if (pill) {
                     if (p === null) {
                         pill.textContent = 'Chưa thi';
-                        pill.className = `${PILL_BASE} bg-gray-100 text-gray-400`;
+                        pill.className = 'attempt-live';
                         pill.removeAttribute('title');
                     } else {
                         const s10 = p * 10;
                         const { score4, letterGrade } = calculateGPAFromPercent(s10 * 10);
-                        const cls = s10 >= 8.5 ? 'bg-amber-100 text-amber-600'
-                            : s10 >= 7.0 ? 'bg-emerald-100 text-emerald-600'
-                            : s10 >= 5.5 ? 'bg-sky-100 text-sky-600'
-                            : s10 >= 4.0 ? 'bg-violet-100 text-violet-600'
-                            : 'bg-red-100 text-red-500';
+                        const cls = s10 >= 8.5 ? 'lv-top'
+                            : s10 >= 7.0 ? 'lv-good'
+                            : s10 >= 5.5 ? 'lv-mid'
+                            : s10 >= 4.0 ? 'lv-low'
+                            : 'lv-fail';
                         pill.textContent = `${score4.toFixed(1)} · ${s10.toFixed(2)} · ${letterGrade}`;
-                        pill.className = `${PILL_BASE} ${cls}`;
+                        pill.className = `attempt-live ${cls}`;
                         pill.title = `Hệ 4: ${score4.toFixed(1)} · Hệ 10: ${s10.toFixed(2)} · Điểm chữ: ${letterGrade}`;
                     }
                 }
@@ -1070,43 +1696,37 @@
                 if (p === null) blanks++; else { anyEntered = true; totalPct += p * weight; }
             }
 
-            if (!anyEntered) { panel.classList.add('hidden'); return; }
+            const desired = parseFloat(document.getElementById('desired-gpa-4')?.value) || 0;
+            const targetScore10 = minScore10ForGpa4(desired);
+            const targetPct = Math.max(0, Math.min(100, targetScore10 * 10));
+
+            // Mốc mục tiêu luôn cập nhật ngay khi bấm chip — phản hồi thị giác tức thì
+            if (elMark) elMark.style.setProperty('--t', targetPct + '%');
+            if (elGoal) elGoal.innerHTML = `Mục tiêu <b>GPA ${desired.toFixed(1)}</b> · ≥ <b>${targetScore10.toFixed(1)}</b>`;
+
+            if (!anyEntered) {
+                elGpa.textContent = '—';
+                if (elLetter) elLetter.textContent = '·';
+                if (elS10) elS10.textContent = 'Hệ 10: 0.00';
+                if (elFill) elFill.style.setProperty('--w', '0%');
+                if (elNote) elNote.textContent = 'Nhập số liệu ở bảng dưới';
+                return;
+            }
 
             const score10 = totalPct / 10;
             const { score4, letterGrade } = calculateGPAFromPercent(totalPct);
-            const desired = parseFloat(document.getElementById('desired-gpa-4')?.value) || 0;
-            const targetScore10 = minScore10ForGpa4(desired);
             const reached = score10 >= targetScore10 - 1e-9;
             const fillPct = Math.max(0, Math.min(100, score10 * 10));
-            const targetPct = Math.max(0, Math.min(100, targetScore10 * 10));
-            const accent = reached ? 'text-emerald-600' : 'text-brand-500';
 
-            const blankNote = blanks > 0
-                ? `<span class="text-[11px] text-gray-400">${blanks} lần chưa nhập = 0đ</span>`
-                : '';
-
-            panel.className = 'mt-1 mb-5 p-4 rounded-2xl border ' + (reached ? 'bg-emerald-50 border-emerald-200' : 'bg-brand-50/70 border-brand-200');
-            panel.innerHTML = `
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1.5"><i class="fas fa-gauge-high text-brand-400"></i> Điểm tổng kết tạm tính</span>
-                    ${blankNote}
-                </div>
-                <div class="flex items-end gap-4 mb-3 flex-wrap">
-                    <div class="flex flex-col"><span class="text-[10px] text-gray-400 font-semibold">HỆ 10</span><span class="text-2xl font-extrabold ${accent}">${score10.toFixed(2)}</span></div>
-                    <div class="flex flex-col"><span class="text-[10px] text-gray-400 font-semibold">HỆ 4</span><span class="text-2xl font-extrabold ${accent}">${score4.toFixed(1)}</span></div>
-                    <div class="flex flex-col"><span class="text-[10px] text-gray-400 font-semibold">ĐIỂM CHỮ</span><span class="text-2xl font-extrabold ${accent}">${letterGrade}</span></div>
-                    <div class="ml-auto text-right"><span class="text-[10px] text-gray-400 font-semibold block">MỤC TIÊU</span><span class="text-sm font-bold ${reached ? 'text-emerald-600' : 'text-amber-600'}">${reached ? 'Đã đạt 🎉' : 'GPA ' + desired.toFixed(1)}</span></div>
-                </div>
-                <div class="relative w-full h-3 bg-white rounded-full overflow-hidden shadow-inner">
-                    <div class="h-full rounded-full transition-all duration-300 ${reached ? 'bg-emerald-400' : 'bg-brand-400'}" style="width:${fillPct}%"></div>
-                    <div class="absolute top-0 bottom-0 w-0.5 bg-amber-500" style="left:${targetPct}%"></div>
-                </div>
-                <div class="flex justify-between text-[10px] text-gray-400 mt-1">
-                    <span>0</span>
-                    <span class="text-amber-500 font-semibold">▲ mốc cần đạt ${targetScore10.toFixed(1)}</span>
-                    <span>10</span>
-                </div>`;
-            panel.classList.remove('hidden');
+            elGpa.textContent = score4.toFixed(1);
+            if (elLetter) elLetter.textContent = letterGrade;
+            if (elS10) elS10.textContent = `Hệ 10: ${score10.toFixed(2)}`;
+            if (elFill) elFill.style.setProperty('--w', fillPct + '%');
+            if (elNote) {
+                elNote.textContent = reached
+                    ? 'Đã chạm mốc mục tiêu'
+                    : (blanks > 0 ? `${blanks} lần chưa nhập = 0đ` : 'Chưa chạm mốc mục tiêu');
+            }
         }
 
         /**
@@ -1119,17 +1739,7 @@
             const styleGpaChips = () => {
                 if (!gpaChipsWrap || !desiredInput) return;
                 gpaChipsWrap.querySelectorAll('.gpa-chip').forEach(btn => {
-                    const active = btn.dataset.gpa === desiredInput.value;
-                    btn.classList.toggle('bg-gradient-to-br', active);
-                    btn.classList.toggle('from-[#dc2f2f]', active);
-                    btn.classList.toggle('to-[#ee5a5a]', active);
-                    btn.classList.toggle('text-white', active);
-                    btn.classList.toggle('border-transparent', active);
-                    btn.classList.toggle('shadow-md', active);
-                    btn.classList.toggle('shadow-brand-200', active);
-                    btn.classList.toggle('bg-white', !active);
-                    btn.classList.toggle('text-gray-600', !active);
-                    btn.classList.toggle('border-brand-100', !active);
+                    btn.classList.toggle('selected', btn.dataset.gpa === desiredInput.value);
                 });
             };
             if (gpaChipsWrap && desiredInput) {
@@ -1139,6 +1749,7 @@
                     desiredInput.value = btn.dataset.gpa;
                     styleGpaChips();
                     updateGpaProjection();
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 });
             }
 
@@ -1148,11 +1759,7 @@
                 if (!scaleToggle) return;
                 const mode = getScaleMode();
                 scaleToggle.querySelectorAll('.scale-mode-btn').forEach(btn => {
-                    const active = btn.dataset.mode === mode;
-                    btn.classList.toggle('bg-[#dc2f2f]', active);
-                    btn.classList.toggle('text-white', active);
-                    btn.classList.toggle('shadow-sm', active);
-                    btn.classList.toggle('text-gray-500', !active);
+                    btn.classList.toggle('active', btn.dataset.mode === mode);
                 });
             };
             if (scaleToggle) {
@@ -1165,7 +1772,7 @@
                 });
             }
 
-            // Nút xoá nhanh dữ liệu đã nhập (giữ nguyên loại kỳ thi & mục tiêu)
+            // Nút "Xóa dữ liệu": xoá số liệu đã nhập (giữ nguyên loại kỳ thi & mục tiêu)
             const resetGoalBtn = document.getElementById('reset-goal-btn');
             if (resetGoalBtn) {
                 resetGoalBtn.addEventListener('click', () => {
@@ -1174,7 +1781,7 @@
                     const resultArea = document.getElementById('required-correct-result');
                     if (resultArea) resultArea.innerHTML = '';
                     scheduleSaveGoalState();
-                    showToast('Đã xoá dữ liệu các lần thi 🧹', 'success');
+                    showToast('Đã xoá dữ liệu các lần thi', 'success');
                 });
             }
 
