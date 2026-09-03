@@ -7,11 +7,24 @@
     <title>Tính số câu cần đạt — GPA hệ 4</title>
     <meta name="description" content="Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu mỗi lần thi (theo công thức UMP). — CLB Tình Nguyện Trường Y (Man in Red).">
     <link rel="icon" type="image/png" href="logo_clb.png">
+    <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#09090B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="logo_clb.png">
+    <script>
+        // Đặt theme trước khi vẽ để không bị nháy màu
+        try {
+            var t = localStorage.getItem('gpaTheme');
+            if (!t || t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', t);
+        } catch (e) { }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;500;700;900&family=Geist+Mono:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         /* ============================================================
            MONOCHROME BRUTALIST — 90% mono, red ONLY for
@@ -24,6 +37,13 @@
             --hairline: #E4E4E7;
             --accent: #DC2F2F;
 
+            /* Stage luôn tối ở cả 2 giao diện; chỉ phần "sheet" đổi màu theo theme */
+            --stage-bg: #09090B;
+            --stage-fg: #FFFFFF;
+            --stage-track: #27272A;
+            --chev-lg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%2309090B' stroke-width='2.5'/></svg>");
+            --chev-sm: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7'><path d='M1 1l4 4 4-4' fill='none' stroke='%2309090B' stroke-width='2'/></svg>");
+
             --font-body: 'Geist', sans-serif;
             --font-mono: 'Geist Mono', monospace;
 
@@ -35,6 +55,17 @@
             --sheet-radius: 28px;
         }
 
+        /* Giao diện tối: đảo vai trò --surface/--ink, stage giữ nguyên nền tối */
+        [data-theme="dark"] {
+            --surface: #131316;
+            --ink: #FAFAFA;
+            --steel: #8B8B93;
+            --hairline: #2C2C33;
+            --chev-lg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%23FAFAFA' stroke-width='2.5'/></svg>");
+            --chev-sm: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7'><path d='M1 1l4 4 4-4' fill='none' stroke='%23FAFAFA' stroke-width='2'/></svg>");
+        }
+        [data-theme="dark"] .sheet { box-shadow: 0 -8px 0 rgba(0, 0, 0, 0.55); }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body { height: 100%; }
@@ -45,7 +76,7 @@
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            background: var(--ink);
+            background: var(--stage-bg);
             color: var(--ink);
             font-family: var(--font-body);
             line-height: 1.5;
@@ -57,7 +88,7 @@
         /* Custom focus rings — no default outlines */
         :focus { outline: none; }
         :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-        .stage :focus-visible { outline-color: var(--surface); }
+        .stage :focus-visible { outline-color: var(--stage-fg); }
 
         /* Universal tactile press */
         button { transition: transform 120ms var(--spring-ease); cursor: pointer; touch-action: manipulation; }
@@ -77,8 +108,8 @@
         .stage {
             flex: 0 0 40dvh;
             min-height: 0;
-            background: var(--ink);
-            color: var(--surface);
+            background: var(--stage-bg);
+            color: var(--stage-fg);
             display: flex;
             flex-direction: column;
             padding: max(14px, env(safe-area-inset-top)) 20px 40px;
@@ -101,7 +132,7 @@
             align-items: center;
             gap: 10px;
         }
-        .brand img { width: 34px; height: 34px; object-fit: contain; background: var(--surface); border-radius: 50%; padding: 2px; }
+        .brand img { width: 34px; height: 34px; object-fit: contain; background: var(--stage-fg); border-radius: 50%; padding: 2px; }
         .brand-name { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; line-height: 1.25; }
         .brand-sub { display: block; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500; color: var(--steel); text-transform: uppercase; letter-spacing: 0.2em; }
 
@@ -131,7 +162,7 @@
             position: relative;
             width: 100%;
             height: 10px;
-            background: #27272A;
+            background: var(--stage-track);
             border-radius: 999px;
             overflow: visible;
         }
@@ -148,7 +179,7 @@
             bottom: -5px;
             width: 3px;
             border-radius: 2px;
-            background: var(--surface);
+            background: var(--stage-fg);
             left: var(--t, 85%);
             transition: left var(--transition-slow);
         }
@@ -163,7 +194,7 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
         }
-        .stage-meta b { font-weight: 700; color: var(--surface); }
+        .stage-meta b { font-weight: 700; color: var(--stage-fg); }
 
         /* ============================================================
            SHEET — floating bottom sheet, the thumb zone
@@ -241,7 +272,7 @@
         }
         select.field-input {
             cursor: pointer;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%2309090B' stroke-width='2.5'/></svg>");
+            background-image: var(--chev-lg);
             background-repeat: no-repeat;
             background-position: right 16px center;
             padding-right: 44px;
@@ -356,7 +387,7 @@
             background-color: var(--surface);
             cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7'><path d='M1 1l4 4 4-4' fill='none' stroke='%2309090B' stroke-width='2'/></svg>");
+            background-image: var(--chev-sm);
             background-repeat: no-repeat;
             background-position: right 12px center;
         }
@@ -399,7 +430,7 @@
 
         .hint { display: flex; gap: 6px; font-weight: 300; font-size: 0.72rem; color: var(--steel); margin-top: 6px; }
         .hint i { margin-top: 2px; }
-        .hidden { display: none !important; }
+        .hidden, [hidden] { display: none !important; }
 
         .add-attempt-btn {
             width: 100%;
@@ -670,8 +701,8 @@
             color: var(--steel);
         }
         .stage-credit i { color: var(--accent); margin-right: 4px; }
-        .stage-credit b { font-weight: 900; color: var(--surface); }
-        .stage-credit span { font-weight: 700; color: var(--surface); }
+        .stage-credit b { font-weight: 900; color: var(--stage-fg); }
+        .stage-credit span { font-weight: 700; color: var(--stage-fg); }
 
         @media (max-width: 380px) {
             .tier-grid { grid-template-columns: 1fr; }
@@ -681,6 +712,107 @@
            DESKTOP ≥ 768px — split-screen app: dark rail trái cố định,
            vùng làm việc phải tự scroll. Bỏ hẳn bottom-sheet paradigm.
            ============================================================ */
+        /* ===== Tabs: Môn này | Sổ điểm kỳ ===== */
+        .tabs { display: flex; border: var(--line); border-radius: 999px; overflow: hidden; margin-bottom: 18px; }
+        .tab {
+            flex: 1; padding: 12px 8px; border: none;
+            background: var(--surface); color: var(--steel);
+            font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .tab + .tab { border-left: var(--line); }
+        .tab.active { background: var(--ink); color: var(--surface); }
+        .tab i { margin-right: 7px; }
+
+        /* ===== Nút tròn trên stage: theme / chia sẻ / cài app ===== */
+        .stage-tools { display: flex; gap: 8px; margin-left: auto; }
+        .icon-btn {
+            width: 36px; height: 36px; flex-shrink: 0;
+            display: grid; place-items: center;
+            border-radius: 50%; border: 2px solid #3F3F46;
+            background: transparent; color: var(--stage-fg); font-size: 0.8rem;
+        }
+        .icon-btn[hidden] { display: none; }
+
+        /* ===== Sổ điểm cả kỳ ===== */
+        .bk-mid { font-family: var(--font-mono); font-weight: 300; color: var(--steel); padding-bottom: 14px; }
+        .book-empty {
+            text-align: center; color: var(--steel); font-size: 0.82rem; line-height: 1.6;
+            padding: 26px 16px; border: 2px dashed var(--hairline); border-radius: 20px; margin-bottom: 12px;
+        }
+        .rank-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 9px 15px; border-radius: 999px;
+            background: var(--ink); color: var(--surface);
+            font-family: var(--font-mono); font-weight: 900; font-size: 0.72rem;
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
+        }
+
+        /* ===== Bảng chia sẻ (dialog gốc của trình duyệt) ===== */
+        .share-dlg {
+            width: calc(100vw - 36px);
+            max-width: 380px;
+            max-height: 90dvh;
+            overflow: auto;
+            padding: 0;
+            border: var(--line);
+            border-radius: 24px;
+            background: var(--surface);
+            color: var(--ink);
+        }
+        .share-dlg::backdrop { background: rgba(9, 9, 11, 0.65); }
+        .share-in { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+        .share-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .share-head h2 { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1.2; }
+        .share-head p { font-weight: 300; font-size: 0.76rem; color: var(--steel); margin-top: 4px; }
+        .qr-box {
+            align-self: center; line-height: 0;
+            background: #FFFFFF; padding: 14px;
+            border: var(--line); border-radius: 20px;
+        }
+        .qr-box canvas { width: 196px; height: 196px; display: block; }
+        .share-url {
+            font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+            text-align: center; word-break: break-all; color: var(--steel);
+            padding: 11px 12px; border: 2px dashed var(--hairline); border-radius: 14px;
+        }
+        .share-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .share-acts .btn-ghost[hidden] { display: none !important; }
+        .share-acts .primary { grid-column: 1 / -1; background: var(--ink); color: var(--surface); border-color: var(--ink); }
+        .share-note { display: flex; gap: 8px; font-weight: 300; font-size: 0.7rem; color: var(--steel); line-height: 1.5; }
+        .share-note i { color: var(--accent); margin-top: 3px; }
+
+        /* ===== Khối cam kết riêng tư ===== */
+        .privacy {
+            display: flex; gap: 12px; align-items: flex-start;
+            padding: 15px 16px; margin-bottom: 16px;
+            border: var(--line); border-radius: 18px; background: var(--surface);
+        }
+        .privacy > i { color: var(--accent); font-size: 0.95rem; margin-top: 3px; flex-shrink: 0; }
+        .privacy .p-title {
+            display: block; margin-bottom: 5px;
+            font-family: var(--font-mono); font-weight: 900; font-size: 0.68rem;
+            text-transform: uppercase; letter-spacing: 0.12em;
+        }
+        .privacy p { font-weight: 300; font-size: 0.76rem; line-height: 1.55; color: var(--steel); }
+        .privacy b { font-weight: 700; color: var(--ink); }
+
+        /* ===== Hàng nút phụ: xuất ảnh / chia sẻ app ===== */
+        .action-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-ghost {
+            flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 13px 8px; background: var(--surface); border: var(--line); border-radius: 999px;
+            font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink);
+        }
+
+        /* ===== Nút hoàn tác trong toast ===== */
+        .toast-act {
+            padding: 9px 15px; border: none; background: var(--accent); color: #FFFFFF;
+            font-family: var(--font-mono); font-weight: 900; font-size: 0.62rem;
+            text-transform: uppercase; letter-spacing: 0.1em; pointer-events: auto;
+        }
+
         @media (min-width: 768px) {
             body { flex-direction: row; }
 
@@ -745,8 +877,13 @@
             <div class="brand">
                 <img src="logo_clb.png" alt="Logo CLB Tình Nguyện Trường Y">
                 <span class="brand-name">CLB Tình Nguyện Trường Y<span class="brand-sub">Man in Red</span></span>
+                <div class="stage-tools">
+                    <button type="button" id="install-btn" class="icon-btn" hidden title="Cài đặt app vào máy" aria-label="Cài đặt app"><i class="fas fa-download"></i></button>
+                    <button type="button" id="share-btn" class="icon-btn" title="Rủ bạn bè cùng dùng app" aria-label="Chia sẻ app"><i class="fas fa-share-nodes"></i></button>
+                    <button type="button" id="theme-btn" class="icon-btn" title="Đổi giao diện sáng / tối" aria-label="Đổi giao diện"><i class="fas fa-moon"></i></button>
+                </div>
             </div>
-            <span class="stage-title">Điểm tổng kết tạm tính · GPA hệ 4</span>
+            <span id="stage-title" class="stage-title">Điểm tổng kết tạm tính · GPA hệ 4</span>
             <div class="stage-main">
                 <span id="stage-gpa" class="stage-gpa mono">—</span>
                 <div class="stage-side">
@@ -771,6 +908,12 @@
         <div class="sheet-inner">
             <div class="grabber" aria-hidden="true"></div>
 
+            <div class="tabs" id="mode-tabs" role="tablist">
+                <button type="button" class="tab active" data-tab="subject" role="tab"><i class="fas fa-calculator"></i>Môn này</button>
+                <button type="button" class="tab" data-tab="book" role="tab"><i class="fas fa-book-open"></i>Sổ điểm kỳ</button>
+            </div>
+
+            <div id="panel-subject">
             <div class="sheet-head">
                 <div>
                     <h1>Tính số câu cần đạt</h1>
@@ -850,14 +993,87 @@
                 </p>
             </details>
 
+            </div><!-- /panel-subject -->
+
+            <!-- ===== Sổ điểm cả kỳ: nhiều môn, tính GPA kỳ theo tín chỉ ===== -->
+            <div id="panel-book" hidden>
+                <div class="sheet-head">
+                    <div>
+                        <h1>Sổ điểm cả kỳ</h1>
+                        <p>Nhiều môn · tính GPA kỳ theo tín chỉ và xếp loại học lực 📚</p>
+                    </div>
+                    <button type="button" id="book-import-btn" class="btn-reset" title="Đưa điểm môn đang tính vào sổ">
+                        <i class="fas fa-down-long"></i> Lấy môn đang tính
+                    </button>
+                </div>
+
+                <div id="book-list"></div>
+                <button type="button" id="book-add-btn" class="add-attempt-btn"><i class="fas fa-plus"></i> Thêm môn</button>
+
+                <div class="field" style="margin-top: 18px;">
+                    <span class="field-label"><i class="fas fa-star"></i> Mục tiêu GPA cả kỳ</span>
+                    <div id="book-goal-chips" class="chip-rail">
+                        <button type="button" data-g="2.0" class="gpa-chip"><span class="letter">TB</span><span class="val">2.0</span></button>
+                        <button type="button" data-g="2.5" class="gpa-chip"><span class="letter">Khá</span><span class="val">2.5</span></button>
+                        <button type="button" data-g="3.2" class="gpa-chip"><span class="letter">Giỏi</span><span class="val">3.2</span></button>
+                        <button type="button" data-g="3.6" class="gpa-chip"><span class="letter">XS</span><span class="val">3.6</span></button>
+                    </div>
+                </div>
+
+                <div id="book-result"></div>
+
+                <div class="hint">
+                    <i class="fas fa-circle-info"></i>
+                    <span>Để trống ô điểm của môn <b>chưa có kết quả</b> để xem cần trung bình bao nhiêu ở các môn còn lại. Xếp loại theo thang: Xuất sắc ≥ 3.6 · Giỏi ≥ 3.2 · Khá ≥ 2.5 · Trung bình ≥ 2.0.</span>
+                </div>
+            </div><!-- /panel-book -->
+
+            <!-- Cam kết riêng tư: hiện ở cả 2 tab -->
+            <div class="privacy">
+                <i class="fas fa-lock"></i>
+                <div>
+                    <span class="p-title">Riêng tư tuyệt đối</span>
+                    <p>Mọi số liệu bạn nhập <b>chỉ được lưu ngay trên máy này</b> — không gửi lên server, không tài khoản, không theo dõi. Khi bạn chia sẻ, người nhận chỉ có <b>link công cụ</b>, không hề thấy điểm của bạn.</p>
+                </div>
+            </div>
+
             <!-- Primary CTA: sticky in the thumb zone -->
             <div class="cta-wrap">
+                <div class="action-row">
+                    <button type="button" id="export-img-btn" class="btn-ghost"><i class="fas fa-image"></i> Xuất ảnh</button>
+                    <button type="button" id="copy-link-btn" class="btn-ghost"><i class="fas fa-user-plus"></i> Rủ bạn dùng</button>
+                </div>
                 <button type="button" id="calculate-required-btn" class="btn-calc">
                     <i class="fas fa-bullseye"></i> Tính số câu cần đạt
                 </button>
             </div>
         </div>
     </main>
+
+    <!-- ===== Bảng chia sẻ: QR · chép link · chia sẻ hệ thống · Facebook ===== -->
+    <dialog id="share-dlg" class="share-dlg" aria-labelledby="share-dlg-title">
+        <div class="share-in">
+            <div class="share-head">
+                <div>
+                    <h2 id="share-dlg-title">Rủ bạn cùng dùng</h2>
+                    <p>Đưa bạn bè quét mã, hoặc gửi link công cụ</p>
+                </div>
+                <button type="button" id="sd-close" class="attempt-remove" title="Đóng" aria-label="Đóng"><i class="fas fa-xmark"></i></button>
+            </div>
+
+            <div id="qr-box" class="qr-box" hidden><canvas id="qr-canvas" aria-label="Mã QR mở công cụ"></canvas></div>
+            <div id="share-url" class="share-url">—</div>
+
+            <div class="share-acts">
+                <button type="button" id="sd-share" class="btn-ghost primary" hidden><i class="fas fa-share-nodes"></i> Chia sẻ…</button>
+                <button type="button" id="sd-copy" class="btn-ghost"><i class="fas fa-copy"></i> Chép link</button>
+                <button type="button" id="sd-qr" class="btn-ghost" hidden><i class="fas fa-qrcode"></i> Lưu ảnh QR</button>
+                <button type="button" id="sd-fb" class="btn-ghost"><i class="fab fa-facebook"></i> Facebook</button>
+            </div>
+
+            <p class="share-note"><i class="fas fa-lock"></i><span>Mã QR và link chỉ dẫn tới công cụ — <b>không chứa điểm của bạn</b>.</span></p>
+        </div>
+    </dialog>
 
     <div id="toast-container"></div>
 
@@ -866,18 +1082,27 @@
 
         // ===== Toast thông báo: "Thành công" / "Cảnh báo" / "Lỗi" =====
         const TOAST_LABELS = { success: 'Thành công', warning: 'Cảnh báo', error: 'Lỗi', info: 'Thông báo' };
-        function showToast(message, type = 'info') {
+        function showToast(message, type = 'info', action = null) {
             const container = document.getElementById('toast-container');
             if (!container) return;
             const el = document.createElement('div');
             el.className = `toast ${type}`;
             el.innerHTML = `<span class="toast-tag">${TOAST_LABELS[type] || TOAST_LABELS.info}</span><span class="toast-msg"></span>`;
             el.querySelector('.toast-msg').textContent = message;
+            // Nút hành động (vd "Hoàn tác") — toast sống lâu hơn để kịp bấm
+            if (action) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'toast-act';
+                btn.textContent = action.label;
+                btn.addEventListener('click', () => { action.run(); el.remove(); });
+                el.appendChild(btn);
+            }
             container.appendChild(el);
             setTimeout(() => {
                 el.classList.add('hide');
                 setTimeout(() => el.remove(), 350);
-            }, 2600);
+            }, action ? 6000 : 2600);
         }
 
         /**
@@ -1696,6 +1921,9 @@
                 if (p === null) blanks++; else { anyEntered = true; totalPct += p * weight; }
             }
 
+            lastSubject = { score10: totalPct / 10, anyEntered, blanks };
+            if (activeTab !== 'subject') return; // đang xem Sổ điểm kỳ -> stage do paintBook vẽ
+
             const desired = parseFloat(document.getElementById('desired-gpa-4')?.value) || 0;
             const targetScore10 = minScore10ForGpa4(desired);
             const targetPct = Math.max(0, Math.min(100, targetScore10 * 10));
@@ -1723,9 +1951,12 @@
             if (elS10) elS10.textContent = `Hệ 10: ${score10.toFixed(2)}`;
             if (elFill) elFill.style.setProperty('--w', fillPct + '%');
             if (elNote) {
-                elNote.textContent = reached
-                    ? 'Đã chạm mốc mục tiêu'
-                    : (blanks > 0 ? `${blanks} lần chưa nhập = 0đ` : 'Chưa chạm mốc mục tiêu');
+                // Cảnh báo rớt môn quan trọng hơn cả mốc mục tiêu -> ưu tiên hiện trước
+                elNote.textContent = (blanks === 0 && score10 < 4.0)
+                    ? 'Cảnh báo: đang ở mức F — nguy cơ rớt môn'
+                    : reached
+                        ? 'Đã chạm mốc mục tiêu'
+                        : (blanks > 0 ? `${blanks} lần chưa nhập = 0đ` : 'Chưa chạm mốc mục tiêu');
             }
         }
 
@@ -1776,12 +2007,21 @@
             const resetGoalBtn = document.getElementById('reset-goal-btn');
             if (resetGoalBtn) {
                 resetGoalBtn.addEventListener('click', () => {
+                    const backup = (() => { try { return localStorage.getItem(GOAL_STATE_KEY); } catch (e) { return null; } })();
                     requiredCalcDone = false; // tắt tự tính lại trước khi dọn bảng
                     renderAttemptsTable(); // vẽ lại bảng trống theo cấu hình hiện tại
                     const resultArea = document.getElementById('required-correct-result');
                     if (resultArea) resultArea.innerHTML = '';
                     scheduleSaveGoalState();
-                    showToast('Đã xoá dữ liệu các lần thi', 'success');
+                    showToast('Đã xoá dữ liệu các lần thi', 'success', backup ? {
+                        label: 'Hoàn tác',
+                        run: () => {
+                            try { localStorage.setItem(GOAL_STATE_KEY, backup); } catch (e) { }
+                            goalStateRestored = false;
+                            restoreGoalState();
+                            showToast('Đã khôi phục dữ liệu', 'success');
+                        }
+                    } : null);
                 });
             }
 
@@ -1798,6 +2038,7 @@
             restoreGoalState();
             styleGpaChips();
             styleScaleToggle();
+            initExtras();
         }
 
         /**
@@ -1847,6 +2088,510 @@
 
             goalStateRestored = true; // từ giờ mới cho phép tự lưu
             updateGpaProjection();
+        }
+
+        /* ============================================================
+           NÂNG CẤP: tab Sổ điểm kỳ · giao diện tối · chia sẻ link ·
+           xuất ảnh · cài app offline
+           ============================================================ */
+
+        const THEME_KEY = 'gpaTheme';
+        const TAB_KEY = 'gpaTab';
+        const BOOK_KEY = 'gpaBook_v1';
+
+        let activeTab = 'subject';
+        let lastSubject = { score10: 0, anyEntered: false, blanks: 0 }; // ảnh chụp điểm môn đang tính
+        let book = { goal: 3.2, subjects: [] };
+
+        // ===== Giao diện sáng / tối =====
+        function currentTheme() {
+            return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        }
+        function applyTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            const icon = document.querySelector('#theme-btn i');
+            if (icon) icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            try { localStorage.setItem(THEME_KEY, t); } catch (e) { }
+        }
+
+        // ===== Vẽ stage (dùng chung cho tab "Môn này" và "Sổ điểm kỳ") =====
+        function paintStage(o) {
+            const set = (id, prop, val) => { const el = document.getElementById(id); if (el) el[prop] = val; };
+            set('stage-title', 'textContent', o.title);
+            set('stage-gpa', 'textContent', o.gpa);
+            set('stage-letter', 'textContent', o.letter);
+            set('stage-s10', 'textContent', o.sub);
+            set('stage-note', 'textContent', o.note);
+            set('stage-goal', 'innerHTML', o.goal);
+            document.getElementById('stage-fill')?.style.setProperty('--w', o.fill + '%');
+            document.getElementById('stage-mark')?.style.setProperty('--t', o.mark + '%');
+        }
+
+        // ===== Tabs: Môn này | Sổ điểm kỳ =====
+        function setTab(tab) {
+            activeTab = tab === 'book' ? 'book' : 'subject';
+            const sub = document.getElementById('panel-subject');
+            const bk = document.getElementById('panel-book');
+            const calc = document.getElementById('calculate-required-btn');
+            if (sub) sub.hidden = activeTab !== 'subject';
+            if (bk) bk.hidden = activeTab !== 'book';
+            if (calc) calc.hidden = activeTab !== 'subject';
+            document.querySelectorAll('#mode-tabs .tab').forEach(b => b.classList.toggle('active', b.dataset.tab === activeTab));
+            try { localStorage.setItem(TAB_KEY, activeTab); } catch (e) { }
+            if (activeTab === 'book') {
+                renderBook();
+            } else {
+                const t = document.getElementById('stage-title');
+                if (t) t.textContent = 'Điểm tổng kết tạm tính · GPA hệ 4';
+                updateGpaProjection();
+            }
+            document.querySelector('.sheet')?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ===== Sổ điểm cả kỳ =====
+        function loadBook() {
+            try {
+                const b = JSON.parse(localStorage.getItem(BOOK_KEY) || 'null');
+                if (b && Array.isArray(b.subjects)) {
+                    book = { goal: parseFloat(b.goal) || 3.2, subjects: b.subjects.slice(0, 40) };
+                }
+            } catch (e) { }
+        }
+        function saveBook() { try { localStorage.setItem(BOOK_KEY, JSON.stringify(book)); } catch (e) { } }
+
+        /** Xếp loại học lực theo GPA hệ 4. */
+        function rankOf(g) {
+            return g >= 3.6 ? 'Xuất sắc' : g >= 3.2 ? 'Giỏi' : g >= 2.5 ? 'Khá' : g >= 2.0 ? 'Trung bình' : g >= 1.0 ? 'Yếu' : 'Kém';
+        }
+
+        /** Nhãn xếp loại rút gọn — dùng cho ô chữ lớn trên stage. */
+        function rankShort(g) {
+            return g >= 3.6 ? 'XS' : g >= 3.2 ? 'Giỏi' : g >= 2.5 ? 'Khá' : g >= 2.0 ? 'TB' : g >= 1.0 ? 'Yếu' : 'Kém';
+        }
+
+        /** Tổng hợp sổ điểm: GPA kỳ theo tín chỉ, tín chỉ đã có điểm / còn lại. */
+        function bookStats() {
+            let cr = 0, pts = 0, doneCr = 0, restCr = 0;
+            for (const m of book.subjects) {
+                const c = parseFloat(m.credits) || 0;
+                cr += c;
+                const raw = (m.s10 ?? '').toString().trim();
+                const s = raw === '' ? NaN : parseFloat(raw);
+                if (!isNaN(s)) {
+                    doneCr += c;
+                    pts += calculateGPAFromPercent(Math.max(0, Math.min(10, s)) * 10).score4 * c;
+                } else {
+                    restCr += c;
+                }
+            }
+            return { cr, pts, doneCr, restCr, gpa: doneCr > 0 ? pts / doneCr : 0 };
+        }
+
+        function renderBook() {
+            const list = document.getElementById('book-list');
+            if (!list) return;
+
+            list.innerHTML = book.subjects.length === 0
+                ? `<div class="book-empty">Chưa có môn nào trong sổ.<br>Bấm <b>Thêm môn</b>, hoặc <b>Lấy môn đang tính</b> để đưa điểm từ tab "Môn này" sang.</div>`
+                : book.subjects.map((m, i) => `
+                <div class="attempt-row" data-i="${i}">
+                    <div class="attempt-head">
+                        <span class="attempt-icon"><i class="fas fa-book"></i></span>
+                        <input type="text" maxlength="40" class="attempt-label bk-name" value="${escapeHtml(m.name || '')}" placeholder="Tên môn" aria-label="Tên môn">
+                        <span class="attempt-live bk-pill">Chưa có điểm</span>
+                        <button type="button" class="attempt-remove bk-del" title="Xoá môn" aria-label="Xoá môn"><i class="fas fa-trash-can"></i></button>
+                    </div>
+                    <div class="attempt-inputs">
+                        <div>
+                            <label class="mini-label">Tín chỉ</label>
+                            <input type="number" inputmode="numeric" class="num-input bk-credits" min="0" max="30" step="1" value="${escapeHtml(m.credits ?? '')}" placeholder="—" aria-label="Số tín chỉ">
+                        </div>
+                        <span class="bk-mid">·</span>
+                        <div>
+                            <label class="mini-label">Điểm hệ 10</label>
+                            <input type="number" inputmode="decimal" class="num-input bk-score" min="0" max="10" step="0.01" value="${escapeHtml(m.s10 ?? '')}" placeholder="chưa thi" aria-label="Điểm hệ 10">
+                        </div>
+                    </div>
+                </div>`).join('');
+
+            list.querySelectorAll('.attempt-row').forEach(row => {
+                const i = parseInt(row.dataset.i, 10);
+                const sync = () => {
+                    const m = book.subjects[i];
+                    if (!m) return;
+                    m.name = row.querySelector('.bk-name').value;
+                    m.credits = row.querySelector('.bk-credits').value;
+                    m.s10 = row.querySelector('.bk-score').value;
+                    saveBook();
+                    paintBook();
+                };
+                row.querySelectorAll('input').forEach(inp => inp.addEventListener('input', sync));
+                row.querySelector('.bk-del')?.addEventListener('click', () => {
+                    const removed = book.subjects.splice(i, 1)[0];
+                    saveBook();
+                    renderBook();
+                    showToast('Đã xoá môn khỏi sổ', 'success', {
+                        label: 'Hoàn tác',
+                        run: () => { book.subjects.splice(i, 0, removed); saveBook(); renderBook(); }
+                    });
+                });
+            });
+
+            document.querySelectorAll('#book-goal-chips .gpa-chip')
+                .forEach(b => b.classList.toggle('selected', Math.abs(parseFloat(b.dataset.g) - book.goal) < 1e-9));
+            paintBook();
+        }
+
+        function paintBook() {
+            const st = bookStats();
+
+            // Nhãn điểm chữ trên từng môn
+            document.querySelectorAll('#book-list .attempt-row').forEach(row => {
+                const pill = row.querySelector('.bk-pill');
+                if (!pill) return;
+                const raw = (row.querySelector('.bk-score')?.value || '').trim();
+                if (raw === '' || isNaN(parseFloat(raw))) {
+                    pill.textContent = 'Chưa có điểm';
+                    pill.className = 'attempt-live bk-pill';
+                    return;
+                }
+                const s = Math.max(0, Math.min(10, parseFloat(raw)));
+                const { score4, letterGrade } = calculateGPAFromPercent(s * 10);
+                const cls = s >= 8.5 ? 'lv-top' : s >= 7 ? 'lv-good' : s >= 5.5 ? 'lv-mid' : s >= 4 ? 'lv-low' : 'lv-fail';
+                pill.textContent = `${score4.toFixed(1)} · ${letterGrade}`;
+                pill.className = `attempt-live bk-pill ${cls}`;
+            });
+
+            const res = document.getElementById('book-result');
+            if (res) {
+                if (st.doneCr === 0) {
+                    res.innerHTML = book.subjects.length
+                        ? `<div class="result-card tone-warn">
+                               <div class="result-head"><i class="fas fa-circle-info"></i> Chưa có môn nào có điểm</div>
+                               <div class="result-body">Nhập <b>tín chỉ</b> và <b>điểm hệ 10</b> của ít nhất một môn để xem GPA cả kỳ.</div>
+                           </div>`
+                        : '';
+                } else {
+                    const chips = `<div class="stat-chips">
+                        <div class="stat-chip"><span class="k">GPA kỳ</span><b>${st.gpa.toFixed(2)}</b></div>
+                        <div class="stat-chip"><span class="k">TC có điểm</span><b>${st.doneCr}</b></div>
+                        <div class="stat-chip"><span class="k">Tổng TC</span><b>${st.cr}</b></div>
+                    </div>`;
+                    const badge = `<span class="rank-badge"><i class="fas fa-medal"></i> Xếp loại: ${rankOf(st.gpa)}</span>`;
+                    // Trung bình hệ 4 cần đạt trên phần tín chỉ chưa có điểm
+                    const need = st.restCr > 0 ? (book.goal * st.cr - st.pts) / st.restCr : null;
+                    let tone = 'info', icon = 'fa-chart-simple', title = 'GPA cả kỳ', extra;
+
+                    if (need === null) {
+                        const ok = st.gpa >= book.goal - 1e-9;
+                        tone = ok ? 'success' : 'danger';
+                        icon = ok ? 'fa-trophy' : 'fa-circle-xmark';
+                        title = ok ? 'Đã đạt mục tiêu kỳ!' : 'Chưa đạt mục tiêu kỳ';
+                        extra = `<p>Tất cả môn đã có điểm — GPA kỳ chốt ở <b>${st.gpa.toFixed(2)}</b>, xếp loại <b>${rankOf(st.gpa)}</b>.</p>`;
+                    } else if (need <= 1e-9) {
+                        tone = 'success'; icon = 'fa-circle-check'; title = 'Chắc suất mục tiêu kỳ';
+                        extra = `<p>Điểm đã có đủ để giữ GPA kỳ ≥ <b>${book.goal.toFixed(1)}</b>, kể cả khi ${st.restCr} tín chỉ còn lại được 0 điểm.</p>`;
+                    } else if (need > 4 + 1e-9) {
+                        tone = 'danger'; icon = 'fa-circle-xmark'; title = 'Ngoài tầm với';
+                        extra = `<p>Dù đạt <b>4.0</b> ở toàn bộ ${st.restCr} tín chỉ còn lại, GPA kỳ tối đa chỉ đạt <b>${((st.pts + 4 * st.restCr) / st.cr).toFixed(2)}</b>.</p>`;
+                    } else {
+                        icon = 'fa-bullseye'; title = 'Trung bình cần đạt ở các môn còn lại';
+                        extra = `<div class="hero-number">
+                                    <span class="big">${need.toFixed(2)}</span>
+                                    <span class="unit">/ 4.0 trung bình</span>
+                                    <span class="badge">${st.restCr} TC còn lại</span>
+                                 </div>
+                                 <p>Mức hệ 4 trung bình tối thiểu ở các môn <b>chưa có điểm</b> để GPA kỳ chạm <b>${book.goal.toFixed(1)}</b>.</p>`;
+                    }
+
+                    res.innerHTML = `<div class="result-card tone-${tone}">
+                        <div class="result-head"><i class="fas ${icon}"></i> ${title}</div>
+                        <div class="result-body">${badge}${chips}${extra}</div>
+                        <div class="result-foot"><i class="fas fa-bullseye"></i>
+                            <span>Mục tiêu <b>GPA kỳ ${book.goal.toFixed(1)}</b> · xếp loại <b>${rankOf(book.goal)}</b></span></div>
+                    </div>`;
+                }
+            }
+
+            if (activeTab !== 'book') return;
+            paintStage({
+                title: 'GPA cả kỳ · thang 4 theo tín chỉ',
+                gpa: st.doneCr > 0 ? st.gpa.toFixed(2) : '—',
+                letter: st.doneCr > 0 ? rankShort(st.gpa) : '·',
+                sub: `${st.doneCr}/${st.cr} tín chỉ đã có điểm`,
+                fill: Math.max(0, Math.min(100, st.gpa / 4 * 100)),
+                mark: Math.max(0, Math.min(100, book.goal / 4 * 100)),
+                note: st.restCr > 0 ? `Còn ${st.restCr} TC chưa có điểm` : (st.cr ? 'Đã đủ điểm tất cả môn' : 'Thêm môn ở bảng dưới'),
+                goal: `Mục tiêu <b>GPA ${book.goal.toFixed(1)}</b> · <b>${rankOf(book.goal)}</b>`,
+            });
+        }
+
+        // ===== Chia sẻ APP cho bạn bè (không bao giờ kèm điểm cá nhân) =====
+        const APP_URL = () => location.origin + location.pathname;
+        const APP_PITCH = 'Tính số câu cần đạt — công cụ GPA cho sinh viên Y: '
+            + 'đặt mục tiêu điểm hệ 4, biết ngay cần đúng bao nhiêu câu mỗi lần thi. '
+            + 'Miễn phí, cài được như app, chạy offline, dữ liệu chỉ lưu trên máy bạn.';
+
+        async function copyAppLink() {
+            const url = APP_URL();
+            try {
+                await navigator.clipboard.writeText(url);
+                showToast('Đã chép link app — gửi cho bạn bè cùng dùng', 'success');
+                return;
+            } catch (e) { /* clipboard bị chặn (trang http, quyền) -> dùng cách cũ */ }
+
+            const ta = document.createElement('textarea');
+            ta.value = url;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            let ok = false;
+            try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+            ta.remove();
+            showToast(ok ? 'Đã chép link app — gửi cho bạn bè cùng dùng' : 'Không chép được link', ok ? 'success' : 'error');
+        }
+
+        /** Khay chia sẻ của hệ thống (Zalo, Messenger, AirDrop…). */
+        async function shareApp() {
+            if (!navigator.share) { copyAppLink(); return; }
+            try {
+                await navigator.share({ title: 'Tính số câu cần đạt — GPA hệ 4', text: APP_PITCH, url: APP_URL() });
+            } catch (e) {
+                if (e && e.name === 'AbortError') return;
+                copyAppLink();
+            }
+        }
+
+        /** Vẽ mã QR trỏ tới app. Thiếu thư viện (lần đầu mở offline) thì ẩn hẳn khối QR. */
+        function buildQr(url) {
+            const box = document.getElementById('qr-box');
+            const cv = document.getElementById('qr-canvas');
+            if (!box || !cv || typeof window.QRious !== 'function') {
+                if (box) box.hidden = true;
+                return false;
+            }
+            new window.QRious({ element: cv, value: url, size: 512, level: 'M', background: '#FFFFFF', foreground: '#09090B' });
+            box.hidden = false;
+            return true;
+        }
+
+        /** Lưu / chia sẻ ảnh mã QR. */
+        function saveQrImage() {
+            const cv = document.getElementById('qr-canvas');
+            if (!cv) return;
+            // Nền trắng có viền cho dễ quét khi in hoặc dán vào slide
+            const P = 64, S = cv.width + P * 2;
+            const out = document.createElement('canvas');
+            out.width = S; out.height = S;
+            const g = out.getContext('2d');
+            g.fillStyle = '#FFFFFF';
+            g.fillRect(0, 0, S, S);
+            g.drawImage(cv, P, P);
+
+            out.toBlob(async (blob) => {
+                if (!blob) { showToast('Không tạo được ảnh QR', 'error'); return; }
+                const file = new File([blob], 'qr-tinh-so-cau-can-dat.png', { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try { await navigator.share({ files: [file], title: 'Tính số câu cần đạt' }); return; }
+                    catch (e) { if (e && e.name === 'AbortError') return; }
+                }
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'qr-tinh-so-cau-can-dat.png';
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+                showToast('Đã tải ảnh QR về máy', 'success');
+            }, 'image/png');
+        }
+
+        function openShareDialog() {
+            const dlg = document.getElementById('share-dlg');
+            if (!dlg) { shareApp(); return; }
+            const url = APP_URL();
+            const urlEl = document.getElementById('share-url');
+            if (urlEl) urlEl.textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+            const hasQr = buildQr(url);
+            const show = (id, on) => { const el = document.getElementById(id); if (el) el.hidden = !on; };
+            show('sd-qr', hasQr);
+            show('sd-share', !!navigator.share);
+            dlg.showModal();
+        }
+
+
+        // ===== Xuất ảnh kết quả (PNG) để gửi nhóm chat =====
+        function snapshotRows() {
+            if (activeTab === 'book') {
+                return book.subjects.filter(m => (m.name || '').trim() || m.credits).map(m => {
+                    const raw = (m.s10 ?? '').toString().trim();
+                    return {
+                        k: `${(m.name || 'Môn').slice(0, 26)} · ${m.credits || 0} TC`,
+                        v: raw === '' ? 'chưa thi' : `${parseFloat(raw).toFixed(2)} /10`,
+                    };
+                });
+            }
+            return Array.from(document.querySelectorAll('#attempts-table .attempt-row')).map(el => {
+                const label = `${el.dataset.label || 'Lần thi'} · ${el.querySelector('.attempt-weight')?.value || 0}%`;
+                if (el.dataset.kind === 'score') {
+                    const v = (el.querySelector('.attempt-score')?.value || '').trim();
+                    return { k: label, v: v === '' ? 'chưa thi' : `${parseFloat(v).toFixed(2)} /10` };
+                }
+                const c = (el.querySelector('.attempt-correct')?.value || '').trim();
+                const t = (el.querySelector('.attempt-total')?.value || '').trim();
+                return { k: label, v: c === '' ? 'chưa thi' : `${c}/${t || '?'} câu` };
+            });
+        }
+
+        function exportImage() {
+            const W = 1080, H = 1350, PAD = 88;
+            const cv = document.createElement('canvas');
+            cv.width = W;
+            cv.height = H;
+            const g = cv.getContext('2d');
+            const mono = (w, size) => `${w} ${size}px "Geist Mono", ui-monospace, monospace`;
+            const txt = (str, x, y, font, color, align) => {
+                g.font = font;
+                g.fillStyle = color;
+                g.textAlign = align || 'left';
+                g.textBaseline = 'alphabetic';
+                g.fillText(str, x, y);
+            };
+            const val = id => (document.getElementById(id)?.textContent || '').trim();
+            const cssPct = (id, prop, dflt) => {
+                const v = parseFloat(document.getElementById(id)?.style.getPropertyValue(prop));
+                return Math.max(0, Math.min(100, isNaN(v) ? dflt : v));
+            };
+
+            g.fillStyle = '#09090B'; g.fillRect(0, 0, W, H);
+            g.fillStyle = '#DC2F2F'; g.fillRect(0, 0, W, 14);
+
+            txt('CLB TÌNH NGUYỆN TRƯỜNG Y · MAN IN RED', PAD, 150, mono(700, 30), '#A1A1AA');
+            txt(val('stage-title').toUpperCase(), PAD, 212, mono(400, 27), '#71717A');
+
+            txt(val('stage-gpa'), PAD, 470, mono(900, 250), '#DC2F2F');
+            txt(val('stage-letter'), PAD, 552, mono(900, 58), '#FFFFFF');
+            txt(val('stage-s10'), PAD, 608, mono(400, 34), '#A1A1AA');
+
+            // Thanh tiến độ + vạch mục tiêu
+            const barY = 676, barW = W - PAD * 2;
+            g.fillStyle = '#27272A'; g.fillRect(PAD, barY, barW, 16);
+            g.fillStyle = '#DC2F2F'; g.fillRect(PAD, barY, barW * cssPct('stage-fill', '--w', 0) / 100, 16);
+            g.fillStyle = '#FFFFFF'; g.fillRect(PAD + barW * cssPct('stage-mark', '--t', 85) / 100 - 3, barY - 9, 6, 34);
+
+            txt(val('stage-goal').replace(/\s+/g, ' ').toUpperCase(), PAD, barY + 72, mono(500, 26), '#A1A1AA');
+            txt(val('stage-note').toUpperCase(), W - PAD, barY + 72, mono(500, 26), '#71717A', 'right');
+
+            // Chi tiết từng lần thi / từng môn
+            let y = barY + 168;
+            for (const r of snapshotRows().slice(0, 8)) {
+                g.fillStyle = '#18181B';
+                g.fillRect(PAD, y - 46, barW, 70);
+                txt(r.k, PAD + 26, y, mono(500, 30), '#E4E4E7');
+                txt(r.v, W - PAD - 26, y, mono(900, 32), '#FFFFFF', 'right');
+                y += 86;
+            }
+
+            txt('Tính số câu cần đạt · Việt Thanh — Y23C-17-PRIT', PAD, H - 122, mono(500, 26), '#71717A');
+            txt((location.host + location.pathname).replace(/\/$/, '') || 'tinhsocaucandat', PAD, H - 74, mono(900, 32), '#DC2F2F');
+            g.fillStyle = '#DC2F2F'; g.fillRect(0, H - 14, W, 14);
+
+            cv.toBlob(async (blob) => {
+                if (!blob) { showToast('Không tạo được ảnh', 'error'); return; }
+                const file = new File([blob], 'gpa.png', { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try { await navigator.share({ files: [file], title: 'Kết quả GPA' }); return; }
+                    catch (e) { if (e && e.name === 'AbortError') return; }
+                }
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `gpa-${Date.now()}.png`;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+                showToast('Đã tải ảnh kết quả về máy', 'success');
+            }, 'image/png');
+        }
+
+        // ===== Gắn sự kiện cho các tính năng mới =====
+        function initExtras() {
+            // Giao diện sáng / tối
+            applyTheme(currentTheme());
+            document.getElementById('theme-btn')?.addEventListener('click', () => {
+                applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+            });
+
+            // Chia sẻ + xuất ảnh
+            document.getElementById('share-btn')?.addEventListener('click', openShareDialog);
+            document.getElementById('copy-link-btn')?.addEventListener('click', openShareDialog);
+            document.getElementById('export-img-btn')?.addEventListener('click', exportImage);
+
+            // Bảng chia sẻ: QR · chép link · khay hệ thống · Facebook
+            const dlg = document.getElementById('share-dlg');
+            document.getElementById('sd-close')?.addEventListener('click', () => dlg?.close());
+            dlg?.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }); // bấm ra ngoài để đóng
+            document.getElementById('sd-share')?.addEventListener('click', shareApp);
+            document.getElementById('sd-copy')?.addEventListener('click', copyAppLink);
+            document.getElementById('sd-qr')?.addEventListener('click', saveQrImage);
+            document.getElementById('sd-fb')?.addEventListener('click', () => {
+                window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(APP_URL()), '_blank', 'noopener');
+            });
+
+            // Sổ điểm kỳ
+            loadBook();
+            document.getElementById('mode-tabs')?.addEventListener('click', (e) => {
+                const b = e.target.closest('.tab');
+                if (b) setTab(b.dataset.tab);
+            });
+            document.getElementById('book-add-btn')?.addEventListener('click', () => {
+                if (book.subjects.length >= 40) { showToast('Tối đa 40 môn', 'warning'); return; }
+                book.subjects.push({ name: '', credits: '', s10: '' });
+                saveBook();
+                renderBook();
+                const rows = document.querySelectorAll('#book-list .attempt-row');
+                rows[rows.length - 1]?.querySelector('.bk-name')?.focus();
+            });
+            document.getElementById('book-goal-chips')?.addEventListener('click', (e) => {
+                const b = e.target.closest('button[data-g]');
+                if (!b) return;
+                book.goal = parseFloat(b.dataset.g);
+                saveBook();
+                renderBook();
+                b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            });
+            // Đưa điểm môn đang tính ở tab "Môn này" sang sổ điểm
+            document.getElementById('book-import-btn')?.addEventListener('click', () => {
+                if (!lastSubject.anyEntered) { showToast('Tab "Môn này" chưa có số liệu để lấy', 'warning'); return; }
+                book.subjects.push({ name: '', credits: '', s10: lastSubject.score10.toFixed(2) });
+                saveBook();
+                renderBook();
+                const rows = document.querySelectorAll('#book-list .attempt-row');
+                rows[rows.length - 1]?.querySelector('.bk-name')?.focus();
+                showToast(`Đã thêm môn ${lastSubject.score10.toFixed(2)}/10 — đặt tên và số tín chỉ`, 'success');
+            });
+
+            // Cài đặt app + chạy offline
+            let installEvent = null;
+            const installBtn = document.getElementById('install-btn');
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                installEvent = e;
+                if (installBtn) installBtn.hidden = false;
+            });
+            installBtn?.addEventListener('click', async () => {
+                if (!installEvent) return;
+                installEvent.prompt();
+                await installEvent.userChoice;
+                installEvent = null;
+                installBtn.hidden = true;
+            });
+            if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+                navigator.serviceWorker.register('sw.js').catch(() => { });
+            }
+
+            // Mở lại đúng tab lần trước
+            let savedTab = 'subject';
+            try { savedTab = localStorage.getItem(TAB_KEY) || 'subject'; } catch (e) { }
+            setTab(savedTab);
         }
 
         document.addEventListener('DOMContentLoaded', initGpaCalculator);

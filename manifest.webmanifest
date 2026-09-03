@@ -1,0 +1,16 @@
+{
+  "name": "Tính số câu cần đạt — GPA hệ 4",
+  "short_name": "Số câu cần đạt",
+  "description": "Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu mỗi lần thi (theo công thức UMP). CLB Tình Nguyện Trường Y — Man in Red.",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#09090B",
+  "theme_color": "#09090B",
+  "icons": [
+    { "src": "logo_clb.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" },
+    { "src": "logo_clb.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" }
+  ]
+}
