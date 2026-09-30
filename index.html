@@ -22,147 +22,494 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;500;700;900&family=Geist+Mono:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         /* ============================================================
-           MONOCHROME BRUTALIST — 90% mono, red ONLY for
-           active state / final result / primary CTA
+           NEO-BAUHAUS TACTILE CLINICAL STUDIO — DESIGN TOKENS
+           Chống 15 lỗi AI Slop · Hệ thống màu đồng bộ Light/Dark
            ============================================================ */
         :root {
+            --canvas: #F8FAFC;
             --surface: #FFFFFF;
-            --ink: #09090B;
-            --steel: #A1A1AA;
-            --hairline: #E4E4E7;
-            --accent: #DC2F2F;
+            --surface-alt: #F1F5F9;
+            --surface-muted: #E2E8F0;
+            --ink: #0F172A;
+            --ink-light: #334155;
+            --steel: #64748B;
+            --steel-light: #94A3B8;
+            --hairline: #E2E8F0;
+            --border-color: #1E293B;
+            --line: 1.75px solid var(--border-color);
+            --line-subtle: 1.5px solid var(--hairline);
 
-            /* Stage luôn tối ở cả 2 giao diện; chỉ phần "sheet" đổi màu theo theme */
-            --stage-bg: #09090B;
-            --stage-fg: #FFFFFF;
-            --stage-track: #27272A;
-            --chev-lg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%2309090B' stroke-width='2.5'/></svg>");
-            --chev-sm: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7'><path d='M1 1l4 4 4-4' fill='none' stroke='%2309090B' stroke-width='2'/></svg>");
+            --accent: #E11D48;
+            --accent-hover: #BE123C;
+            --accent-subtle: rgba(225, 29, 72, 0.12);
+            --accent-blue: #0284C7;
+            --accent-yellow: #D97706;
+            --accent-green: #059669;
+            --accent-purple: #7C3AED;
 
-            --font-body: 'Geist', sans-serif;
+            --theme-pretest-bg: #FFFBEB;
+            --theme-pretest-border: #F59E0B;
+            --theme-pretest-badge: #FEF3C7;
+            --theme-pretest-ink: #B45309;
+
+            --theme-midterm-bg: #F0F9FF;
+            --theme-midterm-border: #0284C7;
+            --theme-midterm-badge: #E0F2FE;
+            --theme-midterm-ink: #0369A1;
+
+            --theme-final-bg: #FFF1F2;
+            --theme-final-border: #E11D48;
+            --theme-final-badge: #FFE4E6;
+            --theme-final-ink: #BE123C;
+
+            --shadow-3d: 3px 3px 0px var(--border-color);
+            --shadow-btn: 2.5px 2.5px 0px var(--border-color);
+            --card-radius: 22px;
+            --btn-radius: 14px;
+            --chip-radius: 12px;
+
+            --stage-bg: #FFFFFF;
+            --stage-fg: #0F172A;
+            --stage-track: #E2E8F0;
+            --stage-border: 2px solid var(--border-color);
+            --stage-shadow: 4px 4px 0px var(--border-color);
+
+            --chev-lg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%230F172A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+            --chev-sm: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7'><path d='M1 1l4 4 4-4' fill='none' stroke='%230F172A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+
+            --font-display: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
             --font-mono: 'Geist Mono', monospace;
 
             --spring-ease: cubic-bezier(0.19, 1, 0.22, 1);
-            --transition-fast: 300ms var(--spring-ease);
-            --transition-slow: 600ms var(--spring-ease);
-
-            --line: 2px solid var(--ink);
-            --sheet-radius: 28px;
+            --transition-fast: 160ms var(--spring-ease);
+            --transition-normal: 280ms var(--spring-ease);
         }
 
-        /* Giao diện tối: đảo vai trò --surface/--ink, stage giữ nguyên nền tối */
+        /* Giao diện tối: Dark Pop Studio — sâu thẳm, rực rỡ, không chói gắt */
         [data-theme="dark"] {
-            --surface: #131316;
-            --ink: #FAFAFA;
-            --steel: #8B8B93;
-            --hairline: #2C2C33;
-            --chev-lg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%23FAFAFA' stroke-width='2.5'/></svg>");
-            --chev-sm: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7'><path d='M1 1l4 4 4-4' fill='none' stroke='%23FAFAFA' stroke-width='2'/></svg>");
+            --canvas: #0B0F17;
+            --surface: #131926;
+            --surface-alt: #1C2436;
+            --surface-muted: #253046;
+            --ink: #F8FAFC;
+            --ink-light: #E2E8F0;
+            --steel: #94A3B8;
+            --steel-light: #64748B;
+            --hairline: #222D42;
+            --border-color: #3B4B68;
+            --line: 1.75px solid var(--border-color);
+            --line-subtle: 1.5px solid var(--hairline);
+
+            --accent: #FB7185;
+            --accent-hover: #F43F5E;
+            --accent-subtle: rgba(251, 113, 133, 0.16);
+            --accent-blue: #38BDF8;
+            --accent-yellow: #FBBF24;
+            --accent-green: #34D399;
+            --accent-purple: #A78BFA;
+
+            --theme-pretest-bg: #221D15;
+            --theme-pretest-border: #F59E0B;
+            --theme-pretest-badge: #382C18;
+            --theme-pretest-ink: #FDE68A;
+
+            --theme-midterm-bg: #112234;
+            --theme-midterm-border: #38BDF8;
+            --theme-midterm-badge: #163654;
+            --theme-midterm-ink: #BAE6FD;
+
+            --theme-final-bg: #2A1521;
+            --theme-final-border: #FB7185;
+            --theme-final-badge: #451B30;
+            --theme-final-ink: #FECDD3;
+
+            --shadow-3d: 3px 3px 0px rgba(0, 0, 0, 0.7);
+            --shadow-btn: 2.5px 2.5px 0px rgba(0, 0, 0, 0.7);
+
+            --stage-bg: #131926;
+            --stage-fg: #F8FAFC;
+            --stage-track: #253046;
+            --stage-border: 2px solid var(--border-color);
+            --stage-shadow: 4px 4px 0px rgba(0, 0, 0, 0.7);
+
+            --chev-lg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' fill='none' stroke='%23F8FAFC' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+            --chev-sm: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7'><path d='M1 1l4 4 4-4' fill='none' stroke='%23F8FAFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
         }
-        [data-theme="dark"] .sheet { box-shadow: 0 -8px 0 rgba(0, 0, 0, 0.55); }
 
+        /* ===== RESET & BROWSER SURFACES ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html, body { height: 100%; }
-
+        html { scroll-behavior: smooth; }
         body {
-            height: 100dvh;
-            overflow: hidden;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            background: var(--stage-bg);
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: var(--canvas);
             color: var(--ink);
             font-family: var(--font-body);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background 200ms ease, color 200ms ease;
         }
 
-        .mono, input, select, output { font-family: var(--font-mono); }
-
-        /* Custom focus rings — no default outlines */
+        ::selection { background: rgba(220, 38, 38, 0.22); color: var(--ink); }
+        input, select, textarea { caret-color: var(--accent); }
         :focus { outline: none; }
-        :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-        .stage :focus-visible { outline-color: var(--stage-fg); }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-        /* Universal tactile press */
-        button { transition: transform 120ms var(--spring-ease); cursor: pointer; touch-action: manipulation; }
-        button:active { transform: scale(0.95); }
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--steel); }
 
-        @keyframes rise {
-            from { opacity: 0; transform: translateY(28px); }
+        .mono, input, select, output { font-family: var(--font-mono); }
+        button { font-family: inherit; cursor: pointer; touch-action: manipulation; }
+
+        /* ===== TACTILE ANIMATIONS ===== */
+        @keyframes cardRise {
+            from { opacity: 0; transform: translateY(14px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
 
+        /* ===== MOBILE STICKY MINI HUD ===== */
+        .mobile-mini-hud {
+            display: none;
+        }
+        @media (max-width: 959px) {
+            .mobile-mini-hud {
+                display: flex;
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                background: var(--surface);
+                border-bottom: 2px solid var(--border-color);
+                padding: 10px 18px;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                transform: translateY(-120%);
+                transition: transform 260ms var(--spring-ease);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            }
+            .mobile-mini-hud.visible {
+                transform: translateY(0);
+            }
+            .hud-left {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .hud-logo {
+                width: 26px;
+                height: 26px;
+                border-radius: 6px;
+                border: 1.5px solid var(--border-color);
+                object-fit: contain;
+                background: #FFF;
+            }
+            .hud-score-badge {
+                display: inline-flex;
+                align-items: baseline;
+                gap: 6px;
+            }
+            .hud-gpa {
+                font-family: var(--font-mono);
+                font-weight: 900;
+                font-size: 1.25rem;
+                color: var(--accent);
+                line-height: 1;
+            }
+            .hud-letter {
+                font-family: var(--font-mono);
+                font-weight: 800;
+                font-size: 0.92rem;
+                color: var(--ink);
+                background: var(--surface-alt);
+                border: 1px solid var(--border-color);
+                padding: 1px 6px;
+                border-radius: 4px;
+            }
+            .hud-meta {
+                font-family: var(--font-mono);
+                font-size: 0.68rem;
+                color: var(--steel);
+                font-weight: 600;
+            }
+            .hud-scroll-top-btn {
+                background: var(--surface-alt);
+                border: 1.5px solid var(--border-color);
+                border-radius: 8px;
+                width: 34px;
+                height: 34px;
+                display: grid;
+                place-items: center;
+                font-size: 0.8rem;
+                color: var(--ink);
+                box-shadow: 1.5px 1.5px 0px var(--border-color);
+            }
+            .hud-scroll-top-btn:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* ===== ARCHITECTURAL APP LAYOUT ===== */
+        .app-layout {
+            width: 100%;
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 16px 16px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (min-width: 960px) {
+            .app-layout {
+                display: grid;
+                grid-template-columns: 430px 1fr;
+                gap: 32px;
+                padding: 40px 32px 80px;
+                align-items: start;
+            }
+        }
+
         /* ============================================================
-           STAGE — immersive dark hero zone (top 40dvh)
+           STAGE: ARCHITECTURAL HERO & RESULT ZONE
            ============================================================ */
         .stage {
-            flex: 0 0 40dvh;
-            min-height: 0;
             background: var(--stage-bg);
-            color: var(--stage-fg);
+            border: var(--stage-border);
+            border-radius: var(--card-radius);
+            box-shadow: var(--stage-shadow);
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            padding: max(14px, env(safe-area-inset-top)) 20px 40px;
-            animation: rise var(--transition-slow) backwards;
-        }
-        .stage-inner {
-            width: 100%;
-            max-width: 620px;
-            margin: 0 auto;
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: 6px;
+            gap: 18px;
+            position: relative;
+            animation: cardRise var(--transition-normal) backwards;
         }
 
-        .brand {
+        @media (min-width: 960px) {
+            .stage {
+                position: sticky;
+                top: 32px;
+                padding: 28px;
+                gap: 20px;
+            }
+        }
+
+        /* Brand Row */
+        .brand-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            gap: 12px;
         }
-        .brand img { width: 34px; height: 34px; object-fit: contain; background: var(--stage-fg); border-radius: 50%; padding: 2px; }
-        .brand-name { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; line-height: 1.25; }
-        .brand-sub { display: block; font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500; color: var(--steel); text-transform: uppercase; letter-spacing: 0.2em; }
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            padding: 3px;
+            background: #FFFFFF;
+            object-fit: contain;
+            flex-shrink: 0;
+            box-shadow: 2px 2px 0px var(--border-color);
+        }
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .brand-name {
+            font-weight: 800;
+            font-size: 0.88rem;
+            line-height: 1.25;
+            letter-spacing: -0.01em;
+        }
+        .brand-sub {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+        }
 
+        /* Quick Tool Icon Buttons */
+        .stage-tools {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-color);
+            background: var(--surface-alt);
+            color: var(--ink);
+            display: grid;
+            place-items: center;
+            font-size: 0.85rem;
+            transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
+            box-shadow: 1.5px 1.5px 0px var(--border-color);
+        }
+        .icon-btn[hidden] { display: none !important; }
+        .icon-btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 2.5px 2.5px 0px var(--border-color);
+            background: var(--surface);
+        }
+        .icon-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0px 0px 0px var(--border-color);
+        }
+
+        /* Neo-Bauhaus 3D Companion Banner */
+        .bauhaus-hero-visual {
+            position: relative;
+            background: var(--surface-alt);
+            border: 1.5px solid var(--hairline);
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            overflow: hidden;
+        }
+        .bauhaus-hero-visual::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(var(--hairline) 1px, transparent 1px);
+            background-size: 8px 8px;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .bauhaus-cube-img {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(2px 3px 6px rgba(0,0,0,0.12));
+            position: relative;
+            z-index: 1;
+            transition: transform 300ms var(--spring-ease);
+        }
+        .bauhaus-hero-visual:hover .bauhaus-cube-img {
+            transform: scale(1.08) rotate(-3deg);
+        }
+        .bauhaus-visual-text {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .bauhaus-visual-title {
+            font-weight: 800;
+            font-size: 0.82rem;
+            letter-spacing: -0.01em;
+        }
+        .bauhaus-visual-desc {
+            font-size: 0.72rem;
+            color: var(--steel);
+            line-height: 1.35;
+        }
+
+        /* Big Score Board */
         .stage-title {
             font-family: var(--font-mono);
-            font-weight: 300;
-            font-size: 0.72rem;
+            font-weight: 700;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.08em;
             color: var(--steel);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .stage-title::before {
+            content: '';
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
         }
 
-        .stage-main { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+        .stage-main {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
         .stage-gpa {
             font-family: var(--font-mono);
             font-weight: 900;
-            font-size: clamp(4rem, 10vw, 8rem);
-            line-height: 0.85;
+            font-size: clamp(3.8rem, 8vw, 5.6rem);
+            line-height: 0.9;
             letter-spacing: -0.04em;
             color: var(--accent);
+            transition: color 180ms ease, opacity 180ms ease;
         }
-        .stage-side { display: flex; flex-direction: column; gap: 2px; }
-        .stage-letter { font-family: var(--font-mono); font-weight: 900; font-size: 1.6rem; line-height: 1; }
-        .stage-s10 { font-family: var(--font-mono); font-weight: 300; font-size: 0.85rem; color: var(--steel); }
+        .stage-gpa.empty, .stage-gpa.is-empty {
+            color: var(--steel);
+            opacity: 0.35;
+            font-weight: 700;
+        }
+        .stage-side {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stage-letter {
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 1.5rem;
+            line-height: 1;
+            background: var(--surface-alt);
+            border: 1.5px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 8px;
+            width: fit-content;
+            box-shadow: 1.5px 1.5px 0px var(--border-color);
+        }
+        .stage-s10 {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: var(--steel);
+        }
 
+        /* Progress Bar & Target Mark */
+        .stage-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
         .stage-bar {
             position: relative;
             width: 100%;
-            height: 10px;
+            height: 12px;
             background: var(--stage-track);
+            border: 1.5px solid var(--border-color);
             border-radius: 999px;
             overflow: visible;
         }
@@ -171,279 +518,744 @@
             width: var(--w, 0%);
             background: var(--accent);
             border-radius: 999px;
-            transition: width var(--transition-slow);
+            transition: width var(--transition-normal);
         }
         .stage-mark {
             position: absolute;
-            top: -5px;
-            bottom: -5px;
-            width: 3px;
+            top: -6px;
+            bottom: -6px;
+            width: 4px;
             border-radius: 2px;
-            background: var(--stage-fg);
+            background: var(--ink);
+            border: 1px solid var(--surface);
             left: var(--t, 85%);
-            transition: left var(--transition-slow);
+            transition: left var(--transition-normal);
+            z-index: 2;
         }
         .stage-meta {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             gap: 10px;
             font-family: var(--font-mono);
-            font-weight: 300;
-            font-size: 0.66rem;
+            font-size: 0.7rem;
             color: var(--steel);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            font-weight: 500;
         }
-        .stage-meta b { font-weight: 700; color: var(--stage-fg); }
+        .stage-meta b {
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        /* Academic Telemetry & Assessment Monitor */
+        .stage-telemetry {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--surface-alt);
+            border: 1.75px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px 14px;
+            box-shadow: 2px 2px 0px var(--border-color);
+            position: relative;
+        }
+        .telemetry-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+        }
+        .telemetry-label {
+            color: var(--steel);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .telemetry-label i {
+            color: var(--accent);
+            font-size: 0.7rem;
+        }
+        .telemetry-val {
+            font-weight: 800;
+            font-size: 0.75rem;
+            color: var(--ink);
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            transition: all 180ms ease;
+        }
+        .telemetry-val.status-success {
+            background: rgba(5, 150, 105, 0.12);
+            color: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+        .telemetry-val.status-info {
+            background: rgba(2, 132, 199, 0.12);
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        .telemetry-val.status-warn {
+            background: rgba(217, 119, 6, 0.12);
+            color: var(--accent-yellow);
+            border-color: var(--accent-yellow);
+        }
+        .telemetry-val.status-danger {
+            background: rgba(225, 29, 72, 0.12);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .telemetry-val.status-neutral {
+            color: var(--steel);
+            border-color: var(--hairline);
+        }
+
+        /* Author Credit */
+        .stage-credit {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--steel);
+            border-top: 1.5px dashed var(--hairline);
+            padding-top: 14px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .stage-credit i {
+            color: var(--accent);
+            margin-right: 4px;
+        }
+        .stage-credit b {
+            color: var(--ink);
+            font-weight: 800;
+        }
 
         /* ============================================================
-           SHEET — floating bottom sheet, the thumb zone
+           SHEET: TACTILE WORKSPACE & FORMS
            ============================================================ */
         .sheet {
-            flex: 1 1 auto;
-            min-height: 0;
             background: var(--surface);
-            border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
-            margin-top: -24px;
-            z-index: 2;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            animation: rise var(--transition-slow) 120ms backwards;
-            box-shadow: 0 -8px 0 rgba(9, 9, 11, 0.25);
+            border: var(--stage-border);
+            border-radius: var(--card-radius);
+            box-shadow: var(--stage-shadow);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: cardRise var(--transition-normal) 60ms backwards;
         }
-        .sheet-inner {
-            max-width: 620px;
-            margin: 0 auto;
-            padding: 10px 20px 0;
+        @media (min-width: 960px) {
+            .sheet {
+                padding: 32px;
+                gap: 24px;
+            }
         }
-        .grabber {
-            width: 44px;
-            height: 5px;
-            border-radius: 999px;
-            background: var(--hairline);
-            margin: 4px auto 14px;
+        .grabber { display: none; }
+
+        /* Tabs Segmented Control */
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--surface-alt);
+            padding: 4px;
+            gap: 4px;
+            box-shadow: var(--shadow-btn);
+        }
+        .tab {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--steel);
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+        }
+        .tab.active {
+            background: var(--ink);
+            color: var(--surface);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        .tab:hover:not(.active) {
+            color: var(--ink);
+            background: rgba(0,0,0,0.04);
+        }
+        .tab:active {
+            transform: scale(0.98);
         }
 
-        .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
-        .sheet-head h1 { font-weight: 900; font-size: 1.25rem; letter-spacing: -0.02em; line-height: 1.15; }
-        .sheet-head p { font-weight: 300; font-size: 0.8rem; color: var(--steel); margin-top: 3px; }
-
+        /* Sheet Head */
+        .sheet-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            border-bottom: 1.5px solid var(--hairline);
+            padding-bottom: 16px;
+        }
+        .sheet-head h1 {
+            font-size: clamp(1.25rem, 3vw, 1.55rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+        }
+        .sheet-head p {
+            font-size: 0.84rem;
+            color: var(--steel);
+            margin-top: 3px;
+        }
         .btn-reset {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            padding: 10px 14px;
-            background: var(--surface);
-            border: var(--line);
-            border-radius: 999px;
+            gap: 6px;
+            padding: 9px 14px;
+            background: var(--surface-alt);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
             font-family: var(--font-mono);
-            font-size: 0.66rem;
+            font-size: 0.7rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
+            color: var(--ink);
+            box-shadow: 1.5px 1.5px 0px var(--border-color);
+            cursor: pointer;
+            transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
             flex-shrink: 0;
         }
+        .btn-reset:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 2.5px 2.5px 0px var(--border-color);
+            background: var(--surface);
+        }
+        .btn-reset:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0px 0px 0px var(--border-color);
+        }
 
-        /* ===== Fields ===== */
-        .field { margin-bottom: 18px; }
+        /* Fields & Inputs */
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
         .field-label {
             display: flex;
             align-items: center;
             gap: 8px;
             font-family: var(--font-mono);
-            font-weight: 300;
-            font-size: 0.66rem;
+            font-weight: 700;
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 0.18em;
+            letter-spacing: 0.08em;
             color: var(--steel);
-            margin-bottom: 8px;
         }
-
         .field-input {
             width: 100%;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
-            padding: 16px;
-            background: var(--surface);
-            border: var(--line);
-            border-radius: 16px;
+            padding: 13px 16px;
+            background: var(--surface-alt);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             color: var(--ink);
-            appearance: none;
+            box-shadow: 2px 2px 0px var(--border-color);
+            transition: border-color 160ms ease, box-shadow 160ms ease;
         }
         select.field-input {
             cursor: pointer;
+            appearance: none;
             background-image: var(--chev-lg);
             background-repeat: no-repeat;
             background-position: right 16px center;
             padding-right: 44px;
         }
 
-        /* ===== Scale toggle ===== */
+        /* Scale Toggle */
         .scale-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 18px;
         }
-        .scale-row .field-label { margin-bottom: 0; }
-        .toggle-group { display: inline-flex; border: var(--line); border-radius: 999px; overflow: hidden; background: var(--surface); }
+        .toggle-group {
+            display: inline-flex;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--surface-alt);
+            box-shadow: 1.5px 1.5px 0px var(--border-color);
+        }
         .toggle-btn {
             font-family: var(--font-mono);
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            padding: 9px 14px;
-            background: var(--surface);
+            padding: 8px 14px;
+            background: transparent;
             color: var(--steel);
             border: none;
+            cursor: pointer;
+            transition: background 140ms ease, color 140ms ease;
         }
-        .toggle-btn + .toggle-btn { border-left: var(--line); }
-        .toggle-btn.active { background: var(--ink); color: var(--surface); }
+        .toggle-btn + .toggle-btn {
+            border-left: 2px solid var(--border-color);
+        }
+        .toggle-btn.active {
+            background: var(--ink);
+            color: var(--surface);
+        }
 
-        /* ===== Attempt cards ===== */
-        @keyframes cardRise {
-            from { opacity: 0; transform: translateY(18px); }
-            to   { opacity: 1; transform: translateY(0); }
+        /* 3-Step Guided Flow */
+        .guided-steps {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-alt);
+            border: 1.75px solid var(--border-color);
+            border-radius: 18px;
+            padding: 12px 14px;
+            margin-top: 14px;
+            margin-bottom: 18px;
+            box-shadow: 2px 2px 0px var(--border-color);
         }
+        .step-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+        .step-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            background: var(--ink);
+            color: var(--surface);
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 0.72rem;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            box-shadow: 1px 1px 0px var(--border-color);
+        }
+        .step-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .step-title {
+            font-weight: 800;
+            font-size: 0.76rem;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .step-sub {
+            font-size: 0.65rem;
+            color: var(--steel);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .step-connector {
+            color: var(--steel-light);
+            font-size: 0.7rem;
+        }
+        @media (max-width: 680px) {
+            .guided-steps {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 12px;
+            }
+            .step-connector { display: none; }
+        }
+
+        /* Attempt Cards */
         .attempt-row {
             background: var(--surface);
-            border: var(--line);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 12px;
-            animation: cardRise var(--transition-slow) backwards;
+            border: 1.75px solid var(--border-color);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+            box-shadow: 2.5px 2.5px 0px var(--border-color);
+            transition: box-shadow 160ms var(--spring-ease), transform 160ms var(--spring-ease), border-color 160ms ease;
         }
-        .attempt-row:nth-child(1) { animation-delay: 0ms; }
-        .attempt-row:nth-child(2) { animation-delay: 70ms; }
-        .attempt-row:nth-child(3) { animation-delay: 140ms; }
-        .attempt-row:nth-child(4) { animation-delay: 210ms; }
-        .attempt-row:nth-child(5) { animation-delay: 280ms; }
-        .attempt-row:nth-child(n+6) { animation-delay: 350ms; }
+        .attempt-row:hover {
+            box-shadow: 3.5px 3.5px 0px var(--border-color);
+            transform: translate(-1px, -1px);
+        }
 
-        .attempt-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        /* Thematic Exam Color Schemes */
+        .attempt-row.theme-pretest {
+            background: var(--theme-pretest-bg);
+            border-color: var(--theme-pretest-border);
+        }
+        .attempt-row.theme-pretest .attempt-icon {
+            background: var(--theme-pretest-border);
+            color: #FFFFFF;
+        }
+        .attempt-row.theme-pretest .attempt-subtag {
+            background: var(--theme-pretest-badge);
+            color: var(--theme-pretest-ink);
+            border: 1px solid var(--theme-pretest-border);
+        }
+
+        .attempt-row.theme-midterm {
+            background: var(--theme-midterm-bg);
+            border-color: var(--theme-midterm-border);
+        }
+        .attempt-row.theme-midterm .attempt-icon {
+            background: var(--theme-midterm-border);
+            color: #FFFFFF;
+        }
+        .attempt-row.theme-midterm .attempt-subtag {
+            background: var(--theme-midterm-badge);
+            color: var(--theme-midterm-ink);
+            border: 1px solid var(--theme-midterm-border);
+        }
+
+        .attempt-row.theme-final {
+            background: var(--theme-final-bg);
+            border-color: var(--theme-final-border);
+        }
+        .attempt-row.theme-final .attempt-icon {
+            background: var(--theme-final-border);
+            color: #FFFFFF;
+        }
+        .attempt-row.theme-final .attempt-subtag {
+            background: var(--theme-final-badge);
+            color: var(--theme-final-ink);
+            border: 1px solid var(--theme-final-border);
+        }
+
+        .attempt-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
         .attempt-icon {
-            width: 32px; height: 32px;
-            display: grid; place-items: center;
+            width: 34px;
+            height: 34px;
             border-radius: 10px;
             background: var(--ink);
             color: var(--surface);
-            font-size: 0.72rem;
+            display: grid;
+            place-items: center;
+            font-size: 0.82rem;
             flex-shrink: 0;
+            box-shadow: 1.5px 1.5px 0px var(--border-color);
+            transition: transform 200ms var(--spring-ease);
         }
-        .attempt-name { font-weight: 900; font-size: 0.95rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .attempt-row:hover .attempt-icon {
+            transform: scale(1.1) rotate(-4deg);
+        }
+        .attempt-name-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .attempt-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+        .attempt-subtag {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* Preset Pills for Question Count */
+        .preset-pills {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        .preset-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--steel);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 2px;
+        }
+        .preset-pill {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border-color);
+            background: var(--surface);
+            color: var(--ink);
+            cursor: pointer;
+            box-shadow: 1.5px 1.5px 0px var(--border-color);
+            transition: transform 100ms ease, box-shadow 100ms ease, background 100ms ease;
+        }
+        .preset-pill:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 2.5px 2.5px 0px var(--border-color);
+            background: var(--surface-alt);
+        }
+        .preset-pill:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0px 0px 0px var(--border-color);
+        }
+
         input.attempt-label {
-            flex: 1; min-width: 0;
+            flex: 1;
+            min-width: 0;
             font-family: var(--font-body);
-            font-weight: 900;
+            font-weight: 800;
             font-size: 0.95rem;
             border: none;
             border-bottom: 2px solid var(--hairline);
             background: transparent;
+            color: var(--ink);
             padding: 4px 2px;
             border-radius: 0;
         }
-        input.attempt-label:focus-visible { outline: none; border-bottom-color: var(--ink); }
-
+        input.attempt-label:focus-visible {
+            outline: none;
+            border-bottom-color: var(--accent);
+        }
         .attempt-live {
             font-family: var(--font-mono);
-            font-size: 0.62rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            padding: 5px 9px;
-            border-radius: 999px;
+            padding: 4px 9px;
+            border-radius: 6px;
             border: 1.5px solid var(--hairline);
-            background: var(--surface);
+            background: var(--surface-alt);
             color: var(--steel);
             flex-shrink: 0;
             margin-left: auto;
         }
-        .attempt-live.lv-top,
-        .attempt-live.lv-good { border-color: var(--ink); background: var(--ink); color: var(--surface); }
-        .attempt-live.lv-mid,
-        .attempt-live.lv-low { border-color: var(--ink); color: var(--ink); }
-        .attempt-live.lv-fail { border-color: var(--accent); background: var(--accent); color: var(--surface); }
-
-        .attempt-weight-tag { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
-        .attempt-weight-kicker { font-family: var(--font-mono); font-weight: 300; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--steel); }
-        .attempt-weight-val { font-family: var(--font-mono); font-weight: 900; font-size: 0.95rem; }
-        input.attempt-weight[type="number"] {
-            width: 62px;
-            text-align: center;
-            font-weight: 900;
-            font-size: 0.9rem;
-            padding: 7px 4px;
-            border: var(--line);
-            border-radius: 10px;
+        .attempt-live.lv-top, .attempt-live.lv-good {
+            border-color: var(--border-color);
+            background: var(--ink);
+            color: var(--surface);
         }
-
-        .attempt-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+        .attempt-live.lv-mid, .attempt-live.lv-low {
+            border-color: var(--border-color);
+            color: var(--ink);
+        }
+        .attempt-live.lv-fail {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #FFFFFF;
+        }
+        .attempt-weight-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .attempt-weight-kicker {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            color: var(--steel);
+        }
+        .attempt-weight-val {
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 0.92rem;
+        }
+        input.attempt-weight[type="number"] {
+            width: 58px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            padding: 6px 4px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--surface-alt);
+            color: var(--ink);
+        }
+        .attempt-tools {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
         select.attempt-kind {
             font-family: var(--font-mono);
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            padding: 8px 30px 8px 12px;
-            border: var(--line);
-            border-radius: 999px;
-            background-color: var(--surface);
+            padding: 6px 28px 6px 10px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--surface-alt);
+            color: var(--ink);
             cursor: pointer;
             appearance: none;
             background-image: var(--chev-sm);
             background-repeat: no-repeat;
-            background-position: right 12px center;
+            background-position: right 10px center;
         }
         .attempt-remove {
-            width: 32px; height: 32px;
-            border: var(--line);
-            border-radius: 10px;
-            background: var(--surface);
+            width: 32px;
+            height: 32px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--surface-alt);
             color: var(--ink);
-            display: grid; place-items: center;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
             flex-shrink: 0;
+            transition: background 120ms ease, color 120ms ease;
         }
-
-        .attempt-inputs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; margin-bottom: 10px; }
-        .attempt-inputs .slash { font-family: var(--font-mono); font-weight: 300; color: var(--steel); padding-bottom: 14px; }
-        .mini-label { display: block; font-family: var(--font-mono); font-weight: 300; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--steel); margin-bottom: 6px; }
+        .attempt-remove:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #FFFFFF;
+        }
+        .attempt-inputs {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 12px;
+        }
+        .attempt-inputs .slash {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--steel);
+            padding-bottom: 12px;
+        }
+        .mini-label {
+            display: block;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 0.64rem;
+            text-transform: uppercase;
+            color: var(--steel);
+            margin-bottom: 4px;
+        }
         .num-input {
             width: 100%;
             text-align: center;
-            font-size: 1.3rem;
-            font-weight: 900;
-            padding: 13px 8px;
-            border: var(--line);
-            border-radius: 14px;
-            background: var(--surface);
+            font-size: 1.25rem;
+            font-weight: 800;
+            padding: 11px 8px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--surface-alt);
+            color: var(--ink);
         }
-        .num-input::placeholder { color: var(--hairline); font-weight: 400; }
+        .num-input::placeholder {
+            color: var(--hairline);
+            font-weight: 500;
+        }
+        .score-line {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .score-line .num-input {
+            width: 110px;
+            flex-shrink: 0;
+        }
 
-        .score-line { display: flex; align-items: center; gap: 14px; }
-        .score-line .num-input { width: 116px; flex-shrink: 0; }
-
+        /* Custom Range Slider */
         input[type="range"].attempt-slider {
-            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
             width: 100%;
-            accent-color: var(--accent);
+            height: 8px;
+            background: var(--hairline);
+            border-radius: 999px;
+            outline: none;
             cursor: pointer;
-            height: 24px;
         }
-        input[type="range"].attempt-slider:disabled { cursor: not-allowed; opacity: 0.35; }
+        input[type="range"].attempt-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2.5px solid var(--accent);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            cursor: grab;
+            transition: transform 120ms ease;
+        }
+        input[type="range"].attempt-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.18);
+        }
+        input[type="range"].attempt-slider::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+        input[type="range"].attempt-slider:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
 
-        .hint { display: flex; gap: 6px; font-weight: 300; font-size: 0.72rem; color: var(--steel); margin-top: 6px; }
-        .hint i { margin-top: 2px; }
+        .hint {
+            display: flex;
+            gap: 8px;
+            font-size: 0.76rem;
+            color: var(--steel);
+            margin-top: 6px;
+            line-height: 1.45;
+        }
+        .hint i {
+            margin-top: 3px;
+            flex-shrink: 0;
+            color: var(--accent);
+        }
         .hidden, [hidden] { display: none !important; }
 
         .add-attempt-btn {
             width: 100%;
-            padding: 14px;
+            padding: 13px;
             border: 2px dashed var(--steel);
-            border-radius: 20px;
-            background: var(--surface);
+            border-radius: 12px;
+            background: var(--surface-alt);
             font-family: var(--font-mono);
             font-weight: 700;
             font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: var(--ink);
+            transition: border-color 140ms ease, background 140ms ease;
+        }
+        .add-attempt-btn:hover {
+            border-style: solid;
+            border-color: var(--border-color);
+            background: var(--surface);
         }
 
         .weight-note {
@@ -452,12 +1264,11 @@
             justify-content: flex-end;
             gap: 14px;
             font-family: var(--font-mono);
-            font-weight: 300;
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             color: var(--steel);
             margin-top: 8px;
         }
-        .weight-note b { font-weight: 900; }
+        .weight-note b { font-weight: 800; color: var(--ink); }
         .weight-note.bad { color: var(--accent); }
         .balance-btn {
             font-family: var(--font-mono);
@@ -466,49 +1277,120 @@
             color: var(--ink);
             background: none;
             border: none;
-            border-bottom: 2px solid var(--ink);
+            border-bottom: 2px solid var(--border-color);
             padding: 0 0 1px;
+            cursor: pointer;
         }
 
-        /* ===== GPA target chips — horizontal snap rail, thumb-sized ===== */
+        /* Target GPA Chips (3D Tactile Keycaps) */
         .chip-rail {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
             gap: 10px;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            padding: 4px 2px 10px;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
         }
-        .chip-rail::-webkit-scrollbar { display: none; }
         .gpa-chip {
-            scroll-snap-align: center;
-            flex: 0 0 auto;
-            min-width: 92px;
-            height: 78px;
+            min-height: 64px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 3px;
-            border: var(--line);
-            border-radius: 999px;
-            background: var(--surface);
+            border: 1.75px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--surface-alt);
             color: var(--ink);
+            box-shadow: 2px 2px 0px var(--border-color);
+            cursor: pointer;
+            transition: transform 140ms var(--spring-ease), box-shadow 140ms var(--spring-ease), background 140ms ease;
+            position: relative;
         }
-        .gpa-chip .letter { font-family: var(--font-mono); font-weight: 900; font-size: 1.5rem; line-height: 1; }
-        .gpa-chip .val { font-family: var(--font-mono); font-weight: 300; font-size: 0.68rem; color: var(--steel); }
-        .gpa-chip.selected { background: var(--accent); border-color: var(--accent); }
-        .gpa-chip.selected .letter, .gpa-chip.selected .val { color: var(--surface); }
+        .gpa-chip .letter {
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 1.25rem;
+            line-height: 1;
+            transition: transform 140ms var(--spring-ease);
+        }
+        .gpa-chip .val {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.68rem;
+            color: var(--steel);
+        }
+        .gpa-chip:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px var(--border-color);
+            background: var(--surface);
+        }
+        .gpa-chip:hover .letter {
+            transform: scale(1.1);
+        }
+        .gpa-chip:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--border-color);
+        }
 
-        /* ===== Primary CTA — sticky in the thumb zone ===== */
+        /* Rank-based vibrant keycap themes */
+        .gpa-chip[data-gpa="4.0"] { --chip-pop: #E11D48; }
+        .gpa-chip[data-gpa="3.5"] { --chip-pop: #8B5CF6; }
+        .gpa-chip[data-gpa="3.0"] { --chip-pop: #0284C7; }
+        .gpa-chip[data-gpa="2.5"] { --chip-pop: #059669; }
+        .gpa-chip[data-gpa="2.0"] { --chip-pop: #D97706; }
+        .gpa-chip[data-gpa="1.5"], .gpa-chip[data-gpa="1.0"] { --chip-pop: #64748B; }
+
+        .gpa-chip.selected {
+            background: var(--chip-pop, var(--accent)) !important;
+            border-color: var(--border-color);
+            color: #FFFFFF;
+            box-shadow: 2.5px 2.5px 0px var(--border-color);
+            transform: translateY(-2px);
+        }
+        .gpa-chip.selected .letter,
+        .gpa-chip.selected .val {
+            color: #FFFFFF !important;
+        }
+
+        /* Sticky CTA Wrap & Buttons */
         .cta-wrap {
             position: sticky;
             bottom: 0;
-            z-index: 3;
+            z-index: 30;
             background: var(--surface);
-            padding: 10px 0 calc(12px + env(safe-area-inset-bottom));
-            border-top: 1px solid var(--hairline);
+            padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+            border-top: 1.5px solid var(--hairline);
+            margin-top: 8px;
+        }
+        .action-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .btn-ghost {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 14px;
+            background: var(--surface-alt);
+            border: 1.75px solid var(--border-color);
+            border-radius: var(--btn-radius);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--ink);
+            box-shadow: 2px 2px 0px var(--border-color);
+            cursor: pointer;
+            transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+        }
+        .btn-ghost:hover {
+            transform: translate(-1.5px, -1.5px);
+            box-shadow: 3.5px 3.5px 0px var(--border-color);
+            background: var(--surface);
+        }
+        .btn-ghost:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0px 0px 0px var(--border-color);
         }
         .btn-calc {
             width: 100%;
@@ -516,55 +1398,520 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            padding: 18px;
+            padding: 16px 20px;
             background: var(--accent);
-            color: var(--surface);
-            border: none;
-            border-radius: 999px;
-            font-family: var(--font-body);
-            font-weight: 900;
-            font-size: 1rem;
-            letter-spacing: 0.01em;
+            color: #FFFFFF;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: -0.01em;
+            box-shadow: 3.5px 3.5px 0px var(--border-color);
+            cursor: pointer;
+            transition: transform 140ms var(--spring-ease), box-shadow 140ms var(--spring-ease), background 140ms ease;
+        }
+        .btn-calc:hover {
+            background: var(--accent-hover);
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0px var(--border-color);
+        }
+        .btn-calc:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px var(--border-color);
         }
 
-        /* ===== Result card ===== */
-        .result-card { border: var(--line); border-radius: 20px; overflow: hidden; background: var(--surface); animation: cardRise var(--transition-slow) backwards; margin-bottom: 18px; }
-        .result-head { display: flex; align-items: center; gap: 10px; padding: 13px 16px; font-weight: 900; font-size: 0.9rem; }
-        .tone-info .result-head, .tone-success .result-head { background: var(--ink); color: var(--surface); }
-        .tone-warn .result-head { border-bottom: var(--line); color: var(--ink); }
-        .tone-danger .result-head { background: var(--accent); color: var(--surface); }
-        .result-body { padding: 16px; font-size: 0.88rem; font-weight: 500; }
-        .result-body p { margin-top: 10px; font-weight: 300; color: var(--steel); }
-        .result-body b { font-weight: 900; color: var(--ink); }
-        .result-foot { display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-top: 1px solid var(--hairline); font-family: var(--font-mono); font-weight: 300; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--steel); }
-        .result-foot b { font-weight: 900; color: var(--ink); }
-        .result-foot i { color: var(--accent); }
+        /* Result Cards & Dynamic Arrival Animations */
+        @keyframes resultArrival {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+            60% {
+                transform: translateY(-2px) scale(1.008);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes scanBeam {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+        }
+        @keyframes auraSuccess {
+            0% { box-shadow: 3.5px 3.5px 0px var(--border-color), 0 0 0 0 rgba(5, 150, 105, 0.6); }
+            50% { box-shadow: 4px 4px 0px var(--border-color), 0 0 30px 6px rgba(5, 150, 105, 0.35); }
+            100% { box-shadow: 3.5px 3.5px 0px var(--border-color), 0 0 0 0 rgba(5, 150, 105, 0); }
+        }
+        @keyframes auraInfo {
+            0% { box-shadow: 3.5px 3.5px 0px var(--border-color), 0 0 0 0 rgba(2, 132, 199, 0.6); }
+            50% { box-shadow: 4px 4px 0px var(--border-color), 0 0 30px 6px rgba(2, 132, 199, 0.35); }
+            100% { box-shadow: 3.5px 3.5px 0px var(--border-color), 0 0 0 0 rgba(2, 132, 199, 0); }
+        }
+        @keyframes auraDanger {
+            0% { box-shadow: 3.5px 3.5px 0px var(--border-color), 0 0 0 0 rgba(225, 29, 72, 0.6); }
+            50% { box-shadow: 4px 4px 0px var(--border-color), 0 0 30px 6px rgba(225, 29, 72, 0.35); }
+            100% { box-shadow: 3.5px 3.5px 0px var(--border-color), 0 0 0 0 rgba(225, 29, 72, 0); }
+        }
+        @keyframes btnClickWave {
+            0% { transform: scale(0.96); filter: brightness(1.2); }
+            50% { transform: scale(1.02); filter: brightness(1.3); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
 
-        .hero-number { display: flex; align-items: flex-end; gap: 10px; margin-top: 12px; }
-        .hero-number .big { font-family: var(--font-mono); font-weight: 900; font-size: 3.4rem; line-height: 0.85; letter-spacing: -0.03em; color: var(--accent); }
-        .hero-number .unit { font-family: var(--font-mono); font-weight: 300; font-size: 0.95rem; color: var(--steel); padding-bottom: 4px; }
-        .hero-number .badge {
-            margin-left: auto;
-            font-family: var(--font-mono);
-            font-weight: 900;
-            font-size: 0.8rem;
-            padding: 6px 12px;
-            border-radius: 999px;
+        .btn-calc.calc-pulse {
+            animation: btnClickWave 320ms ease-out;
+        }
+
+        .result-card {
+            border: 2px solid var(--border-color);
+            border-radius: 18px;
+            overflow: hidden;
+            background: var(--surface);
+            box-shadow: 3.5px 3.5px 0px var(--border-color);
+            margin-top: 16px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .result-card.animate-arrival {
+            animation: resultArrival 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .result-card.tone-success.animate-arrival {
+            animation: resultArrival 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards, auraSuccess 1.1s ease-out;
+        }
+        .result-card.tone-info.animate-arrival {
+            animation: resultArrival 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards, auraInfo 1.1s ease-out;
+        }
+        .result-card.tone-danger.animate-arrival {
+            animation: resultArrival 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards, auraDanger 1.1s ease-out;
+        }
+
+        .result-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: -0.01em;
+        }
+        .result-head::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+            animation: scanBeam 1.2s cubic-bezier(0.4, 0, 0.2, 1) 1;
+            pointer-events: none;
+        }
+        .tone-info .result-head, .tone-success .result-head {
             background: var(--ink);
             color: var(--surface);
         }
+        .tone-warn .result-head {
+            background: var(--accent-yellow);
+            color: #18181B;
+        }
+        .tone-danger .result-head {
+            background: var(--accent);
+            color: #FFFFFF;
+        }
+        .result-body {
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+        .result-body p {
+            margin-top: 10px;
+            color: var(--steel);
+            line-height: 1.55;
+        }
+        .result-body b {
+            color: var(--ink);
+            font-weight: 800;
+        }
+        .result-foot {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-top: 1.5px solid var(--hairline);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--steel);
+            background: var(--surface-alt);
+        }
+        .result-foot b {
+            color: var(--ink);
+            font-weight: 800;
+        }
+        .result-foot i {
+            color: var(--accent);
+        }
+        /* ============================================================
+           MYSTIC ARCANE QUANTUM REACTOR & MINI MATHEMATICAL HUD STAGE
+           Tập trung Đỉnh Cao: Vòng Tròn Ma Thuật Thiên Văn 3D Đột Phá + Mini HUD Toán Học Tinh Gọn
+           ============================================================ */
+        .quantum-math-stage {
+            width: 100%;
+            border-radius: var(--card-radius);
+            background: radial-gradient(circle at 50% 40%, #0d1527 0%, #070a14 70%, #030509 100%);
+            border: 2px solid #1E293B;
+            box-shadow: 4px 4px 0px var(--border-color), 0 20px 50px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            margin: 16px 0;
+            padding: 14px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            user-select: none;
+            animation: stagePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes stagePopIn {
+            0% { opacity: 0; transform: scale(0.96) translateY(14px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
 
-        .bar-track { position: relative; width: 100%; height: 10px; border-radius: 999px; background: var(--hairline); margin-top: 14px; overflow: hidden; }
-        .bar-fill { height: 100%; width: var(--w, 0%); border-radius: 999px; background: var(--accent); transition: width var(--transition-slow); }
+        .quantum-math-topbar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            z-index: 2;
+        }
 
-        .stat-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-        .stat-chip { border: var(--line); border-radius: 14px; padding: 8px 14px; text-align: center; background: var(--surface); }
-        .stat-chip .k { display: block; font-family: var(--font-mono); font-weight: 300; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--steel); margin-bottom: 2px; }
-        .stat-chip b { font-family: var(--font-mono); font-weight: 900; font-size: 1.05rem; }
+        .quantum-math-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 13px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1.5px solid #334155;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            color: #38BDF8;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            backdrop-filter: blur(8px);
+        }
+        .quantum-math-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #38BDF8;
+            box-shadow: 0 0 10px #38BDF8;
+            animation: dotGlowPulse 0.9s ease-in-out infinite alternate;
+        }
+        @keyframes dotGlowPulse {
+            from { transform: scale(0.8); opacity: 0.65; }
+            to { transform: scale(1.4); opacity: 1; box-shadow: 0 0 14px #38BDF8, 0 0 24px #0284C7; }
+        }
 
-        .milestones { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hairline); }
-        .milestones .m-title { display: block; font-family: var(--font-mono); font-weight: 300; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--steel); margin-bottom: 10px; }
-        .tier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .quantum-math-skip-btn {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1.5px solid #334155;
+            color: #94A3B8;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            backdrop-filter: blur(8px);
+        }
+        .quantum-math-skip-btn:hover {
+            color: #F8FAFC;
+            background: #1E293B;
+            border-color: #38BDF8;
+            transform: translate(-1.5px, -1.5px);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        }
+        .quantum-math-skip-btn:active {
+            transform: translate(1px, 1px);
+        }
+
+        /* Khung chứa VÒNG TRÒN NĂNG LƯỢNG MA THUẬT 3D CANVAS — Siêu Lớn & Hoành Tráng */
+        .quantum-math-viewport {
+            position: relative;
+            width: 100%;
+            max-width: 540px;
+            height: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0 8px;
+            border-radius: 20px;
+            background: radial-gradient(circle at center, rgba(56, 189, 248, 0.08) 0%, rgba(225, 29, 72, 0.04) 45%, transparent 75%);
+        }
+        @media (max-width: 480px) {
+            .quantum-math-viewport {
+                height: 310px;
+            }
+        }
+
+        .quantum-math-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 20px;
+        }
+
+        /* DẢI MINI TELEMETRY HUD TOÁN HỌC TINH GỌN (Nhỏ gọn, thanh lịch dưới vòng tròn) */
+        .quantum-mini-hud {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(51, 65, 85, 0.7);
+            backdrop-filter: blur(8px);
+            margin-top: 4px;
+        }
+        .mini-hud-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 700;
+            background: rgba(30, 41, 59, 0.8);
+            color: #94A3B8;
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            transition: all 0.25s ease;
+        }
+        .mini-hud-chip.active {
+            background: rgba(56, 189, 248, 0.18);
+            color: #38BDF8;
+            border-color: #38BDF8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+            font-weight: 800;
+        }
+        .mini-hud-chip.solved {
+            background: rgba(16, 185, 129, 0.18);
+            color: #10B981;
+            border-color: #10B981;
+            font-weight: 800;
+        }
+        .mini-hud-chip.highlight {
+            background: rgba(225, 29, 72, 0.18);
+            color: #FB7185;
+            border-color: #E11D48;
+            font-weight: 800;
+        }
+        .mini-hud-chip i {
+            font-size: 0.62rem;
+        }
+
+        /* Flying Mana Wisps / Comet Fireballs */
+        .flying-data-pill {
+            position: fixed;
+            z-index: 999999;
+            pointer-events: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            font-weight: 800;
+            background: rgba(15, 23, 42, 0.95);
+            color: #F8FAFC;
+            border: 1.5px solid #38BDF8;
+            box-shadow: 0 0 18px rgba(56, 189, 248, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+            white-space: nowrap;
+            will-change: transform, opacity;
+            backdrop-filter: blur(10px);
+        }
+        .flying-data-pill.tone-pretest {
+            border-color: #F59E0B;
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+            color: #FDE68A;
+        }
+        .flying-data-pill.tone-midterm {
+            border-color: #38BDF8;
+            box-shadow: 0 0 18px rgba(56, 189, 248, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+            color: #BAE6FD;
+        }
+        .flying-data-pill.tone-final {
+            border-color: #F43F5E;
+            box-shadow: 0 0 18px rgba(244, 63, 94, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+            color: #FECDD3;
+        }
+        }
+
+        /* Nút tính lại mô phỏng ở chân kết quả */
+        .btn-replay-reactor {
+            margin-top: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 12px;
+            background: var(--surface-alt);
+            border: 1.75px solid var(--border-color);
+            box-shadow: 2.5px 2.5px 0px var(--border-color);
+            color: var(--ink);
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .btn-replay-reactor:hover {
+            transform: translate(-1.5px, -1.5px);
+            box-shadow: 4px 4px 0px var(--border-color);
+            background: var(--surface);
+        }
+        .btn-replay-reactor:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0px 0px 0px var(--border-color);
+        }
+        .btn-replay-reactor i {
+            color: var(--accent);
+        }
+
+        /* Khối con số kết quả sắc sảo, đúc kim loại phát sáng */
+        .hero-number {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-top: 14px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .hero-number .big {
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: clamp(3.0rem, 6.5vw, 3.8rem);
+            line-height: 0.92;
+            color: var(--accent);
+            letter-spacing: -0.035em;
+            text-shadow: 0 2px 18px var(--accent-subtle);
+            will-change: transform;
+            animation: numberPopIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes numberPopIn {
+            0% { transform: scale(0.6); opacity: 0; filter: blur(6px); }
+            60% { transform: scale(1.08); filter: blur(0px); }
+            100% { transform: scale(1.0); opacity: 1; }
+        }
+        .hero-number .unit {
+            font-family: var(--font-mono);
+            font-size: 1.0rem;
+            font-weight: 700;
+            color: var(--steel);
+        }
+        .hero-number .badge {
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 0.82rem;
+            padding: 6px 14px;
+            border-radius: 9px;
+            background: var(--ink);
+            color: var(--surface);
+            margin-left: auto;
+            border: 1.5px solid var(--border-color);
+            box-shadow: 2px 2px 0px var(--border-color);
+        }
+
+        .bar-track {
+            position: relative;
+            width: 100%;
+            height: 12px;
+            border-radius: 999px;
+            background: var(--hairline);
+            margin-top: 14px;
+            overflow: hidden;
+            border: 1.5px solid var(--border-color);
+        }
+        .bar-fill {
+            height: 100%;
+            width: var(--w, 0%);
+            border-radius: 999px;
+            background: var(--accent);
+            transition: width 650ms cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: scanBeam 1.8s ease-in-out infinite;
+        }
+
+        .stat-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .stat-chip {
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            padding: 8px 14px;
+            background: var(--surface-alt);
+            box-shadow: 1.5px 1.5px 0px var(--border-color);
+        }
+        .stat-chip .k {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: var(--steel);
+            margin-bottom: 2px;
+        }
+        .stat-chip b {
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 1.05rem;
+        }
+
+        .milestones {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1.5px dashed var(--hairline);
+        }
+        .milestones .m-title {
+            display: block;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            color: var(--steel);
+            margin-bottom: 10px;
+        }
+        .tier-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+        }
         .tier {
             display: flex;
             align-items: center;
@@ -572,49 +1919,93 @@
             gap: 8px;
             padding: 8px 12px;
             border: 1.5px solid var(--hairline);
-            border-radius: 12px;
+            border-radius: 10px;
             font-family: var(--font-mono);
-            font-size: 0.72rem;
+            font-size: 0.74rem;
             font-weight: 700;
-            background: var(--surface);
+            background: var(--surface-alt);
         }
-        .tier .t-sub { font-size: 0.6rem; color: var(--steel); font-weight: 300; }
-        .tier.ok { border-color: var(--ink); }
-        .tier.safe { background: var(--ink); border-color: var(--ink); color: var(--surface); }
-        .tier.safe .t-sub { color: var(--steel); }
-        .tier.far { color: var(--steel); }
-        .tier.picked { border: 2px solid var(--accent); }
+        .tier .t-sub {
+            font-size: 0.65rem;
+            color: var(--steel);
+            font-weight: 500;
+        }
+        .tier.ok {
+            border-color: var(--border-color);
+        }
+        .tier.safe {
+            background: var(--ink);
+            border-color: var(--border-color);
+            color: var(--surface);
+        }
+        .tier.safe .t-sub {
+            color: var(--steel-light);
+        }
+        .tier.far {
+            color: var(--steel);
+            opacity: 0.6;
+        }
+        .tier.picked {
+            border: 2px solid var(--accent);
+            background: var(--surface);
+            box-shadow: 2px 2px 0px var(--border-color), 0 0 12px var(--accent-subtle);
+            transform: scale(1.02);
+            position: relative;
+        }
 
         .suggest-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border-radius: 999px;
+            border-radius: 8px;
             background: var(--ink);
             color: var(--surface);
             font-family: var(--font-mono);
             font-size: 0.7rem;
             font-weight: 700;
-            padding: 7px 13px;
+            padding: 7px 12px;
             margin-bottom: 12px;
         }
-        .suggest-rows { display: flex; flex-direction: column; gap: 8px; }
+        .suggest-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
         .suggest-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
             border: 1.5px solid var(--hairline);
-            border-radius: 12px;
-            padding: 10px 13px;
+            border-radius: 10px;
+            padding: 9px 12px;
             font-size: 0.85rem;
+            background: var(--surface-alt);
         }
-        .suggest-row .s-name { font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .suggest-row .s-name i { color: var(--steel); font-size: 0.55rem; }
-        .suggest-row .s-val { font-family: var(--font-mono); font-weight: 900; color: var(--accent); }
+        .suggest-row .s-name {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .suggest-row .s-name i {
+            color: var(--steel);
+            font-size: 0.55rem;
+        }
+        .suggest-row .s-val {
+            font-family: var(--font-mono);
+            font-weight: 800;
+            color: var(--accent);
+        }
 
-        /* ===== Conversion table ===== */
-        details.convert { margin: 6px 0 18px; }
+        /* Details & Conversion Table */
+        details.convert {
+            margin: 10px 0 16px;
+            border: 1.5px solid var(--hairline);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: var(--surface-alt);
+        }
         details.convert summary {
             list-style: none;
             display: flex;
@@ -622,37 +2013,100 @@
             gap: 8px;
             cursor: pointer;
             font-family: var(--font-mono);
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.06em;
             color: var(--ink);
             user-select: none;
         }
         details.convert summary::-webkit-details-marker { display: none; }
-        details.convert summary i { transition: transform var(--transition-fast); font-size: 0.6rem; }
+        details.convert summary i { transition: transform var(--transition-fast); font-size: 0.65rem; }
         details.convert[open] summary i { transform: rotate(90deg); }
-        .convert-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-family: var(--font-mono); font-size: 0.78rem; }
+        .convert-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+        }
         .convert-table th {
-            font-weight: 300;
-            font-size: 0.6rem;
+            font-weight: 700;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.1em;
             color: var(--steel);
             padding: 8px;
-            border-bottom: var(--line);
+            border-bottom: 2px solid var(--border-color);
         }
-        .convert-table td { padding: 8px; border-bottom: 1px solid var(--hairline); text-align: center; font-weight: 500; }
+        .convert-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--hairline);
+            text-align: center;
+            font-weight: 600;
+        }
         .convert-table td.lg { font-weight: 900; }
-        .convert-note { font-weight: 300; font-size: 0.72rem; color: var(--steel); margin-top: 10px; }
+        .convert-note {
+            font-size: 0.74rem;
+            color: var(--steel);
+            margin-top: 10px;
+            line-height: 1.45;
+        }
 
-        /* ===== Toasts ===== */
+        /* Privacy Box */
+        .privacy {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--surface-alt);
+        }
+        .privacy > i {
+            color: var(--accent);
+            font-size: 0.95rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .privacy .p-title {
+            display: block;
+            margin-bottom: 3px;
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .privacy p {
+            font-size: 0.76rem;
+            line-height: 1.5;
+            color: var(--steel);
+        }
+        .privacy b { font-weight: 700; color: var(--ink); }
+
+        /* Sổ Điểm Kỳ */
+        .bk-mid { font-family: var(--font-mono); font-weight: 600; color: var(--steel); padding-bottom: 12px; }
+        .book-empty {
+            text-align: center; color: var(--steel); font-size: 0.84rem; line-height: 1.6;
+            padding: 26px 16px; border: 2px dashed var(--hairline); border-radius: 14px; margin-bottom: 12px;
+            background: var(--surface-alt);
+        }
+        .rank-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 7px 13px; border-radius: 8px;
+            background: var(--ink); color: var(--surface);
+            font-family: var(--font-mono); font-weight: 800; font-size: 0.72rem;
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
+        }
+
+        /* Toasts */
         #toast-container {
             position: fixed;
-            bottom: calc(96px + env(safe-area-inset-bottom));
+            bottom: calc(88px + env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
-            z-index: 50;
+            z-index: 60;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -661,353 +2115,341 @@
             width: max-content;
             max-width: calc(100vw - 32px);
         }
-        @keyframes toastRise {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
         .toast {
             display: flex;
             align-items: stretch;
             background: var(--ink);
             color: var(--surface);
-            border-radius: 999px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-color);
             overflow: hidden;
-            animation: toastRise var(--transition-fast) backwards;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            animation: cardRise var(--transition-fast) backwards;
         }
-        .toast.hide { transition: opacity var(--transition-fast), transform var(--transition-fast); opacity: 0; transform: translateY(10px); }
+        .toast.hide {
+            transition: opacity var(--transition-fast), transform var(--transition-fast);
+            opacity: 0;
+            transform: translateY(10px);
+        }
         .toast-tag {
             display: flex;
             align-items: center;
-            padding: 9px 13px;
+            padding: 8px 12px;
             font-family: var(--font-mono);
-            font-weight: 900;
-            font-size: 0.62rem;
+            font-weight: 800;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
         }
         .toast.success .toast-tag { background: var(--surface); color: var(--ink); }
-        .toast.warning .toast-tag { background: var(--steel); color: var(--ink); }
-        .toast.error   .toast-tag { background: var(--accent); color: var(--surface); }
-        .toast.info    .toast-tag { background: var(--surface); color: var(--ink); }
-        .toast-msg { padding: 9px 15px 9px 11px; font-size: 0.78rem; font-weight: 500; }
-
-        /* ===== Credit — luôn hiện trên stage, cả mobile lẫn desktop ===== */
-        .stage-credit {
-            font-family: var(--font-mono);
-            font-weight: 300;
-            font-size: 0.64rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--steel);
-        }
-        .stage-credit i { color: var(--accent); margin-right: 4px; }
-        .stage-credit b { font-weight: 900; color: var(--stage-fg); }
-        .stage-credit span { font-weight: 700; color: var(--stage-fg); }
-
-        @media (max-width: 380px) {
-            .tier-grid { grid-template-columns: 1fr; }
+        .toast.warning .toast-tag { background: var(--accent-yellow); color: #18181B; }
+        .toast.error   .toast-tag { background: var(--accent); color: #FFFFFF; }
+        .toast.info    .toast-tag { background: var(--surface-alt); color: var(--ink); }
+        .toast-msg { padding: 8px 14px 8px 10px; font-size: 0.8rem; font-weight: 600; }
+        .toast-act {
+            padding: 8px 14px; border: none; background: var(--accent); color: #FFFFFF;
+            font-family: var(--font-mono); font-weight: 800; font-size: 0.65rem;
+            text-transform: uppercase; letter-spacing: 0.08em; pointer-events: auto;
+            cursor: pointer;
         }
 
-        /* ============================================================
-           DESKTOP ≥ 768px — split-screen app: dark rail trái cố định,
-           vùng làm việc phải tự scroll. Bỏ hẳn bottom-sheet paradigm.
-           ============================================================ */
-        /* ===== Tabs: Môn này | Sổ điểm kỳ ===== */
-        .tabs { display: flex; border: var(--line); border-radius: 999px; overflow: hidden; margin-bottom: 18px; }
-        .tab {
-            flex: 1; padding: 12px 8px; border: none;
-            background: var(--surface); color: var(--steel);
-            font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.08em;
-        }
-        .tab + .tab { border-left: var(--line); }
-        .tab.active { background: var(--ink); color: var(--surface); }
-        .tab i { margin-right: 7px; }
-
-        /* ===== Nút tròn trên stage: theme / chia sẻ / cài app ===== */
-        .stage-tools { display: flex; gap: 8px; margin-left: auto; }
-        .icon-btn {
-            width: 36px; height: 36px; flex-shrink: 0;
-            display: grid; place-items: center;
-            border-radius: 50%; border: 2px solid #3F3F46;
-            background: transparent; color: var(--stage-fg); font-size: 0.8rem;
-        }
-        .icon-btn[hidden] { display: none; }
-
-        /* ===== Sổ điểm cả kỳ ===== */
-        .bk-mid { font-family: var(--font-mono); font-weight: 300; color: var(--steel); padding-bottom: 14px; }
-        .book-empty {
-            text-align: center; color: var(--steel); font-size: 0.82rem; line-height: 1.6;
-            padding: 26px 16px; border: 2px dashed var(--hairline); border-radius: 20px; margin-bottom: 12px;
-        }
-        .rank-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 9px 15px; border-radius: 999px;
-            background: var(--ink); color: var(--surface);
-            font-family: var(--font-mono); font-weight: 900; font-size: 0.72rem;
-            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
-        }
-
-        /* ===== Bảng chia sẻ (dialog gốc của trình duyệt) ===== */
+        /* Share Dialog */
         .share-dlg {
-            width: calc(100vw - 36px);
-            max-width: 380px;
-            max-height: 90dvh;
-            overflow: auto;
-            padding: 0;
-            border: var(--line);
-            border-radius: 24px;
+            width: calc(100vw - 32px);
+            max-width: 400px;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
             background: var(--surface);
             color: var(--ink);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin: auto;
+            padding: 0;
         }
-        .share-dlg::backdrop { background: rgba(9, 9, 11, 0.65); }
-        .share-in { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
-        .share-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-        .share-head h2 { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1.2; }
-        .share-head p { font-weight: 300; font-size: 0.76rem; color: var(--steel); margin-top: 4px; }
+        .share-dlg::backdrop {
+            background: rgba(12, 13, 17, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        .share-in {
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .share-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .share-head h2 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .share-head p {
+            font-size: 0.78rem;
+            color: var(--steel);
+            margin-top: 2px;
+        }
         .qr-box {
-            align-self: center; line-height: 0;
-            background: #FFFFFF; padding: 14px;
-            border: var(--line); border-radius: 20px;
+            align-self: center;
+            background: #FFFFFF;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 2px 2px 0px var(--border-color);
         }
-        .qr-box canvas { width: 196px; height: 196px; display: block; }
+        .qr-box canvas {
+            width: 180px;
+            height: 180px;
+            display: block;
+        }
         .share-url {
-            font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
-            text-align: center; word-break: break-all; color: var(--steel);
-            padding: 11px 12px; border: 2px dashed var(--hairline); border-radius: 14px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-align: center;
+            word-break: break-all;
+            color: var(--steel);
+            padding: 10px 12px;
+            border: 1.5px dashed var(--hairline);
+            border-radius: 10px;
+            background: var(--surface-alt);
         }
-        .share-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .share-acts .btn-ghost[hidden] { display: none !important; }
-        .share-acts .primary { grid-column: 1 / -1; background: var(--ink); color: var(--surface); border-color: var(--ink); }
-        .share-note { display: flex; gap: 8px; font-weight: 300; font-size: 0.7rem; color: var(--steel); line-height: 1.5; }
-        .share-note i { color: var(--accent); margin-top: 3px; }
-
-        /* ===== Khối cam kết riêng tư ===== */
-        .privacy {
-            display: flex; gap: 12px; align-items: flex-start;
-            padding: 15px 16px; margin-bottom: 16px;
-            border: var(--line); border-radius: 18px; background: var(--surface);
+        .share-acts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
         }
-        .privacy > i { color: var(--accent); font-size: 0.95rem; margin-top: 3px; flex-shrink: 0; }
-        .privacy .p-title {
-            display: block; margin-bottom: 5px;
-            font-family: var(--font-mono); font-weight: 900; font-size: 0.68rem;
-            text-transform: uppercase; letter-spacing: 0.12em;
+        .share-acts .primary {
+            grid-column: 1 / -1;
+            background: var(--ink);
+            color: var(--surface);
         }
-        .privacy p { font-weight: 300; font-size: 0.76rem; line-height: 1.55; color: var(--steel); }
-        .privacy b { font-weight: 700; color: var(--ink); }
-
-        /* ===== Hàng nút phụ: xuất ảnh / chia sẻ app ===== */
-        .action-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .btn-ghost {
-            flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 13px 8px; background: var(--surface); border: var(--line); border-radius: 999px;
-            font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink);
+        .share-note {
+            display: flex;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: var(--steel);
+            line-height: 1.45;
         }
-
-        /* ===== Nút hoàn tác trong toast ===== */
-        .toast-act {
-            padding: 9px 15px; border: none; background: var(--accent); color: #FFFFFF;
-            font-family: var(--font-mono); font-weight: 900; font-size: 0.62rem;
-            text-transform: uppercase; letter-spacing: 0.1em; pointer-events: auto;
-        }
-
-        @media (min-width: 768px) {
-            body { flex-direction: row; }
-
-            .stage {
-                flex: 0 0 clamp(360px, 36vw, 480px);
-                height: 100dvh;
-                padding: 44px 44px 36px;
-            }
-            .stage-inner { max-width: none; }
-            .brand img { width: 44px; height: 44px; }
-            .brand-name { font-size: 0.82rem; }
-            .stage-title { font-size: 0.78rem; }
-            .stage-gpa { font-size: clamp(5.5rem, 9vw, 8rem); }
-            .stage-letter { font-size: 2rem; }
-            .stage-s10 { font-size: 0.95rem; }
-            .stage-meta { font-size: 0.72rem; }
-            .stage-credit { font-size: 0.74rem; }
-
-            .sheet {
-                flex: 1;
-                margin-top: 0;
-                border-radius: 0;
-                box-shadow: none;
-                border-left: 1px solid var(--hairline);
-            }
-            .sheet-inner { max-width: 760px; padding: 40px 56px 0; }
-            .grabber { display: none; }
-
-            .sheet-head { margin-bottom: 26px; }
-            .sheet-head h1 { font-size: 1.7rem; }
-            .sheet-head p { font-size: 0.9rem; }
-
-            .field { margin-bottom: 24px; }
-
-            /* Chips: bỏ snap-rail ngang, trải đều một hàng */
-            .chip-rail { flex-wrap: wrap; overflow-x: visible; scroll-snap-type: none; }
-            .gpa-chip { flex: 1 1 0; min-width: 84px; height: 84px; scroll-snap-align: none; }
-
-            /* Hover affordance — chỉ có trên con trỏ chuột */
-            .gpa-chip:hover { border-color: var(--accent); }
-            .toggle-btn:hover { color: var(--ink); }
-            .btn-reset:hover { background: var(--ink); color: var(--surface); border-color: var(--ink); }
-            .add-attempt-btn:hover { border-style: solid; border-color: var(--ink); }
-            .attempt-remove:hover { background: var(--accent); border-color: var(--accent); color: var(--surface); }
-            .btn-calc:hover { transform: translateY(-2px); }
-            .btn-calc:active { transform: scale(0.95); }
-            details.convert summary:hover { color: var(--accent); }
-
-            .cta-wrap { padding: 14px 0 28px; border-top: none; }
-
-            .attempt-row { padding: 20px; }
-            .num-input { font-size: 1.4rem; }
-            .tier-grid { grid-template-columns: repeat(2, 1fr); }
+        .share-note i {
+            color: var(--accent);
+            margin-top: 2px;
         }
     </style>
 </head>
 
 <body>
-    <!-- ===== STAGE: immersive result zone ===== -->
-    <header class="stage">
-        <div class="stage-inner">
-            <div class="brand">
-                <img src="logo_clb.png" alt="Logo CLB Tình Nguyện Trường Y">
-                <span class="brand-name">CLB Tình Nguyện Trường Y<span class="brand-sub">Man in Red</span></span>
+    <!-- ===== MOBILE MINI STICKY HUD ===== -->
+    <aside class="mobile-mini-hud" id="mobile-mini-hud" aria-label="Bảng tóm tắt GPA rút gọn">
+        <div class="hud-left">
+            <img src="logo_clb.png" alt="Logo CLB" class="hud-logo">
+            <div class="hud-score-badge">
+                <span id="hud-gpa" class="hud-gpa">0.0</span>
+                <span id="hud-letter" class="hud-letter">·</span>
+            </div>
+            <span id="hud-meta" class="hud-meta">Chờ nhập số liệu</span>
+        </div>
+        <button type="button" id="hud-scroll-top" class="hud-scroll-top-btn" title="Cuộn lên đầu trang" aria-label="Cuộn lên đầu trang">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </aside>
+
+    <div class="app-layout">
+        <!-- ===== STAGE: ARCHITECTURAL HERO & RESULT ZONE ===== -->
+        <header class="stage">
+            <div class="brand-row">
+                <div class="brand-lockup">
+                    <img src="logo_clb.png" alt="Logo CLB Tình Nguyện Trường Y" class="brand-logo">
+                    <div class="brand-text">
+                        <span class="brand-name">CLB Tình Nguyện Trường Y</span>
+                        <span class="brand-sub">Man in Red · UMP</span>
+                    </div>
+                </div>
                 <div class="stage-tools">
                     <button type="button" id="install-btn" class="icon-btn" hidden title="Cài đặt app vào máy" aria-label="Cài đặt app"><i class="fas fa-download"></i></button>
                     <button type="button" id="share-btn" class="icon-btn" title="Rủ bạn bè cùng dùng app" aria-label="Chia sẻ app"><i class="fas fa-share-nodes"></i></button>
                     <button type="button" id="theme-btn" class="icon-btn" title="Đổi giao diện sáng / tối" aria-label="Đổi giao diện"><i class="fas fa-moon"></i></button>
                 </div>
             </div>
+
+            <!-- Neo-Bauhaus 3D Companion Banner -->
+            <div class="bauhaus-hero-visual" aria-hidden="true">
+                <img src="web_assets/neo_bauhaus_hero.png" alt="Mô hình khối Bauhaus 3D" class="bauhaus-cube-img">
+                <div class="bauhaus-visual-text">
+                    <span class="bauhaus-visual-title">CÔNG CỤ GPA Y KHOA</span>
+                    <span class="bauhaus-visual-desc">Chuẩn xác theo công thức UMP & hệ 4 tín chỉ lâm sàng.</span>
+                </div>
+            </div>
+
             <span id="stage-title" class="stage-title">Điểm tổng kết tạm tính · GPA hệ 4</span>
             <div class="stage-main">
-                <span id="stage-gpa" class="stage-gpa mono">—</span>
+                <span id="stage-gpa" class="stage-gpa mono empty">0.0</span>
                 <div class="stage-side">
                     <span id="stage-letter" class="stage-letter">·</span>
                     <span id="stage-s10" class="stage-s10">Hệ 10: 0.00</span>
                 </div>
             </div>
-            <div class="stage-bar">
-                <div id="stage-fill" class="stage-fill"></div>
-                <div id="stage-mark" class="stage-mark"></div>
-            </div>
-            <div class="stage-meta">
-                <span id="stage-note">Nhập số liệu ở bảng dưới</span>
-                <span id="stage-goal">Mục tiêu <b>GPA 4.0</b> · ≥ <b>8.5</b></span>
-            </div>
-            <p class="stage-credit"><i class="fas fa-code"></i> Thực hiện bởi <b>Việt Thanh</b> · <span>Y23C - 17 - PRIT</span></p>
-        </div>
-    </header>
 
-    <!-- ===== SHEET: the thumb zone ===== -->
-    <main class="sheet" id="required-correct-section">
-        <div class="sheet-inner">
-            <div class="grabber" aria-hidden="true"></div>
+            <div class="stage-bar-wrap">
+                <div class="stage-bar">
+                    <div id="stage-fill" class="stage-fill"></div>
+                    <div id="stage-mark" class="stage-mark"></div>
+                </div>
+                <div class="stage-meta">
+                    <span id="stage-note">Nhập số liệu ở bảng bên</span>
+                    <span id="stage-goal">Mục tiêu <b>GPA 4.0</b> · ≥ <b>8.5</b></span>
+                </div>
+            </div>
 
+            <!-- Academic Telemetry & Assessment Monitor -->
+            <div class="stage-telemetry" id="stage-telemetry">
+                <div class="telemetry-row">
+                    <span class="telemetry-label"><i class="fas fa-layer-group"></i> Khối lượng đã thi:</span>
+                    <span class="telemetry-val" id="telem-weight">0% trọng số</span>
+                </div>
+                <div class="telemetry-row">
+                    <span class="telemetry-label"><i class="fas fa-chart-line"></i> Trạng thái học phần:</span>
+                    <span class="telemetry-val status-neutral" id="telem-status">Chờ nhập dữ liệu</span>
+                </div>
+            </div>
+
+            <p class="stage-credit">
+                <span><i class="fas fa-user-doctor"></i> Dự án học vụ <b>Việt Thanh</b></span>
+                <span>Y23C · ĐHYD TP.HCM</span>
+            </p>
+        </header>
+
+        <!-- ===== SHEET: TACTILE WORKSPACE & FORMS ===== -->
+        <main class="sheet" id="required-correct-section">
             <div class="tabs" id="mode-tabs" role="tablist">
                 <button type="button" class="tab active" data-tab="subject" role="tab"><i class="fas fa-calculator"></i>Môn này</button>
                 <button type="button" class="tab" data-tab="book" role="tab"><i class="fas fa-book-open"></i>Sổ điểm kỳ</button>
             </div>
 
+            <!-- Tab: Môn này -->
             <div id="panel-subject">
-            <div class="sheet-head">
-                <div>
-                    <h1>Tính số câu cần đạt</h1>
-                    <p>Đặt mục tiêu GPA hệ 4 và xem cần đúng bao nhiêu câu mỗi lần thi 🩺</p>
+                <div class="sheet-head">
+                    <div>
+                        <h1>Tính số câu cần đạt</h1>
+                        <p>Mô phỏng điểm tổng kết học phần và xác định số câu trắc nghiệm cần đạt theo chuẩn UMP</p>
+                    </div>
+                    <button type="button" id="reset-goal-btn" class="btn-reset" title="Xóa dữ liệu đã nhập" aria-label="Xóa dữ liệu đã nhập">
+                        <i class="fas fa-rotate-left"></i> Xóa dữ liệu
+                    </button>
                 </div>
-                <button type="button" id="reset-goal-btn" class="btn-reset" title="Xóa dữ liệu đã nhập" aria-label="Xóa dữ liệu đã nhập">
-                    <i class="fas fa-rotate-left"></i> Xóa dữ liệu
-                </button>
-            </div>
 
-            <div class="field">
-                <label for="exam-type" class="field-label"><i class="fas fa-clipboard-list"></i> Loại kỳ thi</label>
-                <select id="exam-type" class="field-input">
-                    <option value="pretest">Có pretest (10 · 20 · 70)</option>
-                    <option value="nopretest">Không pretest (30 · 70)</option>
-                    <option value="custom">Tùy chỉnh — nhiều đợt, tự đặt tên</option>
-                </select>
-            </div>
-
-            <!-- Thang điểm mỗi bài: cách quy đổi câu đúng -> hệ 10 trước khi nhân trọng số -->
-            <div class="scale-row">
-                <span class="field-label" title="Cách quy đổi câu đúng của mỗi bài thi ra điểm hệ 10 trước khi nhân trọng số">
-                    <i class="fas fa-scale-balanced"></i> Thang điểm mỗi bài
-                </span>
-                <div id="scale-mode-toggle" class="toggle-group">
-                    <button type="button" data-mode="ump" class="toggle-btn scale-mode-btn" title="Câu đúng → hệ 10 theo công thức UMP">Công thức UMP</button>
-                    <button type="button" data-mode="linear" class="toggle-btn scale-mode-btn" title="Hệ 10 = tỉ lệ câu đúng × 10">% đúng × 10</button>
+                <!-- 3-Step Guided Flow -->
+                <div class="guided-steps" role="navigation" aria-label="Hướng dẫn 3 bước">
+                    <div class="step-card">
+                        <span class="step-badge">1</span>
+                        <div class="step-info">
+                            <span class="step-title">Chọn kỳ thi</span>
+                            <span class="step-sub">Pretest / Giữa / Cuối</span>
+                        </div>
+                    </div>
+                    <div class="step-connector"><i class="fas fa-chevron-right"></i></div>
+                    <div class="step-card">
+                        <span class="step-badge">2</span>
+                        <div class="step-info">
+                            <span class="step-title">Nhập điểm đã có</span>
+                            <span class="step-sub">Chưa thi để trống</span>
+                        </div>
+                    </div>
+                    <div class="step-connector"><i class="fas fa-chevron-right"></i></div>
+                    <div class="step-card">
+                        <span class="step-badge">3</span>
+                        <div class="step-info">
+                            <span class="step-title">Chọn mục tiêu GPA</span>
+                            <span class="step-sub">Xem chỉ tiêu câu đúng</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div id="attempts-table">
-                <!-- Bảng nhập câu đúng / tổng câu / trọng số từng lần (render bằng JS) -->
-            </div>
-
-            <div class="field">
-                <span class="field-label"><i class="fas fa-star"></i> Mục tiêu GPA — Điểm hệ 4 mong muốn</span>
-                <input type="hidden" id="desired-gpa-4" value="4.0">
-                <div id="desired-gpa-chips" class="chip-rail">
-                    <button type="button" data-gpa="1.0" class="gpa-chip"><span class="letter">D</span><span class="val">1.0</span></button>
-                    <button type="button" data-gpa="1.5" class="gpa-chip"><span class="letter">D+</span><span class="val">1.5</span></button>
-                    <button type="button" data-gpa="2.0" class="gpa-chip"><span class="letter">C</span><span class="val">2.0</span></button>
-                    <button type="button" data-gpa="2.5" class="gpa-chip"><span class="letter">C+</span><span class="val">2.5</span></button>
-                    <button type="button" data-gpa="3.0" class="gpa-chip"><span class="letter">B</span><span class="val">3.0</span></button>
-                    <button type="button" data-gpa="3.5" class="gpa-chip"><span class="letter">B+</span><span class="val">3.5</span></button>
-                    <button type="button" data-gpa="4.0" class="gpa-chip"><span class="letter">A</span><span class="val">4.0</span></button>
+                <div class="field" style="margin-top: 18px;">
+                    <label for="exam-type" class="field-label"><i class="fas fa-clipboard-list"></i> Loại kỳ thi</label>
+                    <select id="exam-type" class="field-input">
+                        <option value="pretest">Có pretest (10 · 20 · 70)</option>
+                        <option value="nopretest">Không pretest (30 · 70)</option>
+                        <option value="custom">Tùy chỉnh — nhiều đợt, tự đặt tên</option>
+                    </select>
                 </div>
-            </div>
 
-            <div id="required-correct-result"></div>
+                <!-- Thang điểm mỗi bài -->
+                <div class="scale-row" style="margin-top: 14px; margin-bottom: 16px;">
+                    <span class="field-label" title="Cách quy đổi câu đúng của mỗi bài thi ra điểm hệ 10 trước khi nhân trọng số">
+                        <i class="fas fa-scale-balanced"></i> Thang điểm mỗi bài
+                    </span>
+                    <div id="scale-mode-toggle" class="toggle-group">
+                        <button type="button" data-mode="ump" class="toggle-btn scale-mode-btn" title="Câu đúng → hệ 10 theo công thức UMP">Công thức UMP</button>
+                        <button type="button" data-mode="linear" class="toggle-btn scale-mode-btn" title="Hệ 10 = tỉ lệ câu đúng × 10">% đúng × 10</button>
+                    </div>
+                </div>
 
-            <div class="hint">
-                <i class="fas fa-circle-info"></i>
-                <span>Để trống ô câu đúng của các lần <b>chưa thi</b> để nhận gợi ý số câu cần đạt. Dữ liệu bạn nhập được lưu tự động trên máy; sau lần tính đầu tiên, kết quả sẽ tự cập nhật khi bạn chỉnh số liệu.</span>
-            </div>
+                <div id="attempts-table">
+                    <!-- Render bằng JS -->
+                </div>
 
-            <!-- Bảng quy đổi tham khảo (đóng/mở) -->
-            <details class="convert">
-                <summary><i class="fas fa-chevron-right"></i> Xem bảng quy đổi hệ 10 → điểm chữ → hệ 4</summary>
-                <table class="convert-table">
-                    <thead>
-                        <tr><th>Hệ 10</th><th>Điểm chữ</th><th>Hệ 4</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>9.5 – 10</td><td class="lg">A+</td><td>4.0</td></tr>
-                        <tr><td>8.5 – 9.4</td><td class="lg">A</td><td>4.0</td></tr>
-                        <tr><td>8.0 – 8.4</td><td class="lg">B+</td><td>3.5</td></tr>
-                        <tr><td>7.0 – 7.9</td><td class="lg">B</td><td>3.0</td></tr>
-                        <tr><td>6.5 – 6.9</td><td class="lg">C+</td><td>2.5</td></tr>
-                        <tr><td>5.5 – 6.4</td><td class="lg">C</td><td>2.0</td></tr>
-                        <tr><td>5.0 – 5.4</td><td class="lg">D+</td><td>1.5</td></tr>
-                        <tr><td>4.0 – 4.9</td><td class="lg">D</td><td>1.0</td></tr>
-                        <tr><td>&lt; 4.0</td><td class="lg">F</td><td>0.0</td></tr>
-                    </tbody>
-                </table>
-                <p class="convert-note">
-                    <i class="fas fa-circle-info"></i> Câu đúng → hệ 10 theo công thức UMP: dưới 50% đúng tính <b>8 × tỉ lệ đúng</b>; 50% = 4.0đ; 60% = 5.0đ; trên 60% tăng dần tới 10đ.
-                </p>
-            </details>
+                <div class="field" style="margin-top: 18px;">
+                    <span class="field-label"><i class="fas fa-bullseye"></i> Mục tiêu GPA — Điểm hệ 4 mong muốn</span>
+                    <input type="hidden" id="desired-gpa-4" value="4.0">
+                    <div id="desired-gpa-chips" class="chip-rail">
+                        <button type="button" data-gpa="1.0" class="gpa-chip"><span class="letter">D</span><span class="val">1.0</span></button>
+                        <button type="button" data-gpa="1.5" class="gpa-chip"><span class="letter">D+</span><span class="val">1.5</span></button>
+                        <button type="button" data-gpa="2.0" class="gpa-chip"><span class="letter">C</span><span class="val">2.0</span></button>
+                        <button type="button" data-gpa="2.5" class="gpa-chip"><span class="letter">C+</span><span class="val">2.5</span></button>
+                        <button type="button" data-gpa="3.0" class="gpa-chip"><span class="letter">B</span><span class="val">3.0</span></button>
+                        <button type="button" data-gpa="3.5" class="gpa-chip"><span class="letter">B+</span><span class="val">3.5</span></button>
+                        <button type="button" data-gpa="4.0" class="gpa-chip"><span class="letter">A</span><span class="val">4.0</span></button>
+                    </div>
+                </div>
 
+                <div id="required-correct-result"></div>
+
+                <div class="hint">
+                    <i class="fas fa-circle-info"></i>
+                    <span>Để trống ô câu đúng của các lần <b>chưa thi</b> để nhận gợi ý số câu cần đạt. Dữ liệu bạn nhập được lưu tự động trên máy; sau lần tính đầu tiên, kết quả sẽ tự cập nhật khi bạn chỉnh số liệu.</span>
+                </div>
+
+                <!-- Bảng quy đổi tham khảo -->
+                <details class="convert">
+                    <summary><i class="fas fa-chevron-right"></i> Xem bảng quy đổi hệ 10 → điểm chữ → hệ 4</summary>
+                    <table class="convert-table">
+                        <thead>
+                            <tr><th>Hệ 10</th><th>Điểm chữ</th><th>Hệ 4</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>9.5 – 10</td><td class="lg">A+</td><td>4.0</td></tr>
+                            <tr><td>8.5 – 9.4</td><td class="lg">A</td><td>4.0</td></tr>
+                            <tr><td>8.0 – 8.4</td><td class="lg">B+</td><td>3.5</td></tr>
+                            <tr><td>7.0 – 7.9</td><td class="lg">B</td><td>3.0</td></tr>
+                            <tr><td>6.5 – 6.9</td><td class="lg">C+</td><td>2.5</td></tr>
+                            <tr><td>5.5 – 6.4</td><td class="lg">C</td><td>2.0</td></tr>
+                            <tr><td>5.0 – 5.4</td><td class="lg">D+</td><td>1.5</td></tr>
+                            <tr><td>4.0 – 4.9</td><td class="lg">D</td><td>1.0</td></tr>
+                            <tr><td>&lt; 4.0</td><td class="lg">F</td><td>0.0</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="convert-note">
+                        <i class="fas fa-circle-info"></i> Câu đúng → hệ 10 theo công thức UMP: dưới 50% đúng tính <b>8 × tỉ lệ đúng</b>; 50% = 4.0đ; 60% = 5.0đ; trên 60% tăng dần tới 10đ.
+                    </p>
+                </details>
             </div><!-- /panel-subject -->
 
-            <!-- ===== Sổ điểm cả kỳ: nhiều môn, tính GPA kỳ theo tín chỉ ===== -->
+            <!-- Tab: Sổ điểm cả kỳ -->
             <div id="panel-book" hidden>
                 <div class="sheet-head">
                     <div>
                         <h1>Sổ điểm cả kỳ</h1>
-                        <p>Nhiều môn · tính GPA kỳ theo tín chỉ và xếp loại học lực 📚</p>
+                        <p>Theo dõi điểm trung bình học kỳ theo tín chỉ và phân loại học lực chính quy</p>
                     </div>
                     <button type="button" id="book-import-btn" class="btn-reset" title="Đưa điểm môn đang tính vào sổ">
                         <i class="fas fa-down-long"></i> Lấy môn đang tính
                     </button>
                 </div>
 
-                <div id="book-list"></div>
+                <div id="book-list" style="margin-top: 18px;"></div>
                 <button type="button" id="book-add-btn" class="add-attempt-btn"><i class="fas fa-plus"></i> Thêm môn</button>
 
                 <div class="field" style="margin-top: 18px;">
@@ -1028,16 +2470,16 @@
                 </div>
             </div><!-- /panel-book -->
 
-            <!-- Cam kết riêng tư: hiện ở cả 2 tab -->
+            <!-- Cam kết riêng tư -->
             <div class="privacy">
                 <i class="fas fa-lock"></i>
                 <div>
                     <span class="p-title">Riêng tư tuyệt đối</span>
-                    <p>Mọi số liệu bạn nhập <b>chỉ được lưu ngay trên máy này</b> — không gửi lên server, không tài khoản, không theo dõi. Khi bạn chia sẻ, người nhận chỉ có <b>link công cụ</b>, không hề thấy điểm của bạn.</p>
+                    <p>Mọi số liệu bạn nhập <b>chỉ được lưu ngay trên máy này</b> — không gửi lên máy chủ, không tài khoản, không theo dõi. Khi bạn chia sẻ, người nhận chỉ có link công cụ, không hề thấy điểm của bạn.</p>
                 </div>
             </div>
 
-            <!-- Primary CTA: sticky in the thumb zone -->
+            <!-- Primary CTA Wrap -->
             <div class="cta-wrap">
                 <div class="action-row">
                     <button type="button" id="export-img-btn" class="btn-ghost"><i class="fas fa-image"></i> Xuất ảnh</button>
@@ -1047,10 +2489,10 @@
                     <i class="fas fa-bullseye"></i> Tính số câu cần đạt
                 </button>
             </div>
-        </div>
-    </main>
+        </main>
+    </div><!-- /.app-layout -->
 
-    <!-- ===== Bảng chia sẻ: QR · chép link · chia sẻ hệ thống · Facebook ===== -->
+    <!-- ===== Bảng chia sẻ (Dialog) ===== -->
     <dialog id="share-dlg" class="share-dlg" aria-labelledby="share-dlg-title">
         <div class="share-in">
             <div class="share-head">
@@ -1322,6 +2764,760 @@
         }
 
         /**
+         * Chạy hiệu ứng số đếm mượt mà (Animated number ticker / roll-up).
+         */
+        function animateNumberRoll(el, start, end, duration = 460, decimals = 0) {
+            if (!el) return;
+            const s = parseFloat(start) || 0;
+            const e = parseFloat(end) || 0;
+            if (s === e) {
+                el.textContent = decimals > 0 ? e.toFixed(decimals) : e;
+                return;
+            }
+            const startTime = performance.now();
+            const step = (now) => {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 4); // Quartic ease out
+                const val = s + (e - s) * ease;
+                el.textContent = decimals > 0 ? val.toFixed(decimals) : Math.round(val);
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    el.textContent = decimals > 0 ? end.toFixed(decimals) : end;
+                }
+            };
+            requestAnimationFrame(step);
+        }
+        /**
+         * MYSTIC ARCANE QUANTUM REACTOR & LIVE MATHEMATICAL HUD ENGINE
+         * Tuyệt tác đồ họa Vòng Tròn Ma Thuật Thiên Văn 3D Đột Phá:
+         * 1. Celestial Astrolabe & Arcane Rune Circles (24 Cổ ngữ toán học ma thuật, vành thước đo thiên văn 72 vạch)
+         * 2. Sacred Geometry Hexagram & Metatron Matrix (Trận đồ lục giác linh tự 3D)
+         * 3. Euler 3D Gyroscope Orbit Rings (3 Vòng quay hồi chuyển phối cảnh chiều sâu)
+         * 4. Arcane Tesla Lightning Arcs (Tia sét plasma ma thuật giật giữa các vành)
+         * 5. Quantum Singularity Core (Lõi hố đen lượng tử phát quang cực đại + 64 hạt Mana Wisps)
+         * 6. Radar Sweep 360° & Flying Comet Fireballs phóng từ form vào tâm
+         * 7. Mini Telemetry HUD Tinh Gọn: Hiển thị 4 mốc toán học nhỏ gọn, thanh lịch dưới vòng tròn
+         *
+         * @param {HTMLElement} targetArea - Vùng hiển thị buồng giải thuật
+         * @param {Function} onComplete - Callback khi hoàn tất giải thuật
+         */
+        function startQuantumEnergyReactor(targetArea, onComplete) {
+            if (!targetArea) { onComplete(); return; }
+
+            // 1. Thu thập dữ liệu thực tế từ DOM
+            const rowEls = Array.from(document.querySelectorAll('#attempts-table .attempt-row'));
+            const mode = getScaleMode();
+            const desiredGPAInput = document.getElementById('desired-gpa-4');
+            const desiredGPA = parseFloat(desiredGPAInput ? desiredGPAInput.value : '4.0') || 4.0;
+            const targetScore10 = minScore10ForGpa4(desiredGPA);
+
+            const parsedAttempts = [];
+            let knownScoreSum = 0;
+            let unknownAttempts = [];
+
+            rowEls.forEach((el, idx) => {
+                const label = el.dataset.label || `Lần ${idx + 1}`;
+                const kind = el.dataset.kind;
+                const weight = parseFloat(el.querySelector('.attempt-weight')?.value) || 0;
+                let tone = 'p-midterm';
+                let pillTone = 'tone-midterm';
+                let rawText = '';
+                let s10 = null;
+
+                const l = label.toLowerCase();
+                if (l.includes('pretest')) { tone = 'p-pretest'; pillTone = 'tone-pretest'; }
+                else if (l.includes('cuối kỳ') || l.includes('final')) { tone = 'p-final'; pillTone = 'tone-final'; }
+
+                if (kind === 'score') {
+                    const raw = el.querySelector('.attempt-score')?.value;
+                    if (raw !== '' && !isNaN(parseFloat(raw))) {
+                        s10 = parseFloat(raw);
+                        rawText = `${s10.toFixed(2)}/10đ`;
+                    } else {
+                        rawText = 'Chưa thi';
+                    }
+                } else {
+                    const total = parseInt(el.querySelector('.attempt-total')?.value, 10);
+                    const correctRaw = el.querySelector('.attempt-correct')?.value;
+                    if (correctRaw !== '' && !isNaN(parseInt(correctRaw, 10)) && total > 0) {
+                        const c = parseInt(correctRaw, 10);
+                        s10 = rowScore10(c, total, mode);
+                        rawText = `${c}/${total} câu (${s10.toFixed(2)}đ)`;
+                    } else {
+                        rawText = total ? `${total} câu (Chưa thi)` : 'Chưa thi';
+                    }
+                }
+
+                const item = {
+                    el,
+                    label,
+                    kind,
+                    weight,
+                    tone,
+                    pillTone,
+                    rawText,
+                    s10,
+                    total: parseInt(el.querySelector('.attempt-total')?.value, 10) || null,
+                    contrib: s10 !== null ? (s10 * weight / 100) : 0
+                };
+
+                parsedAttempts.push(item);
+                if (s10 !== null) {
+                    knownScoreSum += item.contrib;
+                } else {
+                    unknownAttempts.push(item);
+                }
+            });
+
+            const finalTargetNeed = targetScore10 - knownScoreSum;
+            const unknownWeightSum = unknownAttempts.reduce((sum, a) => sum + a.weight, 0) || 1;
+            const finalAttempt = unknownAttempts[0] || parsedAttempts[parsedAttempts.length - 1];
+            const finalTotalQuestions = finalAttempt ? finalAttempt.total || 80 : 80;
+
+            // 2. Tìm nghiệm tối tiểu thực tế
+            let minCorrectFound = null;
+            let minScoreFound = 0;
+            for (let c = 0; c <= finalTotalQuestions; c++) {
+                const s = rowScore10(c, finalTotalQuestions, mode);
+                const totalS = knownScoreSum + (s * (finalAttempt ? finalAttempt.weight : 50) / 100);
+                if (totalS >= targetScore10 - 1e-9) {
+                    minCorrectFound = c;
+                    minScoreFound = s;
+                    break;
+                }
+            }
+            if (minCorrectFound === null) {
+                minCorrectFound = finalTotalQuestions;
+                minScoreFound = 10;
+            }
+
+            // 3. Dựng buồng giao diện ma thuật kỳ bí (Mystic Arcane Stage)
+            targetArea.innerHTML = `
+                <div class="quantum-math-stage" id="quantum-math-stage" role="region" aria-label="Đang kích hoạt Vòng Tròn Ma Thuật Phân Giải Điểm UMP">
+                    <div class="quantum-math-topbar">
+                        <div class="quantum-math-badge">
+                            <span class="quantum-math-dot"></span>
+                            <span>✦ VÒNG TRÒN NĂNG LƯỢNG MA THUẬT & TOÁN HỌC UMP ✦</span>
+                        </div>
+                        <button type="button" class="quantum-math-skip-btn" id="quantum-math-skip-btn" title="Bỏ qua mô phỏng, xem kết quả ngay">
+                            <span>Bỏ qua</span> <i class="fas fa-forward"></i>
+                        </button>
+                    </div>
+
+                    <!-- VÒNG TRÒN NĂNG LƯỢNG THIÊN VĂN MA THUẬT 3D (SIÊU HOÀNH TRÁNG) -->
+                    <div class="quantum-math-viewport" id="quantum-math-viewport">
+                        <canvas class="quantum-math-canvas" id="quantum-energy-canvas"></canvas>
+                    </div>
+
+                    <!-- DẢI MINI TELEMETRY HUD TINH GỌN PHÍA DƯỚI -->
+                    <div class="quantum-mini-hud" id="quantum-mini-hud">
+                        <div class="mini-hud-chip active" id="mchip-target">
+                            <i class="fas fa-bullseye"></i> <span>MỤC TIÊU: S₁₀ ≥ ${targetScore10.toFixed(2)}đ (GPA ${desiredGPA.toFixed(1)})</span>
+                        </div>
+                        <div class="mini-hud-chip" id="mchip-known">
+                            <i class="fas fa-database"></i> <span>ĐÃ CÓ: +${knownScoreSum.toFixed(2)}đ</span>
+                        </div>
+                        <div class="mini-hud-chip" id="mchip-need">
+                            <i class="fas fa-scale-balanced"></i> <span>CẦN: ≥ ${Math.max(0, finalTargetNeed).toFixed(2)}đ</span>
+                        </div>
+                        <div class="mini-hud-chip highlight" id="mchip-scan">
+                            <i class="fas fa-bolt"></i> <span id="mchip-scan-text">SCANNING: x ∈ [0, ${finalTotalQuestions}]...</span>
+                        </div>
+                    </div>
+                </div>`;
+
+            setTimeout(() => targetArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+
+            // ==========================================
+            // CANVAS 3D MYSTIC ARCANE ASTROLABE ENGINE
+            // ==========================================
+            const canvas = document.getElementById('quantum-energy-canvas');
+            const viewport = document.getElementById('quantum-math-viewport');
+            let animId = null;
+            let isDone = false;
+            let timeoutHandles = [];
+
+            // 24 Cổ ngữ ma thuật & Ký tự toán học huyền bí
+            const RUNES = ['∑', '∫', '∇', '∞', 'π', 'ϕ', 'ψ', 'Ω', 'λ', 'μ', 'Δ', 'θ', '≈', 'ℏ', '∀', '∃', '⊕', '⊗', 'Ξ', 'Φ', '√', 'ℵ', '∮', '∂'];
+
+            // Shockwaves and Core Energy state
+            const shockwaves = [];
+            const lightningBolts = [];
+            let coreStatusText = 'THIẾT LẬP';
+            let coreScanNumber = `GPA ${desiredGPA.toFixed(1)}`;
+            let corePulseScale = 1.0;
+            let energyGlow = 0.8;
+            let rotationSpeedMultiplier = 1.0;
+
+            if (canvas && viewport) {
+                const ctx = canvas.getContext('2d');
+                let width = 0;
+                let height = 0;
+
+                const resizeCanvas = () => {
+                    const rect = viewport.getBoundingClientRect();
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    width = rect.width;
+                    height = rect.height;
+                    canvas.width = width * dpr;
+                    canvas.height = height * dpr;
+                    ctx.scale(dpr, dpr);
+                };
+                resizeCanvas();
+
+                // Generate swirling ambient Mana Wisps
+                const manaWisps = [];
+                for (let i = 0; i < 64; i++) {
+                    manaWisps.push({
+                        angle: Math.random() * Math.PI * 2,
+                        dist: 25 + Math.random() * 140,
+                        speed: 0.012 + Math.random() * 0.028,
+                        size: 1.0 + Math.random() * 2.4,
+                        color: i % 4 === 0 ? '#38BDF8' : i % 4 === 1 ? '#818CF8' : i % 4 === 2 ? '#F43F5E' : '#FBBF24',
+                        alpha: 0.25 + Math.random() * 0.75
+                    });
+                }
+
+                let rotRune = 0;
+                let rotAstrolabe = 0;
+                let rotHex = 0;
+                let rotGyroX = 0;
+                let rotGyroY = 0;
+                let rotGyroZ = 0;
+                let radarAngle = 0;
+
+                // Generator tia sét ma thuật ngẫu nhiên giữa các vành
+                const spawnLightning = () => {
+                    if (Math.random() < 0.28 * rotationSpeedMultiplier) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const r1 = 50 + Math.random() * 30;
+                        const r2 = r1 + 35 + Math.random() * 45;
+                        lightningBolts.push({
+                            angle,
+                            r1,
+                            r2,
+                            segments: 5,
+                            alpha: 1.0,
+                            color: Math.random() < 0.6 ? '#38BDF8' : '#F43F5E'
+                        });
+                    }
+                };
+
+                const renderCanvasFrame = () => {
+                    if (isDone) return;
+                    ctx.clearRect(0, 0, width, height);
+
+                    const cx = width / 2;
+                    const cy = height / 2;
+                    const baseRadius = Math.min(width, height) * 0.44;
+
+                    rotRune += 0.004 * rotationSpeedMultiplier;
+                    rotAstrolabe -= 0.006 * rotationSpeedMultiplier;
+                    rotHex += 0.009 * rotationSpeedMultiplier;
+                    rotGyroX += 0.022 * rotationSpeedMultiplier;
+                    rotGyroY += 0.028 * rotationSpeedMultiplier;
+                    rotGyroZ += 0.015 * rotationSpeedMultiplier;
+                    radarAngle += 0.035 * rotationSpeedMultiplier;
+
+                    spawnLightning();
+
+                    // ==========================================
+                    // 1. Quầng Hào Quang Cực Quang Nền (Aurora Nebula)
+                    // ==========================================
+                    const bgGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, baseRadius * 1.15);
+                    bgGrad.addColorStop(0, `rgba(56, 189, 248, ${0.22 * energyGlow})`);
+                    bgGrad.addColorStop(0.35, `rgba(129, 140, 248, ${0.12 * energyGlow})`);
+                    bgGrad.addColorStop(0.65, `rgba(225, 29, 72, ${0.08 * energyGlow})`);
+                    bgGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.fillStyle = bgGrad;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, baseRadius * 1.15, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // ==========================================
+                    // 2. Tia Quét Radar Ma Thuật 360° (Mystic Radar Sweep)
+                    // ==========================================
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    const sweepGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, baseRadius * 0.95);
+                    sweepGrad.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
+                    sweepGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+                    ctx.fillStyle = sweepGrad;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.arc(0, 0, baseRadius * 0.95, radarAngle, radarAngle + 0.65);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+
+                    // ==========================================
+                    // 3. Vành Cổ Ngữ Toán Học Ngoại Vi (Arcane Rune Circle)
+                    // ==========================================
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(rotRune);
+
+                    const rRune = baseRadius * 0.92;
+                    // Đường tròn vành ngoài
+                    ctx.lineWidth = 1.8;
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, rRune, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Đường tròn đệm
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = 'rgba(251, 191, 36, 0.35)';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, rRune - 14, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Vẽ 24 ký tự Cổ Ngữ
+                    ctx.font = 'bold 11px "Geist Mono", serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    for (let i = 0; i < RUNES.length; i++) {
+                        const theta = (i / RUNES.length) * Math.PI * 2;
+                        const rx = Math.cos(theta) * (rRune - 7);
+                        const ry = Math.sin(theta) * (rRune - 7);
+                        ctx.save();
+                        ctx.translate(rx, ry);
+                        ctx.rotate(theta + Math.PI / 2);
+                        ctx.fillStyle = i % 2 === 0 ? '#38BDF8' : '#FBBF24';
+                        ctx.shadowColor = ctx.fillStyle;
+                        ctx.shadowBlur = 6;
+                        ctx.fillText(RUNES[i], 0, 0);
+                        ctx.restore();
+                    }
+                    ctx.restore();
+
+                    // ==========================================
+                    // 4. Vành Thước Đo Thiên Văn (Astrolabe Degree Wheel)
+                    // ==========================================
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(rotAstrolabe);
+                    const rAstro = baseRadius * 0.72;
+
+                    ctx.lineWidth = 1.2;
+                    ctx.strokeStyle = 'rgba(129, 140, 248, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, rAstro, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // 72 vạch chia độ
+                    for (let i = 0; i < 72; i++) {
+                        const theta = (i / 72) * Math.PI * 2;
+                        const isMajor = i % 6 === 0;
+                        const len = isMajor ? 8 : 4;
+                        const x1 = Math.cos(theta) * rAstro;
+                        const y1 = Math.sin(theta) * rAstro;
+                        const x2 = Math.cos(theta) * (rAstro - len);
+                        const y2 = Math.sin(theta) * (rAstro - len);
+
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.lineWidth = isMajor ? 1.5 : 0.8;
+                        ctx.strokeStyle = isMajor ? '#F43F5E' : 'rgba(148, 163, 184, 0.4)';
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+
+                    // ==========================================
+                    // 5. Trận Đồ Lục Giác Linh Tự (Sacred Hexagram Matrix)
+                    // ==========================================
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(rotHex);
+                    const rHex = baseRadius * 0.54;
+
+                    ctx.lineWidth = 1.4;
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+                    ctx.shadowColor = '#38BDF8';
+                    ctx.shadowBlur = 8;
+
+                    // Vẽ 2 tam giác lồng nhau tạo thành lục giác linh tự
+                    for (let t = 0; t < 2; t++) {
+                        const offset = t * (Math.PI / 3);
+                        ctx.beginPath();
+                        for (let p = 0; p < 3; p++) {
+                            const angle = offset + (p * Math.PI * 2 / 3);
+                            const hx = Math.cos(angle) * rHex;
+                            const hy = Math.sin(angle) * rHex;
+                            if (p === 0) ctx.moveTo(hx, hy);
+                            else ctx.lineTo(hx, hy);
+                        }
+                        ctx.closePath();
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+
+                    // ==========================================
+                    // 6. 3 Vành Con Quay Hồi Chuyển Gyroscope 3D (Euler Orbit Rings)
+                    // ==========================================
+                    const drawEulerRing3D = (radius, rx, ry, strokeStyle, lineWidth, dashArray) => {
+                        ctx.save();
+                        ctx.translate(cx, cy);
+                        ctx.lineWidth = lineWidth;
+                        ctx.strokeStyle = strokeStyle;
+                        if (dashArray) ctx.setLineDash(dashArray);
+
+                        ctx.beginPath();
+                        const steps = 64;
+                        for (let i = 0; i <= steps; i++) {
+                            const theta = (i / steps) * Math.PI * 2;
+                            const x3d = radius * Math.cos(theta);
+                            const y3d = radius * Math.sin(theta);
+                            const z3d = 0;
+
+                            const y1 = y3d * Math.cos(rx) - z3d * Math.sin(rx);
+                            const z1 = y3d * Math.sin(rx) + z3d * Math.cos(rx);
+
+                            const x2 = x3d * Math.cos(ry) + z1 * Math.sin(ry);
+                            const z2 = -x3d * Math.sin(ry) + z1 * Math.cos(ry);
+
+                            const scale = 320 / (320 + z2);
+                            const px = x2 * scale;
+                            const py = y1 * scale;
+
+                            if (i === 0) ctx.moveTo(px, py);
+                            else ctx.lineTo(px, py);
+                        }
+                        ctx.closePath();
+                        ctx.stroke();
+
+                        // Hạt ngọc ma thuật trượt trên quỹ đạo
+                        const beadTheta = (Date.now() * 0.0035 * rotationSpeedMultiplier) % (Math.PI * 2);
+                        const bx3d = radius * Math.cos(beadTheta);
+                        const by3d = radius * Math.sin(beadTheta);
+                        const by1 = by3d * Math.cos(rx);
+                        const bz1 = by3d * Math.sin(rx);
+                        const bx2 = bx3d * Math.cos(ry) + bz1 * Math.sin(ry);
+                        const bz2 = -bx3d * Math.sin(ry) + bz1 * Math.cos(ry);
+                        const bscale = 320 / (320 + bz2);
+
+                        ctx.beginPath();
+                        ctx.arc(bx2 * bscale, by1 * bscale, 4.0 * bscale, 0, Math.PI * 2);
+                        ctx.fillStyle = strokeStyle;
+                        ctx.shadowColor = strokeStyle;
+                        ctx.shadowBlur = 12;
+                        ctx.fill();
+                        ctx.restore();
+                    };
+
+                    drawEulerRing3D(baseRadius * 0.46, rotGyroX, rotGyroY, '#38BDF8', 2.4, [10, 5]);
+                    drawEulerRing3D(baseRadius * 0.36, rotGyroY, rotGyroZ, '#F43F5E', 2.2, [8, 6]);
+                    drawEulerRing3D(baseRadius * 0.28, rotGyroZ, rotGyroX, '#FBBF24', 2.0, null);
+
+                    // ==========================================
+                    // 7. Tia Sét Plasma Ma Thuật Giật Giữa Các Vành (Lightning Bolts)
+                    // ==========================================
+                    for (let i = lightningBolts.length - 1; i >= 0; i--) {
+                        const bolt = lightningBolts[i];
+                        ctx.save();
+                        ctx.translate(cx, cy);
+                        ctx.beginPath();
+                        let curR = bolt.r1;
+                        let curA = bolt.angle;
+                        ctx.moveTo(Math.cos(curA) * curR, Math.sin(curA) * curR);
+
+                        const rStep = (bolt.r2 - bolt.r1) / bolt.segments;
+                        for (let s = 1; s <= bolt.segments; s++) {
+                            curR += rStep;
+                            curA += (Math.random() - 0.5) * 0.35;
+                            ctx.lineTo(Math.cos(curA) * curR, Math.sin(curA) * curR);
+                        }
+                        ctx.lineWidth = 2.0;
+                        ctx.strokeStyle = bolt.color;
+                        ctx.globalAlpha = bolt.alpha;
+                        ctx.shadowColor = bolt.color;
+                        ctx.shadowBlur = 10;
+                        ctx.stroke();
+                        ctx.restore();
+
+                        bolt.alpha *= 0.85;
+                        if (bolt.alpha < 0.05) lightningBolts.splice(i, 1);
+                    }
+
+                    // ==========================================
+                    // 8. Hạt Mana Wisps Xoáy Ốc Vào Tâm
+                    // ==========================================
+                    manaWisps.forEach(p => {
+                        p.angle += p.speed * rotationSpeedMultiplier;
+                        p.dist -= 0.22 * rotationSpeedMultiplier;
+                        if (p.dist < 14) {
+                            p.dist = baseRadius * 0.95 + Math.random() * 20;
+                            p.angle = Math.random() * Math.PI * 2;
+                        }
+                        const px = cx + Math.cos(p.angle) * p.dist;
+                        const py = cy + Math.sin(p.angle) * p.dist * 0.8;
+
+                        ctx.beginPath();
+                        ctx.arc(px, py, p.size, 0, Math.PI * 2);
+                        ctx.fillStyle = p.color;
+                        ctx.globalAlpha = p.alpha;
+                        ctx.shadowColor = p.color;
+                        ctx.shadowBlur = 6;
+                        ctx.fill();
+                        ctx.globalAlpha = 1.0;
+                    });
+
+                    // ==========================================
+                    // 9. Sóng Xung Kích Ma Thuật Bùng Nổ (Shockwaves)
+                    // ==========================================
+                    for (let i = shockwaves.length - 1; i >= 0; i--) {
+                        const sw = shockwaves[i];
+                        sw.radius += sw.speed;
+                        sw.alpha *= 0.93;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, sw.radius, 0, Math.PI * 2);
+                        ctx.lineWidth = sw.width || 3.0;
+                        ctx.strokeStyle = sw.color || `rgba(56, 189, 248, ${sw.alpha})`;
+                        ctx.shadowColor = sw.color;
+                        ctx.shadowBlur = 14;
+                        ctx.stroke();
+                        if (sw.alpha < 0.02 || sw.radius > baseRadius * 1.3) {
+                            shockwaves.splice(i, 1);
+                        }
+                    }
+
+                    // ==========================================
+                    // 10. Lõi Hố Đen Lượng Tử & Điểm Kỳ Dị (Quantum Singularity Core)
+                    // ==========================================
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.scale(corePulseScale, corePulseScale);
+
+                    const coreRadius = baseRadius * 0.18;
+                    const coreGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, coreRadius * 1.4);
+                    coreGrad.addColorStop(0, '#FFFFFF');
+                    coreGrad.addColorStop(0.25, '#38BDF8');
+                    coreGrad.addColorStop(0.65, '#0284C7');
+                    coreGrad.addColorStop(1, 'rgba(2, 132, 199, 0)');
+                    ctx.fillStyle = coreGrad;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, coreRadius * 1.4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Vành bao quanh lõi
+                    ctx.lineWidth = 2.2;
+                    ctx.strokeStyle = '#38BDF8';
+                    ctx.shadowColor = '#38BDF8';
+                    ctx.shadowBlur = 16;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, coreRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Chữ hiển thị Hologram tại tâm lõi
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = '900 11px "Geist Mono", monospace';
+                    ctx.fillStyle = '#0F172A';
+                    ctx.fillText(coreScanNumber, 0, -5);
+
+                    ctx.font = '800 8px "Plus Jakarta Sans", sans-serif';
+                    ctx.fillStyle = '#1E293B';
+                    ctx.fillText(coreStatusText, 0, 7);
+
+                    ctx.restore();
+
+                    // Thu nhỏ dần core pulse
+                    corePulseScale += (1.0 - corePulseScale) * 0.1;
+
+                    animId = requestAnimationFrame(renderCanvasFrame);
+                };
+
+                animId = requestAnimationFrame(renderCanvasFrame);
+            }
+
+            // ==========================================
+            // FLYING COMET FIREBALLS (Form -> Tâm Lò Hố Đen)
+            // ==========================================
+            const triggerFlyingDataPills = () => {
+                if (!viewport) return;
+                const viewRect = viewport.getBoundingClientRect();
+                const targetX = viewRect.left + viewRect.width / 2;
+                const targetY = viewRect.top + viewRect.height / 2;
+
+                parsedAttempts.forEach((attempt, idx) => {
+                    if (!attempt.el) return;
+                    const elRect = attempt.el.getBoundingClientRect();
+                    const startX = elRect.left + 24;
+                    const startY = elRect.top + 16;
+
+                    // Tạo viên ngọc sao băng ma thuật
+                    const pill = document.createElement('div');
+                    pill.className = `flying-data-pill ${attempt.pillTone}`;
+                    pill.innerHTML = `<i class="fas fa-meteor"></i> <span>${attempt.label}: ${attempt.rawText}</span>`;
+                    pill.style.left = `${startX}px`;
+                    pill.style.top = `${startY}px`;
+                    pill.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                    document.body.appendChild(pill);
+
+                    setTimeout(() => {
+                        const startTime = performance.now();
+                        const duration = 540;
+
+                        const flyLoop = (now) => {
+                            if (isDone) { pill.remove(); return; }
+                            const elapsed = now - startTime;
+                            const progress = Math.min(1, elapsed / duration);
+                            const ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+                            const curX = startX + (targetX - startX) * ease + Math.sin(progress * Math.PI * 2) * 45 * (1 - progress);
+                            const curY = startY + (targetY - startY) * ease - Math.sin(progress * Math.PI) * 55;
+                            const curScale = 0.95 + (1 - progress) * 0.25 - progress * 0.55;
+
+                            pill.style.left = `${curX}px`;
+                            pill.style.top = `${curY}px`;
+                            pill.style.transform = `translate(-50%, -50%) scale(${curScale}) rotate(${progress * 420}deg)`;
+
+                            if (progress < 1) {
+                                requestAnimationFrame(flyLoop);
+                            } else {
+                                pill.remove();
+                                // Kích nổ shockwave rực rỡ tại tâm
+                                corePulseScale = 1.45;
+                                energyGlow = 1.5;
+                                shockwaves.push({
+                                    radius: 12,
+                                    speed: 5.5,
+                                    alpha: 1.0,
+                                    width: 4.0,
+                                    color: attempt.tone === 'p-pretest' ? '#F59E0B' : attempt.tone === 'p-final' ? '#E11D48' : '#38BDF8'
+                                });
+                            }
+                        };
+                        requestAnimationFrame(flyLoop);
+                    }, idx * 150 + 90);
+                });
+            };
+
+            triggerFlyingDataPills();
+
+            // ==========================================
+            // KỊCH BẢN KÍCH HOẠT ĐỒNG BỘ 5 BƯỚC TOÁN HỌC & HYPER-ACCELERATION
+            // ==========================================
+            const skipBtn = document.getElementById('quantum-math-skip-btn');
+
+            const cleanupAndFinish = () => {
+                if (isDone) return;
+                isDone = true;
+                if (animId) cancelAnimationFrame(animId);
+                timeoutHandles.forEach(h => clearTimeout(h));
+                document.querySelectorAll('.flying-data-pill').forEach(p => p.remove());
+                onComplete();
+            };
+
+            if (skipBtn) {
+                skipBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    cleanupAndFinish();
+                });
+            }
+
+            const mchipTarget = document.getElementById('mchip-target');
+            const mchipKnown = document.getElementById('mchip-known');
+            const mchipNeed = document.getElementById('mchip-need');
+            const mchipScan = document.getElementById('mchip-scan');
+            const mchipScanText = document.getElementById('mchip-scan-text');
+
+            // Bước 1: 0ms
+            coreStatusText = 'THIẾT LẬP';
+            coreScanNumber = `GPA ${desiredGPA.toFixed(1)}`;
+            rotationSpeedMultiplier = 1.0;
+
+            // Bước 2: Nạp dữ liệu (600ms)
+            timeoutHandles.push(setTimeout(() => {
+                if (isDone) return;
+                if (mchipKnown) mchipKnown.classList.add('active');
+                coreStatusText = 'NẠP SỐ LIỆU';
+                coreScanNumber = `S₁₀ ≥ ${targetScore10.toFixed(1)}`;
+                corePulseScale = 1.3;
+                rotationSpeedMultiplier = 1.4;
+            }, 600));
+
+            // Bước 3: Thu gọn điểm đã tích lũy (1250ms)
+            timeoutHandles.push(setTimeout(() => {
+                if (isDone) return;
+                if (mchipKnown) { mchipKnown.classList.remove('active'); mchipKnown.classList.add('solved'); }
+                if (mchipNeed) mchipNeed.classList.add('active');
+                coreStatusText = 'ĐÃ CÓ';
+                coreScanNumber = `+${knownScoreSum.toFixed(2)}đ`;
+                corePulseScale = 1.35;
+                rotationSpeedMultiplier = 1.8;
+            }, 1250));
+
+            // Bước 4: Giải nghiệm cần gánh (1900ms)
+            timeoutHandles.push(setTimeout(() => {
+                if (isDone) return;
+                if (mchipNeed) { mchipNeed.classList.remove('active'); mchipNeed.classList.add('solved'); }
+                if (mchipScan) mchipScan.classList.add('active');
+                coreStatusText = 'CẦN GÁNH';
+                coreScanNumber = `≥ ${Math.max(0, finalTargetNeed).toFixed(2)}đ`;
+                corePulseScale = 1.35;
+                rotationSpeedMultiplier = 2.4;
+            }, 1900));
+
+            // Bước 5: Quét nghiệm Brute-Force ma thuật (2550ms)
+            timeoutHandles.push(setTimeout(() => {
+                if (isDone) return;
+                rotationSpeedMultiplier = 3.2;
+
+                let curScan = Math.max(0, minCorrectFound - 8);
+                const scanInterval = setInterval(() => {
+                    if (isDone) { clearInterval(scanInterval); return; }
+                    if (curScan < minCorrectFound) {
+                        const sScore = rowScore10(curScan, finalTotalQuestions, mode);
+                        const totalS = knownScoreSum + (sScore * (finalAttempt ? finalAttempt.weight : 50) / 100);
+                        if (mchipScanText) {
+                            mchipScanText.textContent = `QUÉT x = ${curScan}/${finalTotalQuestions} câu → S₁₀ = ${totalS.toFixed(2)}đ`;
+                        }
+                        coreStatusText = 'QUÉT NGHIỆM';
+                        coreScanNumber = `${curScan}/${finalTotalQuestions}`;
+                        corePulseScale = 1.2;
+                        curScan++;
+                    } else {
+                        clearInterval(scanInterval);
+                        const sScore = rowScore10(minCorrectFound, finalTotalQuestions, mode);
+                        const totalS = knownScoreSum + (sScore * (finalAttempt ? finalAttempt.weight : 50) / 100);
+                        if (mchipScanText) {
+                            mchipScanText.innerHTML = `<b>LOCKED: x = ${minCorrectFound}/${finalTotalQuestions} CÂU (S₁₀ = ${totalS.toFixed(2)}đ) ✅</b>`;
+                        }
+                        if (mchipScan) { mchipScan.classList.remove('active'); mchipScan.classList.add('solved'); }
+
+                        coreStatusText = 'LOCKED ON!';
+                        coreScanNumber = `${minCorrectFound} CÂU`;
+                        corePulseScale = 1.6;
+                        energyGlow = 2.4;
+                        rotationSpeedMultiplier = 4.5;
+
+                        // Supernova Flash Wave
+                        for (let k = 0; k < 4; k++) {
+                            setTimeout(() => {
+                                shockwaves.push({
+                                    radius: 10 + k * 16,
+                                    speed: 7.0 + k * 2.5,
+                                    alpha: 1.0,
+                                    width: 5.0,
+                                    color: k % 2 === 0 ? '#10B981' : '#38BDF8'
+                                });
+                            }, k * 90);
+                        }
+
+                        // Chờ 650ms rồi hiển thị Thẻ Kết Quả 3D
+                        timeoutHandles.push(setTimeout(() => {
+                            cleanupAndFinish();
+                        }, 650));
+                    }
+                }, 100);
+            }, 2550));
+        }
+
+        /**
          * Tính số câu cần đúng ở các lần thi còn lại để đạt điểm hệ 4 mong muốn.
          *
          * Mô hình chuẩn hoá: mỗi lần thi có trọng số w_i (%) và hiệu suất p_i ∈ [0,1]
@@ -1330,6 +3526,7 @@
          */
         function calculateRequiredCorrectAnswers(opts) {
             const silent = !!(opts && opts.silent === true);
+            const withReactor = !!(opts && opts.withReactor === true);
             const desiredGPAInput = document.getElementById('desired-gpa-4');
             const resultArea = document.getElementById('required-correct-result');
             if (!desiredGPAInput || !resultArea) return;
@@ -1339,8 +3536,8 @@
                 if (silent) return; // đang gõ dở: giữ kết quả cũ, không chen lỗi vào
                 requiredCalcDone = true;
                 resultArea.innerHTML = `
-                    <div class="result-card tone-danger">
-                        <div class="result-head"><i class="fas fa-circle-exclamation"></i> Chưa thể tính</div>
+                    <div class="result-card tone-danger animate-arrival">
+                        <div class="result-head"><i class="fas fa-circle-exclamation"></i> Dữ liệu chưa hợp lệ</div>
                         <div class="result-body">${msg}</div>
                     </div>`;
             };
@@ -1353,7 +3550,7 @@
             let weightSum = 0;
             for (const el of rowEls) {
                 const kind = el.dataset.kind;
-                const label = escapeHtml(el.dataset.label || 'Lần thi'); // tên do người dùng đặt -> escape trước khi nhúng vào HTML kết quả
+                const label = escapeHtml(el.dataset.label || 'Lần thi');
                 const weight = parseFloat(el.querySelector('.attempt-weight')?.value);
                 if (isNaN(weight) || weight < 0 || weight > 100) {
                     showError(`Trọng số của "<b>${label}</b>" không hợp lệ (0–100%).`);
@@ -1389,7 +3586,7 @@
                             return;
                         }
                         correct = c;
-                        p = rowScore10(c, total, mode) / 10; // hiệu suất = điểm hệ 10 / 10 theo thang đang chọn
+                        p = rowScore10(c, total, mode) / 10;
                     }
                     attempts.push({ label, kind, weight, total, correct, p });
                 }
@@ -1414,28 +3611,76 @@
             const unknown = attempts.filter(a => a.p === null);
             const neededPct = targetPct - knownPct;
 
-            // Bộ khung hiển thị kết quả: header trạng thái + nội dung + chân nhắc mục tiêu (đồng nhất mọi nhánh)
-            const render = ({ tone, icon, title, body }) => {
-                requiredCalcDone = true; // từ giờ kết quả sẽ tự cập nhật khi chỉnh số liệu
+            // Bộ khung hiển thị kết quả: header trạng thái + nội dung + chân nhắc mục tiêu
+            const doRealRender = ({ tone, icon, title, body }) => {
+                requiredCalcDone = true;
                 resultArea.innerHTML = `
-                    <div class="result-card tone-${tone}">
+                    <div class="result-card tone-${tone} animate-arrival">
                         <div class="result-head"><i class="fas ${icon}"></i> ${title}</div>
-                        <div class="result-body">${body}</div>
+                        <div class="result-body">
+                            ${body}
+                            <div>
+                                <button type="button" class="btn-replay-reactor" id="btn-replay-energy" title="Chạy lại mô phỏng giải thuật tính điểm">
+                                    <i class="fas fa-microchip"></i> Tính lại (Animation)
+                                </button>
+                            </div>
+                        </div>
                         <div class="result-foot">
                             <i class="fas fa-bullseye"></i>
-                            <span>Mục tiêu <b>GPA ${desiredGPA.toFixed(1)}</b> · điểm tổng kết cần <b>≥ ${targetScore10.toFixed(1)}</b> (hệ 10)</span>
+                            <span>Mục tiêu <b>GPA ${desiredGPA.toFixed(1)}</b> · Điểm tổng kết cần đạt <b>≥ ${targetScore10.toFixed(1)}</b> (hệ 10)</span>
                         </div>
                     </div>`;
-                // Bấm nút tính (không phải auto-update) thì đưa kết quả vào tầm nhìn — quan trọng trên mobile
+
+                // Chạy hiệu ứng số đếm mượt mà (number roll-up)
+                const bigEl = resultArea.querySelector('.hero-number .big');
+                if (bigEl) {
+                    const rawVal = bigEl.textContent.trim();
+                    const isDec = rawVal.includes('.');
+                    const targetNum = parseFloat(rawVal);
+                    if (!isNaN(targetNum)) {
+                        animateNumberRoll(bigEl, 0, targetNum, 520, isDec ? 2 : 0);
+                    }
+                }
+
+                // Gắn sự kiện nút "Tích năng lượng lại"
+                const replayBtn = resultArea.querySelector('#btn-replay-energy');
+                if (replayBtn) {
+                    replayBtn.addEventListener('click', () => {
+                        calculateRequiredCorrectAnswers({ withReactor: true });
+                    });
+                }
+
+                // Chạy hiệu ứng nạp thanh tiến độ
+                const barFill = resultArea.querySelector('.bar-fill');
+                if (barFill) {
+                    const targetW = barFill.style.getPropertyValue('--w') || '0%';
+                    barFill.style.width = '0%';
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            barFill.style.width = targetW;
+                        });
+                    });
+                }
+
                 if (!silent) setTimeout(() => resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
             };
-            // Khối "số to" cho con số cần đạt
+
+            const render = (data) => {
+                if (withReactor) {
+                    startQuantumEnergyReactor(resultArea, () => doRealRender(data));
+                } else {
+                    doRealRender(data);
+                }
+            };
+
+            // Khối "số to kết quả" chuẩn mực cao cấp
             const heroNumber = (big, unit, badge) => `
                 <div class="hero-number">
                     <span class="big">${big}</span>
                     <span class="unit">${unit}</span>
                     ${badge ? `<span class="badge">${badge}</span>` : ''}
                 </div>`;
+
             // Ba ô điểm hệ 10 / hệ 4 / điểm chữ
             const statChips = (s10, s4, letter) => {
                 const chip = (lbl, val) => `<div class="stat-chip"><span class="k">${lbl}</span><b>${val}</b></div>`;
@@ -1452,20 +3697,19 @@
 
                 if (reached) {
                     render({
-                        tone: 'success', icon: 'fa-trophy', title: 'Đã đạt mục tiêu!',
+                        tone: 'success', icon: 'fa-circle-check', title: 'ĐÃ ĐẠT CHUẨN MỤC TIÊU HỌC PHẦN',
                         body: `${statChips(finalScore10.toFixed(2), score4.toFixed(1), letterGrade)}
-                               <p>Kết quả hiện tại đã đủ để đạt mục tiêu. Tuyệt vời!</p>`
+                               ${heroNumber(finalScore10.toFixed(2), '/ 10 điểm tổng kết', 'ĐÃ ĐẠT CHUẨN')}
+                               <p>Tổng điểm tích lũy hiện tại đã hoàn thành chuẩn điểm GPA mục tiêu theo quy chế đào tạo.</p>`
                     });
                     return;
                 }
 
-                // Chưa đạt: lấy lần thi có trọng số lớn nhất làm "đòn bẩy", gợi ý số câu cần đúng ở lần đó
-                // (giữ nguyên kết quả các lần khác) để biết cụ thể cần làm bao nhiêu câu mới chạm mục tiêu.
                 const ratioAttempts = attempts.filter(a => a.kind === 'ratio');
                 const pool = ratioAttempts.length ? ratioAttempts : attempts;
                 const lever = pool.reduce((best, a) => (a.weight > best.weight ? a : best), pool[0]);
-                const otherPct = knownPct - lever.p * lever.weight;            // điểm các lần khác (giữ nguyên)
-                const neededFromLever = targetPct - otherPct;                  // phần cần bù từ lần đòn bẩy
+                const otherPct = knownPct - lever.p * lever.weight;
+                const neededFromLever = targetPct - otherPct;
                 const neededP = lever.weight > 0 ? neededFromLever / lever.weight : Infinity;
                 const chips = statChips(finalScore10.toFixed(2), score4.toFixed(1), letterGrade);
 
@@ -1473,13 +3717,13 @@
                     const needScore = Math.ceil(neededP * 10 * 100) / 100;
                     const cur = lever.p * 10;
                     if (needScore > 10) {
-                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
-                            body: `${chips}<p>Dù đạt <b>10/10</b> điểm ở lần "<b>${lever.label}</b>", điểm tổng kết vẫn chưa chạm mục tiêu.</p>
+                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'VƯỢT NGƯỠNG ĐIỂM TỐI ĐA (100% ĐIỂM)',
+                            body: `${chips}<p>Dù đạt điểm tối đa (<b>10/10</b> điểm) ở bài thi "<b>${lever.label}</b>", điểm tổng kết vẫn chưa đạt ngưỡng mục tiêu.</p>
                                    ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
                     } else {
-                        render({ tone: 'info', icon: 'fa-bullseye', title: 'Để đạt mục tiêu cần',
+                        render({ tone: 'info', icon: 'fa-bullseye', title: 'CHỈ TIÊU ĐIỂM HỆ 10 CẦN ĐẠT',
                             body: `${chips}${heroNumber(needScore.toFixed(2), '/ 10 điểm', null)}
-                                   <p>Ở lần <b>${lever.label}</b> cần đạt bấy nhiêu điểm (đang ${cur.toFixed(2)}/10), giữ nguyên các lần khác.</p>
+                                   <p>Điểm hệ 10 tối thiểu cần đạt ở bài thi <b>${lever.label}</b> (hiện đang ${cur.toFixed(2)}/10), giữ nguyên các bài thi khác.</p>
                                    ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
                     }
                     return;
@@ -1488,16 +3732,16 @@
                 const needCorrect = minCorrectForScore10(neededP * 10, lever.total, mode);
                 const cur = lever.correct;
                 if (needCorrect > lever.total) {
-                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
-                        body: `${chips}<p>Dù đúng cả <b>${lever.total}/${lever.total}</b> câu ở lần "<b>${lever.label}</b>", điểm tổng kết vẫn chưa chạm mục tiêu.</p>
+                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'VƯỢT NGƯỠNG ĐIỂM TỐI ĐA (100% SỐ CÂU)',
+                        body: `${chips}<p>Dù làm đúng toàn bộ <b>${lever.total}/${lever.total}</b> câu ở bài thi "<b>${lever.label}</b>", điểm tổng kết vẫn chưa đạt ngưỡng mục tiêu.</p>
                                ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
                     return;
                 }
                 const acc = Math.round((needCorrect / lever.total) * 100);
-                render({ tone: 'info', icon: 'fa-bullseye', title: 'Để đạt mục tiêu cần',
+                render({ tone: 'info', icon: 'fa-bullseye', title: 'CHỈ TIÊU SỐ CÂU ĐÚNG CẦN ĐẠT',
                     body: `${chips}
                            ${heroNumber(needCorrect, `/ ${lever.total} câu`, '≈ ' + acc + '%')}
-                           <p>Số câu đúng tối thiểu ở lần <b>${lever.label}</b> (đang ${cur}/${lever.total}), giữ nguyên các lần khác.</p>
+                           <p>Số câu đúng tối thiểu cần đạt ở bài thi <b>${lever.label}</b> (hiện đang ${cur}/${lever.total}), giữ nguyên các bài thi khác.</p>
                            ${progressBar(acc)}
                            ${milestoneTableHtml(lever, otherPct, mode, desiredGPA)}` });
                 return;
@@ -1506,8 +3750,9 @@
             // 3b. Đã chắc chắn đạt dù các lần còn lại được 0 điểm
             if (neededPct <= 1e-9) {
                 render({
-                    tone: 'success', icon: 'fa-circle-check', title: 'Chắc suất đạt mục tiêu!',
-                    body: `Kết quả các lần đã thi đã đủ để đạt <b>GPA ${desiredGPA.toFixed(1)}</b> — kể cả khi các lần còn lại được 0 điểm. Quá đỉnh!`
+                    tone: 'success', icon: 'fa-circle-check', title: 'ĐỦ ĐIỀU KIỆN ĐẠT MỤC TIÊU (AN TOÀN TUYỆT ĐỐI)',
+                    body: `${heroNumber('0', 'câu cần thêm', 'AN TOÀN TUYỆT ĐỐI')}
+                           <p>Tổng điểm các bài thi đã hoàn tất đã vượt ngưỡng mục tiêu <b>GPA ${desiredGPA.toFixed(1)}</b> ngay cả khi các bài thi còn lại đạt 0 điểm.</p>`
                 });
                 return;
             }
@@ -1516,23 +3761,23 @@
             if (unknown.length === 1) {
                 const a = unknown[0];
                 if (a.weight <= 0) {
-                    render({ tone: 'warn', icon: 'fa-triangle-exclamation', title: 'Không thể bù điểm',
-                        body: `Lần "<b>${a.label}</b>" có trọng số <b>0%</b> nên không ảnh hưởng tới điểm tổng kết.` });
+                    render({ tone: 'warn', icon: 'fa-triangle-exclamation', title: 'KHÔNG THỂ BÙ ĐIỂM',
+                        body: `Bài thi "<b>${a.label}</b>" có trọng số <b>0%</b> nên không ảnh hưởng tới điểm tổng kết.` });
                     return;
                 }
-                const neededP = neededPct / a.weight; // hiệu suất cần ở lần này
+                const neededP = neededPct / a.weight;
 
                 if (a.kind === 'score') {
-                    const needScore = Math.ceil(neededP * 10 * 100) / 100; // điểm hệ 10, làm tròn lên 2 số lẻ
+                    const needScore = Math.ceil(neededP * 10 * 100) / 100;
                     if (needScore > 10) {
                         const maxScore10 = (knownPct + a.weight) / 10;
-                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
-                            body: `Dù đạt <b>10/10</b> điểm ở lần "<b>${a.label}</b>", điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).
+                        render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'VƯỢT NGƯỠNG ĐIỂM TỐI ĐA (100% ĐIỂM)',
+                            body: `Dù đạt điểm tuyệt đối <b>10/10</b> ở bài thi "<b>${a.label}</b>", điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).
                                    ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
                     } else {
-                        render({ tone: 'info', icon: 'fa-bullseye', title: 'Điểm cần đạt',
+                        render({ tone: 'info', icon: 'fa-bullseye', title: 'CHỈ TIÊU ĐIỂM HỆ 10 CẦN ĐẠT',
                             body: `${heroNumber(needScore.toFixed(2), '/ 10 điểm', null)}
-                                   <p>Điểm hệ 10 tối thiểu ở lần <b>${a.label}</b> để đạt mục tiêu.</p>
+                                   <p>Điểm hệ 10 tối thiểu ở bài thi <b>${a.label}</b> để hoàn thành mục tiêu học phần.</p>
                                    ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
                     }
                     return;
@@ -1541,15 +3786,15 @@
                 const needCorrect = minCorrectForScore10(neededP * 10, a.total, mode);
                 if (needCorrect > a.total) {
                     const maxScore10 = (knownPct + a.weight) / 10;
-                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
-                        body: `Dù đúng cả <b>${a.total}/${a.total}</b> câu ở lần "<b>${a.label}</b>", điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).
+                    render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'VƯỢT NGƯỠNG ĐIỂM TỐI ĐA (100% SỐ CÂU)',
+                        body: `Dù làm đúng toàn bộ <b>${a.total}/${a.total}</b> câu ở bài thi "<b>${a.label}</b>", điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).
                                ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
                     return;
                 }
                 const acc = Math.round((needCorrect / a.total) * 100);
-                render({ tone: 'info', icon: 'fa-bullseye', title: 'Số câu cần đạt',
+                render({ tone: 'info', icon: 'fa-bullseye', title: 'CHỈ TIÊU SỐ CÂU ĐÚNG CẦN ĐẠT',
                     body: `${heroNumber(needCorrect, `/ ${a.total} câu`, '≈ ' + acc + '%')}
-                           <p>Số câu đúng tối thiểu ở lần <b>${a.label}</b> để đạt mục tiêu.</p>
+                           <p>Số câu đúng tối thiểu ở bài thi <b>${a.label}</b> để hoàn thành mục tiêu học phần.</p>
                            ${progressBar(acc)}
                            ${milestoneTableHtml(a, knownPct, mode, desiredGPA)}` });
                 return;
@@ -1558,20 +3803,20 @@
             // 3d. Còn nhiều lần chưa nhập -> gợi ý theo mức "đúng đều" giữa các lần
             const unknownWeight = unknown.reduce((s, a) => s + a.weight, 0);
             if (unknownWeight <= 0) {
-                render({ tone: 'warn', icon: 'fa-triangle-exclamation', title: 'Không thể bù điểm',
-                    body: 'Các lần còn lại có tổng trọng số <b>0%</b> nên không ảnh hưởng tới điểm tổng kết.' });
+                render({ tone: 'warn', icon: 'fa-triangle-exclamation', title: 'KHÔNG THỂ BÙ ĐIỂM',
+                    body: 'Các bài thi còn lại có tổng trọng số <b>0%</b> nên không ảnh hưởng tới điểm tổng kết.' });
                 return;
             }
-            const reqRatio = neededPct / unknownWeight; // hiệu suất đồng đều cần ở các lần còn lại
+            const reqRatio = neededPct / unknownWeight;
 
             if (reqRatio > 1 + 1e-9) {
                 const maxScore10 = (knownPct + unknownWeight) / 10;
-                render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'Ngoài tầm với',
-                    body: `Dù đạt điểm tuyệt đối ở tất cả các lần còn lại, điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).` });
+                render({ tone: 'danger', icon: 'fa-circle-xmark', title: 'VƯỢT NGƯỠNG ĐIỂM TỐI ĐA (100% SỐ CÂU)',
+                    body: `Dù đạt điểm tuyệt đối ở tất cả các bài thi còn lại, điểm tổng kết tối đa chỉ đạt <b>${maxScore10.toFixed(2)}</b> (hệ 10).` });
                 return;
             }
 
-            const reqScore10 = reqRatio * 10; // điểm hệ 10 cần đạt đều ở mỗi lần còn lại
+            const reqScore10 = reqRatio * 10;
             const rows = unknown.map(a => {
                 let val;
                 if (a.kind === 'score') {
@@ -1586,10 +3831,11 @@
                 </div>`;
             }).join('');
 
-            render({ tone: 'info', icon: 'fa-lightbulb', title: `Gợi ý cho ${unknown.length} lần còn lại`,
-                body: `<div class="suggest-badge"><i class="fas fa-wave-square"></i> Giữ phong độ đều ≈ ${reqScore10.toFixed(1)}/10 điểm mỗi lần</div>
+            render({ tone: 'info', icon: 'fa-scale-balanced', title: `PHÂN BỔ CHỈ TIÊU ĐỒNG ĐỀU (${unknown.length} BÀI THI CÒN LẠI)`,
+                body: `${heroNumber(reqScore10.toFixed(2), '/ 10 điểm mỗi bài', 'TRUNG BÌNH')}
+                       <div class="suggest-badge"><i class="fas fa-chart-simple"></i> Ngưỡng điểm hệ 10 cần duy trì ≈ ${reqScore10.toFixed(2)} / 10 điểm mỗi bài</div>
                        <div class="suggest-rows">${rows}</div>
-                       <p>Phương án cân bằng — lần này làm tốt hơn thì lần sau có thể nhẹ nhàng hơn.</p>` });
+                       <p>Phương án cân bằng trọng số giữa các bài thi còn lại để bảo toàn mục tiêu GPA.</p>` });
         }
 
         /**
@@ -1637,6 +3883,20 @@
                 const icon = ATTEMPT_ICONS[row.label] || 'fa-layer-group';
                 const safeLabel = escapeHtml(row.label);
 
+                let themeCls = '';
+                let subTag = '';
+                const l = (row.label || '').toLowerCase();
+                if (l.includes('pretest')) {
+                    themeCls = 'theme-pretest';
+                    subTag = 'Đánh giá đầu khóa · 10%';
+                } else if (l.includes('giữa kỳ') || l.includes('midterm')) {
+                    themeCls = 'theme-midterm';
+                    subTag = `Đánh giá quá trình · ${row.weight}%`;
+                } else if (l.includes('cuối kỳ') || l.includes('final')) {
+                    themeCls = 'theme-final';
+                    subTag = `Kết thúc học phần · ${row.weight}%`;
+                }
+
                 let header;
                 if (isCustom) {
                     // Chế độ tùy chỉnh: tên sửa được, chọn kiểu nhập, chỉnh trọng số, xoá lần thi
@@ -1665,7 +3925,10 @@
                     header = `
                     <div class="attempt-head">
                         <span class="attempt-icon"><i class="fas ${icon}"></i></span>
-                        <span class="attempt-name">${safeLabel}</span>
+                        <div class="attempt-name-wrap">
+                            <span class="attempt-name">${safeLabel}</span>
+                            ${subTag ? `<span class="attempt-subtag">${subTag}</span>` : ''}
+                        </div>
                         ${pillHtml}
                         <span class="attempt-weight-tag">
                             <span class="attempt-weight-kicker">Trọng số</span>
@@ -1677,31 +3940,38 @@
 
                 if (row.kind === 'score') {
                     return `
-                    <div class="attempt-row" data-kind="score" data-label="${safeLabel}" data-index="${idx}">
+                    <div class="attempt-row ${themeCls}" data-kind="score" data-label="${safeLabel}" data-index="${idx}">
                         ${header}
                         <div class="score-line">
                             <input type="number" inputmode="decimal" class="attempt-score num-input" min="0" max="10" step="0.01" placeholder="…/10">
                             <input type="range" class="attempt-slider" min="0" max="10" step="0.1" value="0">
                         </div>
-                        <p class="hint"><i class="fas fa-circle-info"></i><span>Nhập thẳng điểm hệ 10 của lần thi này (vd pretest), hoặc kéo thanh trượt.</span></p>
+                        <p class="hint"><i class="fas fa-circle-info"></i><span>Nhập điểm hệ 10 đã thi, hoặc để trống nếu chưa thi nha.</span></p>
                     </div>`;
                 }
                 return `
-                <div class="attempt-row" data-kind="ratio" data-label="${safeLabel}" data-index="${idx}">
+                <div class="attempt-row ${themeCls}" data-kind="ratio" data-label="${safeLabel}" data-index="${idx}">
                     ${header}
                     <div class="attempt-inputs">
                         <div>
                             <label class="mini-label">Câu đúng</label>
-                            <input type="number" inputmode="numeric" class="attempt-correct num-input" min="0" placeholder="—">
+                            <input type="number" inputmode="numeric" class="attempt-correct num-input" min="0" placeholder="chưa thi">
                         </div>
                         <span class="slash">/</span>
                         <div>
                             <label class="mini-label">Tổng câu</label>
-                            <input type="number" inputmode="numeric" class="attempt-total num-input" min="1" placeholder="—">
+                            <input type="number" inputmode="numeric" class="attempt-total num-input" min="1" placeholder="vd: 60">
                         </div>
                     </div>
+                    <div class="preset-pills">
+                        <span class="preset-label"><i class="fas fa-bolt"></i> Chọn nhanh:</span>
+                        <button type="button" class="preset-pill" data-val="40">40 câu</button>
+                        <button type="button" class="preset-pill" data-val="50">50 câu</button>
+                        <button type="button" class="preset-pill" data-val="60">60 câu</button>
+                        <button type="button" class="preset-pill" data-val="80">80 câu</button>
+                    </div>
                     <input type="range" class="attempt-slider" min="0" max="100" step="1" value="0" disabled>
-                    <p class="attempt-hint hint"><i class="fas fa-circle-info"></i><span>Nhập tổng câu để kéo thanh chọn nhanh số câu đúng.</span></p>
+                    <p class="attempt-hint hint"><i class="fas fa-circle-info"></i><span>Nhập tổng câu để kéo thanh trượt, hoặc để trống ô câu đúng để xem gợi ý.</span></p>
                 </div>`;
             }).join('');
 
@@ -1731,6 +4001,19 @@
             const rows = Array.from(container.querySelectorAll('.attempt-row'));
 
             rows.forEach(row => {
+                // Preset pills chọn nhanh số câu
+                row.querySelectorAll('.preset-pill').forEach(pill => {
+                    pill.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const totalInput = row.querySelector('.attempt-total');
+                        if (totalInput) {
+                            totalInput.value = pill.dataset.val;
+                            totalInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            totalInput.focus();
+                        }
+                    });
+                });
+
                 const slider = row.querySelector('.attempt-slider');
                 if (row.dataset.kind === 'score') {
                     const score = row.querySelector('.attempt-score');
@@ -1881,7 +4164,7 @@
             const mode = getScaleMode();
             const rows = Array.from(document.querySelectorAll('#attempts-table .attempt-row'));
 
-            let totalPct = 0, blanks = 0, anyEntered = false;
+            let totalPct = 0, blanks = 0, blankWeight = 0, anyEntered = false;
             for (const el of rows) {
                 const weight = parseFloat(el.querySelector('.attempt-weight')?.value) || 0;
                 let p = null;
@@ -1918,7 +4201,7 @@
                     }
                 }
 
-                if (p === null) blanks++; else { anyEntered = true; totalPct += p * weight; }
+                if (p === null) { blanks++; blankWeight += weight; } else { anyEntered = true; totalPct += p * weight; }
             }
 
             lastSubject = { score10: totalPct / 10, anyEntered, blanks };
@@ -1933,11 +4216,14 @@
             if (elGoal) elGoal.innerHTML = `Mục tiêu <b>GPA ${desired.toFixed(1)}</b> · ≥ <b>${targetScore10.toFixed(1)}</b>`;
 
             if (!anyEntered) {
-                elGpa.textContent = '—';
+                elGpa.textContent = '0.0';
+                elGpa.classList.add('empty');
                 if (elLetter) elLetter.textContent = '·';
                 if (elS10) elS10.textContent = 'Hệ 10: 0.00';
                 if (elFill) elFill.style.setProperty('--w', '0%');
-                if (elNote) elNote.textContent = 'Nhập số liệu ở bảng dưới';
+                if (elNote) elNote.textContent = 'Chờ nhập dữ liệu';
+                updateMiniHud('0.0', '·', 'Chờ nhập số liệu');
+                updateAcademicTelemetry({ state: 'empty' });
                 return;
             }
 
@@ -1946,18 +4232,21 @@
             const reached = score10 >= targetScore10 - 1e-9;
             const fillPct = Math.max(0, Math.min(100, score10 * 10));
 
-            elGpa.textContent = score4.toFixed(1);
+            const prevGpa = parseFloat(elGpa.textContent) || 0;
+            animateNumberRoll(elGpa, prevGpa, score4, 380, 1);
+            elGpa.classList.remove('empty');
             if (elLetter) elLetter.textContent = letterGrade;
             if (elS10) elS10.textContent = `Hệ 10: ${score10.toFixed(2)}`;
             if (elFill) elFill.style.setProperty('--w', fillPct + '%');
             if (elNote) {
-                // Cảnh báo rớt môn quan trọng hơn cả mốc mục tiêu -> ưu tiên hiện trước
                 elNote.textContent = (blanks === 0 && score10 < 4.0)
-                    ? 'Cảnh báo: đang ở mức F — nguy cơ rớt môn'
+                    ? 'Cảnh báo: Đang ở mức F (Nguy cơ không đạt)'
                     : reached
-                        ? 'Đã chạm mốc mục tiêu'
-                        : (blanks > 0 ? `${blanks} lần chưa nhập = 0đ` : 'Chưa chạm mốc mục tiêu');
+                        ? 'Đã đạt ngưỡng mục tiêu GPA'
+                        : (blanks > 0 ? `Còn ${blanks} bài thi chưa nhập (= 0đ)` : 'Chưa đạt ngưỡng mục tiêu GPA');
             }
+            updateMiniHud(score4.toFixed(1), letterGrade, `Hệ 10: ${score10.toFixed(2)}`);
+            updateAcademicTelemetry({ state: 'entered', score4, score10, blanks, blankWeight, reached, desired, letterGrade });
         }
 
         /**
@@ -2032,7 +4321,12 @@
 
             const calcRequiredBtn = document.getElementById('calculate-required-btn');
             if (calcRequiredBtn) {
-                calcRequiredBtn.addEventListener('click', () => calculateRequiredCorrectAnswers());
+                calcRequiredBtn.addEventListener('click', () => {
+                    calcRequiredBtn.classList.remove('calc-pulse');
+                    void calcRequiredBtn.offsetWidth;
+                    calcRequiredBtn.classList.add('calc-pulse');
+                    calculateRequiredCorrectAnswers({ withReactor: true });
+                });
             }
 
             restoreGoalState();
@@ -2118,13 +4412,83 @@
         function paintStage(o) {
             const set = (id, prop, val) => { const el = document.getElementById(id); if (el) el[prop] = val; };
             set('stage-title', 'textContent', o.title);
-            set('stage-gpa', 'textContent', o.gpa);
+            const elGpa = document.getElementById('stage-gpa');
+            if (elGpa) {
+                if (o.gpa === '—' || !o.gpa) {
+                    elGpa.textContent = '0.0';
+                    elGpa.classList.add('empty');
+                } else {
+                    elGpa.textContent = o.gpa;
+                    elGpa.classList.remove('empty');
+                }
+            }
             set('stage-letter', 'textContent', o.letter);
             set('stage-s10', 'textContent', o.sub);
             set('stage-note', 'textContent', o.note);
             set('stage-goal', 'innerHTML', o.goal);
             document.getElementById('stage-fill')?.style.setProperty('--w', o.fill + '%');
             document.getElementById('stage-mark')?.style.setProperty('--t', o.mark + '%');
+            updateMiniHud(o.gpa === '—' ? '0.0' : o.gpa, o.letter, o.sub);
+        }
+
+        // ===== Cập nhật Mobile Sticky Mini HUD =====
+        function updateMiniHud(gpa, letter, meta) {
+            const hudGpa = document.getElementById('hud-gpa');
+            const hudLetter = document.getElementById('hud-letter');
+            const hudMeta = document.getElementById('hud-meta');
+            if (hudGpa) hudGpa.textContent = gpa || '0.0';
+            if (hudLetter) hudLetter.textContent = letter || '·';
+            if (hudMeta) hudMeta.textContent = meta || '';
+        }
+
+        // ===== Bảng giám sát học vụ & Khối lượng đánh giá chính quy =====
+        function updateAcademicTelemetry(info) {
+            const telemWeight = document.getElementById('telem-weight');
+            const telemStatus = document.getElementById('telem-status');
+            if (!telemWeight || !telemStatus) return;
+
+            if (info.type === 'book') {
+                const pct = info.cr > 0 ? Math.round(info.doneCr / info.cr * 100) : 0;
+                telemWeight.textContent = `${info.doneCr} / ${info.cr || 0} TC (${pct}%)`;
+                if (info.doneCr === 0) {
+                    telemStatus.textContent = 'Chưa chốt điểm môn nào';
+                    telemStatus.className = 'telemetry-val status-neutral';
+                } else if (info.restCr === 0) {
+                    telemStatus.textContent = `Hoàn tất kỳ học (GPA ${info.gpa.toFixed(2)})`;
+                    telemStatus.className = 'telemetry-val status-success';
+                } else if (info.gpa >= info.goal) {
+                    telemStatus.textContent = `Đạt mốc mục tiêu GPA ${info.goal.toFixed(1)}`;
+                    telemStatus.className = 'telemetry-val status-success';
+                } else {
+                    telemStatus.textContent = `Đang tích lũy (Cần ≥ ${info.goal.toFixed(1)})`;
+                    telemStatus.className = 'telemetry-val status-info';
+                }
+                return;
+            }
+
+            if (info.state === 'empty') {
+                telemWeight.textContent = '0% trọng số';
+                telemStatus.textContent = 'Chờ nhập dữ liệu';
+                telemStatus.className = 'telemetry-val status-neutral';
+                return;
+            }
+
+            const evaluatedWeight = Math.max(0, 100 - (info.blankWeight || 0));
+            telemWeight.textContent = `${Math.round(evaluatedWeight)}% trọng số`;
+
+            if (info.blanks === 0 && info.score10 < 4.0) {
+                telemStatus.textContent = 'Cảnh báo: Nguy cơ không đạt (F)';
+                telemStatus.className = 'telemetry-val status-danger';
+            } else if (info.reached) {
+                telemStatus.textContent = `Đạt chuẩn mục tiêu GPA (≥ ${info.desired.toFixed(1)})`;
+                telemStatus.className = 'telemetry-val status-success';
+            } else if (info.blanks > 0) {
+                telemStatus.textContent = `Còn ${info.blanks} bài thi chưa có điểm`;
+                telemStatus.className = 'telemetry-val status-info';
+            } else {
+                telemStatus.textContent = `Chưa chạm ngưỡng mục tiêu (${info.letterGrade})`;
+                telemStatus.className = 'telemetry-val status-warn';
+            }
         }
 
         // ===== Tabs: Môn này | Sổ điểm kỳ =====
@@ -2323,6 +4687,15 @@
                 mark: Math.max(0, Math.min(100, book.goal / 4 * 100)),
                 note: st.restCr > 0 ? `Còn ${st.restCr} TC chưa có điểm` : (st.cr ? 'Đã đủ điểm tất cả môn' : 'Thêm môn ở bảng dưới'),
                 goal: `Mục tiêu <b>GPA ${book.goal.toFixed(1)}</b> · <b>${rankOf(book.goal)}</b>`,
+            });
+            updateAcademicTelemetry({
+                type: 'book',
+                doneCr: st.doneCr,
+                cr: st.cr,
+                restCr: st.restCr,
+                gpa: st.gpa,
+                rank: rankOf(st.gpa),
+                goal: book.goal
             });
         }
 
@@ -2592,6 +4965,30 @@
             let savedTab = 'subject';
             try { savedTab = localStorage.getItem(TAB_KEY) || 'subject'; } catch (e) { }
             setTab(savedTab);
+
+            // Kích hoạt theo dõi cuộn cho Mobile Sticky Mini HUD
+            initMiniHudScroll();
+        }
+
+        // ===== Theo dõi cuộn trang cho Mobile Sticky Mini HUD =====
+        function initMiniHudScroll() {
+            const stage = document.querySelector('.stage');
+            const hud = document.getElementById('mobile-mini-hud');
+            const scrollTopBtn = document.getElementById('hud-scroll-top');
+            if (!stage || !hud) return;
+
+            const onScroll = () => {
+                const rect = stage.getBoundingClientRect();
+                if (rect.bottom < 60) {
+                    hud.classList.add('visible');
+                } else {
+                    hud.classList.remove('visible');
+                }
+            };
+            window.addEventListener('scroll', onScroll, { passive: true });
+            scrollTopBtn?.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
         }
 
         document.addEventListener('DOMContentLoaded', initGpaCalculator);
