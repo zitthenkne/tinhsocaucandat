@@ -3,8 +3,8 @@
  * - Trang chính: ưu tiên mạng (luôn lấy bản mới), rớt mạng thì lấy bản đã lưu.
  * - Tài nguyên khác (logo, font, icon CDN): ưu tiên cache cho nhanh.
  */
-const CACHE = 'gpa-v2';
-const CORE = ['./', './index.html', './logo_clb.png', './manifest.webmanifest'];
+const CACHE = 'gpa-v4';
+const CORE = ['./', './index.html', './logo_clb.png', './manifest.webmanifest', './web_assets/gpa-buddy.svg'];
 
 self.addEventListener('install', (e) => {
     e.waitUntil(
